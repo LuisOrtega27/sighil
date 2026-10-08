@@ -1,0 +1,30 @@
+### getUsers
+GET http://localhost:4000/api/users
+
+### getUser
+GET http://localhost:4000/api/users/2
+
+### createUser
+POST http://localhost:4000/api/users
+Content-Type: application/json
+
+{
+    "rol_id": 1,
+    "nombre": "Usuario de Prueba 2",
+    "email": "usuario.prueba2@gmail.com",
+    "estatus": "desactivado"
+}
+
+### updateUser
+PUT http://localhost:4000/api/users/4
+Content-Type: application/json
+
+{
+    "rol_id": 1,
+    "nombre": "Usuario de Editado",
+    "email": "usuario.editado@gmail.com",
+    "estatus": "desactivado"
+}
+
+### deleteUser
+DELETE  http://localhost:4000/api/users/3
