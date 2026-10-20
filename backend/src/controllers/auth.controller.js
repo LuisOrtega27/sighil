@@ -1,9 +1,5 @@
 import pool from "../database.js";
 import bcrypt from "bcryptjs";
-import dotenv from "dotenv";
-
-dotenv.config({ path: ".env.development" || ".env" })
-const TOKEN_SECRET = process.env.TOKEN_SECRET;
 
 
 import createAccessToken from "../lib/jwt.js";

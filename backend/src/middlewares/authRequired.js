@@ -3,7 +3,7 @@ import dotenv from "dotenv"
 
 import pool from "../database.js";
 
-dotenv.config({ path: ".env.development" || ".env" })
+dotenv.config()
 
 const TOKEN_SECRET = process.env.TOKEN_SECRET;
 

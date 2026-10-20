@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken"
 import dotenv from "dotenv"
 
-dotenv.config({ path: ".env.development" || ".env" });
+dotenv.config();
 
 const TOKEN_SECRET = process.env.TOKEN_SECRET;
 
