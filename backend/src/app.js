@@ -10,7 +10,7 @@ import profileRoutes from "./routes/profile.route.js"
 import authRequired from './middlewares/authRequired.js';
 
 
-dotenv.config();
+dotenv.config({ path: ".env.development" || ".env" });
 
 const app = express();
 
@@ -20,7 +20,7 @@ app.set('port', process.env.PORT || 4001);
 
 
 // Middlewares
-app.use(cors());
+app.use(cors({ origin: 5173 }));
 app.use(express.json());
 app.use(cookieParser());
 // app.use(express.urlencoded({ extended: true }));

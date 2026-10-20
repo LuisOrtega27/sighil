@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+@theme {
+    --color-sub: rgb(8, 178, 240);
+    --color-error: rgba(255, 0, 0, 0.2);
+}
