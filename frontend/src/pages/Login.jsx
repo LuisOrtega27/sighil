@@ -51,7 +51,7 @@ export const Login = () => {
           </div>
 
           <div className="relative z-10 pt-4 border-t border-slate-800/60 flex items-center justify-between text-[11px] text-slate-400 font-mono">
-            <span>Versión v2.0 (2026)</span>
+            <span>Versión v0.1 (2026)</span>
             <span className="flex items-center gap-1.5">
               {/* Icono: fa-shield-halved text-blue-400 — pendiente de agregar */}
               Acceso Restringido
@@ -121,26 +121,39 @@ export const Login = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-[10px] uppercase font-mono tracking-wider text-slate-400 mb-1">Nombre</label>
-                    <input type="text" placeholder="Ej. Juan" required className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 transition-colors" />
+                    <input type="text" name="fname" placeholder="Ej. Juan" required className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 transition-colors" />
                   </div>
                   <div>
                     <label className="block text-[10px] uppercase font-mono tracking-wider text-slate-400 mb-1">Apellido</label>
-                    <input type="text" placeholder="Ej. Pérez" required className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 transition-colors" />
+                    <input type="text" name="lname" placeholder="Ej. Pérez" required className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 transition-colors" />
                   </div>
                 </div>
 
                 <div>
+                  <label className="block text-[10px] uppercase font-mono tracking-wider text-slate-400 mb-1">Cedula de Identidad</label>
+                  <input type="text" name="ci" placeholder="00.000.000" required className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 transition-colors font-mono" />
+                </div>
+
+                <div>
                   <label className="block text-[10px] uppercase font-mono tracking-wider text-slate-400 mb-1">Correo Institucional</label>
-                  <input type="email" placeholder="jperez@alcaldia.gob" required className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 transition-colors font-mono" />
+                  <input type="email" name="email" placeholder="jperez@alcaldia.gob" required className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 transition-colors font-mono" />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] uppercase font-mono tracking-wider text-slate-400 mb-1">Numero de Telefono</label>
+                  <input type="text" name="phone" placeholder="0000-0000000" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 transition-colors font-mono" />
                 </div>
 
                 <div>
                   <label className="block text-[10px] uppercase font-mono tracking-wider text-slate-400 mb-1">Área o Departamento</label>
                   <select className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500 transition-colors">
-                    <option>Ingeniería Hidráulica / Cuencas</option>
-                    <option>Meteorología y Estaciones</option>
-                    <option>Mitigación de Riesgos e Inspección</option>
-                    <option>Supervisión General / Coordinador</option>
+                    <option>Coordinación de Quebradas</option>
+                    <option>Direción de Riesgos</option>
+                    <option>Protección Civil</option>
+                    <option>Sala de Riesgo</option>
+                    <option>Presidencia</option>
+                    <option>Visitante</option>
+                    <option>Informatica</option>
                   </select>
                 </div>
 
