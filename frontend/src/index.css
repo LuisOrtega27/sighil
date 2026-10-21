@@ -3,6 +3,20 @@
 @theme {
     --color-sub: rgb(8, 178, 240);
     --color-error: rgba(255, 0, 0, 0.2);
+
+    /* Paleta del sistema SIROH (migrada de las variables :root de siroh.html) */
+    --color-primary: #0f2c59;
+    --color-secondary: #1d70b8;
+    --color-orange: #e65c00;
+    --color-orange-2: #ff8800;
+    --color-lightblue: #f0f7ff;
+    --color-lightorange: #fff8f0;
+    --color-alert: #d9381e;
+    --color-warning: #f59e0b;
+    --color-success: #10b981;
+    --color-page: #f8fafc;
+    --color-ink: #1e293b;
+    --color-line: #cbd5e1;
 }
 
 /* Sutil animación de gradiente de fondo para la sección corporativa */

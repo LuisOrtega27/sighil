@@ -1,0 +1,106 @@
+/* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   siroh/siroh.css
+   Estilos minimos de la pagina SIROH: animaciones y selectores que
+   Tailwind v4 no cubre de forma comoda. Migrados desde siroh.html
+   (que usaba CSS propio, no Tailwind).
+   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
+
+:root {
+    scroll-behavior: smooth;
+}
+
+/* Fuente del original: 'Segoe UI', sans-serif */
+.siroh-root {
+    font-family: "Segoe UI", sans-serif;
+}
+
+/* Aparicion de secciones SPA (antes: .page-section.active-page) */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.page-active {
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+/* Submenu colapsable de SIROH (antes: #sub-for-list / #link-siroh.active + #sub-for-list) */
+.nav-submenu {
+    max-height: 0;
+    margin-bottom: 0;
+    overflow: hidden;
+    transition: max-height 0.6s ease, margin-bottom 0.6s ease;
+}
+.nav-submenu.is-open {
+    max-height: 200px;
+    margin-bottom: 10px;
+}
+
+/* Formulario SIROH horizontal con scroll-snap (antes: #form-siroh) */
+.siroh-form {
+    display: flex;
+    overflow-x: scroll;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    max-height: 950px;
+}
+.siroh-form::-webkit-scrollbar {
+    display: none;
+}
+
+/* Vista lateral dentro del formulario (antes: .sub-content-view) */
+.siroh-view {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+    flex-basis: 100%;
+    max-height: 100%;
+    overflow-y: scroll;
+    scroll-margin-top: 150px;
+}
+
+/* Validacion nativa solo dentro del formulario SIROH (antes: #form-siroh input:invalid) */
+.siroh-form input:invalid {
+    border-color: var(--color-alert);
+    background-color: #f002;
+}
+.siroh-form input:invalid + label {
+    color: var(--color-alert);
+    font-weight: 900;
+}
+
+/* Etiqueta-imagen para abrir el mapa (antes: #label-map-btn / #label-map-img) */
+.map-img-label {
+    margin-top: 15px;
+}
+.map-img {
+    max-height: 40px;
+    padding: 8px;
+    border: solid 2px #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: scale 0.3s ease;
+}
+.map-img:active {
+    scale: 0.8;
+}
+
+/* Opciones de imagen (canales / diques / morteros) dentro de .cb-item */
+.cb-item > label > img {
+    object-fit: contain;
+    height: 100px;
+    aspect-ratio: 1 / 1;
+}
+.cb-img > input[type="checkbox"]:has(+ label > img) {
+    display: none;
+}
+.cb-img > input[type="checkbox"] + label > img {
+    cursor: pointer;
+    border: transparent solid 2px;
+}
+.cb-img > input[type="checkbox"]:checked + label > img {
+    border-color: #28e;
+}
+
+/* Subtitulos repetidos dentro de una misma vista (antes: .section-subTitle ~ .section-subTitle) */
+.sec-subtitle ~ .sec-subtitle {
+    margin-top: 20px;
+}
