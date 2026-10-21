@@ -1,0 +1,2063 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="icon" href="./imgs/icons/redStar_icon.png" type="image/x-icon">
+    
+    <title>SIGHIL - Sistema de Información Geográfica e Hidrológica de Libertador</title>
+    
+
+    <style>
+        :root {
+    --primary-blue: #0f2c59;
+    --secondary-blue: #1d70b8;
+
+    --primary-orange: #e65c00;
+    --secondary-orange: #ff8800;
+
+    --light-blue: #f0f7ff;
+    --light-orange:#fff8f0;
+
+    --alert-red: #d9381e;
+    --warning-orange: #f59e0b;
+    --success-green: #10b981;
+
+    --bg-slate: #f8fafc;
+
+    --text-main: #1e293b;
+
+    --border-muted: #cbd5e1;
+
+    --sidebar-width: 290px;
+    
+    scroll-behavior: smooth;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+body { 
+    background-color: var(--bg-slate); 
+    color: var(--text-main); 
+    display: flex; 
+    min-height: 100vh; 
+}
+
+/* SIDEBAR / PANEL LATERAL */
+.sidebar {
+    width: var(--sidebar-width);
+    background-color: var(--primary-blue);
+    color: white;
+    padding: 25px 20px;
+    position: fixed;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+    z-index: 100;
+}
+.brand-area { text-align: center; }
+.brand-logo-container {
+    width: 100%; max-height: 90px; margin-bottom: 12px;
+    display: flex; justify-content: center; align-items: center;
+    background: rgba(255, 255, 255, 0.05); padding: 10px; border-radius: 8px;
+}
+.brand-logo-container img { max-width: 100%; max-height: 65px; object-fit: contain; }
+.brand-area h2 { font-size: 22px; font-weight: 800; border-bottom: 2px solid var(--secondary-blue); padding-bottom: 8px; margin-bottom: 12px; letter-spacing: 1px; }
+.brand-area p { font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 700; line-height: 1.3; }
+
+.nav-menu { list-style: none; margin-top: 20px; text-align: left; }
+.nav-menu li a { color: #cbd5e1; text-decoration: none; display: block; padding: 11px 14px; border-radius: 6px; font-size: 12.5px; margin-bottom: 4px; cursor: pointer; transition: all 0.3s; }
+.nav-menu li a:hover, .nav-menu li a.active { background-color: var(--secondary-blue); color: white; font-weight: 600; padding-left: 18px; }
+
+/* Sub menu de Formulario E.O.H.*/
+
+#link-siroh.active + #sub-for-list{
+    /* display: block; */
+    max-height: 200px;
+    margin-bottom: 10px;
+}
+
+#sub-for-list{ 
+    list-style: none; 
+    padding-left: 15px; 
+    margin-bottom: 10px; 
+
+    /* display: none;  */
+    max-height: 0px;
+    margin-bottom: 0;
+    transition: max-height 0.6s ease, margin-bottom 0.6s ease;
+    overflow: hidden;
+}
+
+#sub-for-list li a{ 
+    font-size: 11.5px; 
+    padding: 6px 10px; 
+    color: #fff; 
+    border-left: 2px solid rgba(255,255,255,0.2); 
+    border-radius: 0 4px 4px 0; 
+    margin-bottom: 2px; 
+}
+#sub-for-list li a:hover{ 
+    border-left: 2px solid var(--bg-slate); 
+}
+
+#sub-for-list li a.input-disabled{
+    pointer-events: none;
+    opacity: 0.8;
+    cursor: not-allowed;
+}
+
+/* Submenú de Meteorología */
+.submenu-meteorologia{ 
+    list-style: none; 
+    padding-left: 15px; 
+    margin-bottom: 10px; 
+    display: none; 
+}
+.submenu-meteorologia.active-submenu { 
+    display: block; 
+}
+.submenu-meteorologia li a{ 
+    font-size: 11.5px; 
+    padding: 6px 10px; 
+    color: #94a3b8; 
+    border-left: 2px solid rgba(255,255,255,0.2); 
+    border-radius: 0 4px 4px 0; 
+    margin-bottom: 2px; 
+}
+.submenu-meteorologia li a:hover, .submenu-meteorologia li a.active-sublink { color: white; 
+    background: rgba(255,255,255,0.1); 
+    border-left-color: var(--secondary-blue); 
+}
+.sidebar-footer { font-size: 10.5px; color: #64748b; text-align: center; border-top: 1px solid #1e293b; padding-top: 12px; line-height: 1.3; }
+
+/* CONTENEDOR PRINCIPAL */
+.main-container { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); padding: 35px; }
+.top-navbar { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-muted); padding-bottom: 15px; margin-bottom: 25px; }
+
+/* SECCIONES SPA */
+.page-section { display: none; }
+.page-section.active-page { display: block; animation: fadeIn 0.2s ease-in-out; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* PANELES Y CUADROS */
+.card-panel { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px; border-top: 4px solid var(--secondary-blue); }
+.card-panel h2 { color: var(--primary-blue); font-size: 20px; margin-bottom: 4px; text-transform: uppercase; }
+.card-panel .subtitle { color: #64748b; font-size: 12.5px; font-weight: 600; margin-bottom: 25px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* SUB-PESTAÑAS */
+.tab-container { 
+    display: flex; 
+    gap: 5px; 
+    border-bottom: 2px solid var(--border-muted); 
+    margin-bottom: 20px; 
+    background: #e2e8f0; 
+    padding: 5px 5px 0 5px; 
+    border-radius: 6px 6px 0 0; 
+    overflow-x: auto; 
+}
+.tab-btn { 
+    background: #cbd5e1; 
+    border: none; 
+    padding: 10px 14px; 
+    font-size: 11px; 
+    font-weight: bold; 
+    cursor: pointer; 
+    border-radius: 5px 5px 0 0; 
+    color: #475569; 
+    text-transform: uppercase; 
+    white-space: nowrap; 
+}
+.tab-btn.active-tab { 
+    background: white; 
+    color: var(--primary-blue); 
+    border-bottom: 2px solid white; 
+}
+
+
+/* FORMULARIOS EXPANDIDOS */
+#form-siroh{
+    display: flex;
+    overflow-x: scroll;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    max-height: 950px;
+}
+#form-siroh::-webkit-scrollbar{
+    display: none;
+}
+
+.sub-content-view{
+    scroll-snap-align: start;
+    flex-shrink: 0;
+    flex-basis: 100%;
+    max-height: 100%;
+    overflow-y: scroll;
+    scroll-margin-top: 150px;
+}
+
+#form-siroh input:invalid{
+    border-color: var(--alert-red);
+    background-color: #f002;
+}
+#form-siroh input:invalid + label{
+    color: var(--alert-red);
+    font-weight: 900;
+}
+
+#label-map-btn{
+    margin-top: 15px;
+}
+#label-map-img{
+    max-height: 40px;
+    padding: 8px;
+    border: solid 2px #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: scale 0.3s ease;
+}
+#label-map-img:active{
+    scale: 0.8;
+}
+
+#map-btn{ display: none;}
+
+.ficha-header { 
+    text-align: center; 
+    background: #f1f5f9; 
+    padding: 12px; 
+    border-radius: 6px; 
+    border: 1px solid var(--border-muted); 
+    margin-bottom: 20px; 
+    font-size: 11px; 
+    color: #334155; 
+    font-weight: bold; 
+    line-height: 1.4; 
+}
+.form-row { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+    gap: 12px; 
+    margin-bottom: 12px; 
+}
+.form-group { 
+    display: flex; 
+    flex-direction: column; 
+}
+.form-group > textarea{
+    min-height: 200px;
+}
+.form-group label { 
+    font-size: 10.5px; 
+    font-weight: 700; 
+    margin-bottom: 4px; 
+    color: #475569; 
+    text-transform: uppercase; 
+}
+.form-group input, .form-group select, .form-group textarea { 
+    padding: 7px 10px; 
+    border: 1px solid var(--border-muted); 
+    border-radius: 4px; 
+    font-size: 12.5px; 
+    background-color: #fff; 
+}
+
+.checkbox-section-title { 
+    font-size: 12px; 
+    font-weight: bold; 
+    color: var(--primary-blue); 
+    background: var(--light-blue); 
+    padding: 6px 10px; 
+    margin: 15px 0 10px 0; 
+    text-transform: uppercase; 
+    border-left: 3px solid var(--secondary-blue); 
+}
+.section-subTitle{
+    padding: 6px 11px; 
+    font-size: 10px;
+    text-transform: uppercase; 
+    color: var(--primary-orange); 
+    background: var(--light-orange); 
+    border-left: 3px solid var(--secondary-orange); 
+}
+.section-subTitle ~ .section-subTitle {
+    margin-top: 20px;
+}
+.checkbox-grid { 
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 8px;
+    padding: 5px;
+}
+.checkbox-item { 
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #334155;
+}
+
+.checkbox-item > label > img{
+    object-fit: contain;
+    height: 100px;
+    aspect-ratio: 1/1;
+}
+.checkbox-item > input[type="checkbox"]:has(+label>img) {
+    display: none;
+}
+.checkbox-item > input[type="checkbox"] + label>img{
+    cursor: pointer;
+    border: transparent solid 2px;
+
+}
+.checkbox-item > input[type="checkbox"]:checked + label>img{
+    border-color: #28e;
+}
+
+/* REPOSITORIOS Y TABLAS */
+table { 
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    margin-bottom: 15px;
+}
+th, td { padding: 10px 12px; font-size: 12px; border-bottom: 1px solid #e2e8f0; text-align: left; }
+th { background-color: var(--light-blue); color: var(--primary-blue); font-weight: 700; text-transform: uppercase; font-size: 10.5px; }
+
+/* ESTADOS DE EQUIPOS */
+.badge { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; display: inline-block; }
+.badge-activo { background-color: #e6f4ea; color: #137333; }
+.badge-inactivo { background-color: #fce8e6; color: #c5221f; }
+.badge-resguardo { background-color: #fef7e0; color: #b06000; }
+
+/* COMPONENTES DE CONTROL */
+.btn { background-color: var(--secondary-blue); color: white; padding: 10px 20px; border: none; border-radius: 4px; font-weight: 700; cursor: pointer; font-size: 12px; text-transform: uppercase; transition: background 0.2s; }
+.btn:hover { background-color: var(--primary-blue); }
+.btn-danger { background-color: var(--alert-red); }
+.btn-danger:hover { background-color: #b91c1c; }
+.btn-success { background-color: var(--success-green); }
+.btn-success:hover { background-color: #047857; }
+.btn-small { padding: 4px 8px; font-size: 11px; margin-right: 2px; }
+
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
+.kpi-card { background: var(--light-blue); padding: 15px; border-radius: 6px; border-left: 4px solid var(--secondary-blue); text-align: center; }
+.kpi-card p { font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: bold; }
+.kpi-card h3 { font-size: 22px; color: var(--primary-blue); margin-top: 5px; }
+
+.mock-map-container { width: 100%; height: 500px; background: #e2e8f0; border-radius: 6px; border: 2px dashed var(--border-muted); display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; overflow: hidden; }
+.map-layer-box { position: absolute; top: 15px; right: 15px; background: white; padding: 12px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); font-size: 11px; width: 180px; }
+.print-preview-container { background: #fff; border: 2px solid #000; padding: 30px; margin-top: 20px; font-family: 'Courier New', monospace; }
+
+/* FICHA DETALLADA ESTACION */
+.ficha-estacion-modal { background: #fafafa; border: 1px solid var(--border-muted); padding: 20px; border-radius: 6px; margin-top: 15px; border-left: 5px solid var(--primary-blue); }
+    </style>
+    
+</head>
+<body>
+    <!-- <div class="toast-container" id="toast-container"></div> -->
+
+    <div class="sidebar">
+        <div class="brand-area">
+            <div class="brand-logo-container">
+                <img src="./imgs/logos/LOGO ALCALDIA NUEVO.fw.png" alt="Logo Alcaldía Municipio Libertador">
+            </div>
+            <h2>SIGHIL</h2>
+            <p>Infraestructura Geográfica e Hidrológica</p>
+            <ul class="nav-menu" id="main-menu">
+                <li><a onclick="switchPage('territorial')" id="link-territorial" class="active"> &times; Gestion territorial</a></li>
+                <li><a onclick="switchPage('geoportal')" id="link-geoportal">🌐 Geoportal Hídrico</a></li>
+                <li>
+                    <a onclick="switchPage('siroh')" id="link-siroh">📋 SIROH (Obras)</a>
+                    <ul class="submenu-formulario_eoh" id="sub-for-list">
+                        <li>
+                            <a id="sub-link-nuevo">Nuevo</a>
+                        </li>
+                        <li>
+                            <a id="sub-link-ver">Ver</a>
+                        </li>
+                        <li>
+                            <a id="sub-link-otro">Otro</a>
+                        </li>
+                    </ul>
+                </li>
+                
+                <li>
+                    <a onclick="toggleMeteorologiaMenu()" id="link-meteorologia">🌧️ Meteorología Municipal</a>
+                    <ul class="submenu-meteorologia" id="sub-met-list">
+                        <li><a onclick="switchMeteorologiaSubPage('estaciones')" id="sublink-estaciones">▪️ Estaciones</a></li>
+                        <li><a onclick="switchMeteorologiaSubPage('carga')" id="sublink-carga">▪️ Carga</a></li>
+                        <li><a onclick="switchMeteorologiaSubPage('historico')" id="sublink-historico">▪️ Histórico</a></li>
+                        <li><a onclick="switchMeteorologiaSubPage('anual')" id="sublink-anual">▪️ Anual</a></li>
+                        <li><a onclick="switchMeteorologiaSubPage('dashboard')" id="sublink-dashboard">▪️ Dashboard</a></li>
+                    </ul>
+                </li>
+                
+                <li><a onclick="switchPage('hidrologia')" id="link-hidrologia">💧 Hidrología Municipal</a></li>
+                <li><a onclick="switchPage('morfometria')" id="link-morfometria">📐 Morfometría Municipal</a></li>
+            </ul>
+        </div>
+        <div class="sidebar-footer">
+            Alcaldía del Municipio Libertador<br>IMGRAD • Gestión de Riesgos<br><b>Entorno Operativo v2.6</b>
+        </div>
+    </div>
+
+    <div class="main-container">
+
+        
+        
+        <div class="top-navbar">
+            <div>
+                <h1 id="page-title">Geoportal Hídrico Municipal</h1>
+                <p id="page-desc" style="color: #64748b; font-size: 12.5px; margin-top: 2px;">Visor de mapas interactivo y mapas base (Capas SIG).</p>
+            </div>
+
+
+            <div class="login-nav"> 
+                <button style="padding: 10px; border-radius: 20px; corner-shape: bevel;" onclick="cerrarSesion()">cerrar sesion</button>
+                <div style="font-size: 11px; font-weight: bold; background: #e2e8f0; padding: 6px 12px; border-radius: 4px; color: var(--primary-blue);">
+                    IMGRAD: Sala Técnica de Control
+                </div>
+            </div>
+        </div>
+
+        
+        <div id="page-territorial" class="page-section active-page">
+
+            <div class="card-panel">
+
+                <h2>Gestion de Inventario de Cuerpos de Agua</h2>
+                <div class="subtitle">Formulario Tecnico de Gestion de Cuerpos de Agua</div>
+    
+                <form id="form-hidro">
+            
+                    <div class="form-seccion">
+    
+                        <div class="checkbox-section-title">1 Identificación y Clasificación Básica</div>
+                        
+                        <div class="form-row">
+    
+                            <div class="form-group">
+                        
+                                <label for="hidro__tipo_cuerpo_agua">Tipo de Cuerpo de Agua <span class="required">*</span></label>
+                                <select name="hidro__tipo_cuerpo_agua" id="hidro__tipo_cuerpo_agua" required>
+                                    <option value="" disabled selected>Seleccione una opción...</option>
+                                    <option value="Rio">Río</option>
+                                    <option value="Quebrada">Quebrada</option>
+                                    <option value="Torrentera">Torrentera</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="hidro__nombre">Nombre del Cuerpo de Agua <span class="required">*</span></label>
+                                <input type="text" name="hidro__nombre" id="hidro__nombre" placeholder="Ej. Catuche" required>
+                            </div>
+                        </div>
+                        
+                        <h5>Jerarquía del Flujo <span class="required">*</span></h5>
+                        <div class="checkbox-grid">
+                            
+                            <div class="checkbox-item">
+                                <input type="radio" name="hidro__jerarquia_flujo" id="hidro__jerarquia_flujo__principal" value="Principal" checked> 
+                                <label for="hidro__jerarquia_flujo__principal" class="radio-label">Curso Principal</label>
+                            </div>
+        
+                            <div class="checkbox-item">
+                                <input type="radio" name="hidro__jerarquia_flujo" id="hidro__jerarquia_flujo__secundario" value="Secundario"> 
+                                <label for="hidro__jerarquia_flujo__secundario" class="radio-label">Curso Secundario / Afluente</label>
+                            </div>
+    
+                        </div>
+    
+                    </div>
+    
+                    <div class="form-seccion">
+                        <div class="checkbox-section-title">2 Zonificación Hidrográfica</div>
+    
+                        <div class="form-row">
+    
+                            <div class="form-group">
+                                <label>Cuenca Principal <span class="required">*</span></label>
+                                <select id="cuenca_principal" name="cuenca_principal" required>
+                                    <option value="" disabled selected>Seleccione...</option>
+                                    <option value="Guaire">Guaire</option>
+                                    <option value="Tacagua">Tacagua</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Sub-cuenca <span class="required">*</span></label>
+                                <select id="sub_cuenca" name="sub_cuenca" disabled required>
+                                    <option value="" disabled selected>Seleccione una sub-cuenca...</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>Micro-cuenca</label>
+                                <input type="text" name="micro_cuenca" placeholder="Ej. Tramo Alto">
+                            </div>
+                            
+                        </div>
+    
+                    </div>
+    
+                    <div class="form-seccion">
+    
+                        <div class="checkbox-section-title">3 Parámetros Técnicos y Georreferenciación</div>
+                        
+                        <div id="alerta-cotas" class="alert-error" hidden>
+                            Inconsistencia Hidráulica: La cota mínima de desembocadura no puede ser mayor o igual a la cota de nacimiento.
+                        </div>
+    
+                        <div class="form-row">
+                            
+                            <div class="form-group">
+                                <label for="hidro__cota_maxima">Cota Máxima (msnm) <span class="required">*</span></label>
+                                <input type="number" id="hidro__cota_maxima" name="cota_maxima" placeholder="Naciente" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="hidro__cota_minima">Cota Mínima (msnm) <span class="required">*</span></label>
+                                <input type="number" id="hidro__cota_minima" name="cota_minima" placeholder="Desembocadura" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="hidro__utm_este">Coordenada Este (X) <span class="required">*</span></label>
+                                <input type="number" name="hidro__utm_este" placeholder="Ej. 727639" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="hidro__utm_norte">Coordenada Norte (Y) <span class="required">*</span></label>
+                                <input type="number" name="hidro__utm_norte" placeholder="Ej. 1164731" required>
+                            </div>
+    
+                        </div>
+    
+                        <div class="form-row">
+                            
+                            <div class="form-group">
+                                <label for="hidro__tipo_lecho">Tipo de Lecho / Cauce</label>
+                                <select name="hidro__tipo_lecho" id="hidro__tipo_lecho">
+                                    <option value="Rocoso">Rocoso (Natural)</option>
+                                    <option value="Sedimentario">Sedimentario / Tierra</option>
+                                    <option value="Canalizado">Canalizado en Concreto</option>
+                                    <option value="Mixto">Mixto</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label id="hidro__nivel_riesgo">Estatus de Riesgo de Torrencialidad</label>
+                                <select name="hidro__nivel_riesgo" id="hidro__nivel_riesgo">
+                                    <option value="Bajo">Bajo</option>
+                                    <option value="Moderado" selected>Moderado</option>
+                                    <option value="Alto">Alto (Respuesta de crecida rápida crítica)</option>
+                                </select>
+                            </div>
+    
+                        </div>
+    
+                        <div class="form-group">
+                            <label for="hidro__observaciones">Observaciones Hidráulicas Generales</label>
+                            <textarea name="hidro__observaciones" rows="3" placeholder="Indicar presencia de obras..."></textarea>
+                        </div>
+    
+                    </div>
+    
+                    <div class="form-row">
+                        <button type="reset" id="hidro__btn-limpiar" class="btn btn-secondary">Limpiar</button>
+                        <button type="submit" id="hidro__btn-guardar" class="btn btn-primary">Guardar en Inventario Central</button>
+                    </div>
+                </form>
+                
+            </div>
+            
+        </div>
+
+        <div id="page-geoportal" class="page-section">
+            <div class="card-panel">
+                <h2>Consulta y Cruce de Datos Territoriales</h2>
+                <div class="subtitle">Análisis espacial en tiempo real de la poligonal del Municipio Libertador</div>
+                
+                <div class="mock-map-container">
+                    <div style="text-align: center; color: #475569; z-index: 5;">
+                        <span style="font-size: 40px;">🗺️</span>
+                        <h3 style="margin-top:10px;">PROYECCIÓN DE CAPAS SIG INTERACTIVAS</h3>
+                        <p style="font-size:12px; max-width:400px; margin: 5px auto;">Representación cartográfica de quebradas, ejes fluviales principales y áreas vulnerables a inundaciones.</p>
+                        <button class="btn btn-small" style="margin-top:15px;" onclick="alert('Cargando API de Mapas...')">Centrar en Poligonal Metropolitana</button>
+                    </div>
+                    <div class="map-layer-box">
+                        <b style="text-transform: uppercase; font-size:10px; display:block; margin-bottom:6px; color:var(--primary-blue)">Control de Capas SIG</b>
+                        <label style="display:block; margin-bottom:4px;"><input type="checkbox" checked> Red de Drenaje e Hilos</label>
+                        <label style="display:block; margin-bottom:4px;"><input type="checkbox" checked> Inventario de Obras SIROH</label>
+                        <label style="display:block; margin-bottom:4px;"><input type="checkbox"> Áreas de Inundación (Crecidas)</label>
+                        <label style="display:block;"><input type="checkbox"> Estaciones Red Pluviométrica</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-siroh" class="page-section">
+            <div class="card-panel">
+                <div class="ficha-header">
+                    MINISTERIO DEL PODER POPULAR DE LAS AGUAS • VICEMINISTERIO DE ADMINISTRACIÓN DE CUENCAS HIDROGRÁFICAS<br>
+                    DIRECCIÓN GENERAL DE MITIGACIÓN Y CONTROL DE INUNDACIONES • ALCALDÍA DE LIBERTADOR (IMGRAD)
+                </div>
+                <h2>Sistema de Inspección y Registro de Obras Hidráulicas (SIROH)</h2>
+                <div class="subtitle">Formulario Técnico de Evaluación de Infraestructura Fluvial</div>
+
+                <div class="tab-container">
+                    <a class="tab-btn active-tab" href="#view-s-id" id="btn-s-id" onclick="switchSubTab('siroh', 's-id')">1. Control e Inspectores</a>
+                    <a class="tab-btn" href="#view-s-entorno" id="btn-s-entorno" onclick="switchSubTab('siroh', 's-entorno')">2. Datos de Cuenca y Entorno</a>
+                    <a class="tab-btn" href="#view-s-tipo" id="btn-s-tipo" onclick="switchSubTab('siroh', 's-tipo')">3. Tipo y Detalles de Obra</a>
+                    <a class="tab-btn" href="#view-s-Caracteristicas" id="btn-s-Caracteristicas" onclick="switchSubTab('siroh', 's-Caracteristicas')">4. Caracteristicas de la Obra</a>
+                    <a class="tab-btn" href="#view-s-danos" id="btn-s-danos" onclick="switchSubTab('siroh', 's-danos')">5. Daños Estructurales</a>
+                    <a class="tab-btn" href="#view-s-metodologia" id="btn-s-metodologia" onclick="switchSubTab('siroh', 's-metodologia')">6. Metodologia Aplicada</a>
+                    <a class="tab-btn" href="#view-s-organizaciones" id="btn-s-organizaciones" onclick="switchSubTab('siroh', 's-organizaciones')">7. Organizaciones participantes</a>
+                </div>
+
+                <form id="form-siroh">
+                    
+                    <div id="view-s-id" class="sub-content-view">
+
+                        <div class="checkbox-section-title">Control de la Inspección</div>
+                        <div class="form-row">
+
+                            <div class="form-group">
+                                <label for="header_fecha__fecha">Fecha de Inspección</label>
+                                <input type="date"  name="header_fecha__fecha" id="header_fecha__fecha" required> 
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="tiem_ins">Tiempo de Inspección (Hrs)</label>
+                                <input type="text" name="tiem_ins" id="tiem_ins" placeholder="HH:MM" pattern="^\d{1,3}:\d{2}$"  title="el patron es: 'Horas:Minutos'" maxlength="6" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="ficha_n">FICHA Nº:</label>
+                                <input type="text" name="ficha_n" id="ficha_n" pattern="\d{2}-\d{2}-\d{2}-\w{3}-\d{2}" placeholder="00-00-00-ABC-00" title="Patron esperado: '00-00-00-ABC-00'" maxlength="15" autocomplete="off" list="" autofocus required>
+                                <datalist id="short-code">
+                                    <option value="CAT"></option>
+                                    <option value="ANA"></option>
+                                    <option value="MAR"></option>
+                                    <option value="FLO"></option>
+                                    <option value="CHA"></option>
+                                    <option value="VAL"></option>
+                                    <option value="JUA"></option>
+                                    <option value="HAC"></option>
+                                    <option value="GUA"></option>
+                                    <option value="MAC"></option>
+                                    <option value="ADE"></option>
+                                    <option value="SAB"></option>
+                                    <option value="PEO"></option>
+                                    <option value="MAM"></option>
+                                    <option value="PED"></option>
+                                    <option value="TOR"></option>
+                                    <option value="ALG"></option>
+                                    <option value="SAN"></option>
+                                    <option value="CAR"></option>
+                                    <option value="TRI"></option>
+                                    <option value="LIM"></option>
+                                    <option value="ASN"></option>
+                                    <option value="TAC"></option>
+                                    <option value="TOP"></option>
+                                </datalist>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="cod_n">CODIGO Nº:</label>
+                                <input type="text" name="cod_n" id="cod_n" pattern="\d{6}" required readonly>
+                            </div>
+
+                        </div>
+
+                        <div class="checkbox-section-title">Ubicación Espacial y Georreferenciación</div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="coor_utm__e">Coordenadas UTM: Este (E)</label>
+                                <input type="text" name="coor_utm__e" id="coor_utm__e" pattern="^\d{6}.\d{1,2}$" placeholder="000006.12" title="Patron esperado: 123456.12" maxlength="9" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="coor_utm__n">Coordenadas UTM: Norte (N)</label>
+                                <input type="text" name="coor_utm__n" id="coor_utm__n" pattern="^\d{7}.\d{1,2}$" placeholder="0000007.12" title="Patron esperado: 1234567.12" maxlength="10" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="map-btn" id="label-map-btn">
+                                    <img src="./imgs/icons/map-location-dot.svg" alt="abrir mapa" id="label-map-img">
+                                </label>
+                                <input type="button" value="abrir mapa" id="map-btn">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="header_codigo__huso">Huso SIG</label>
+                                <input type="number" name="header_codigo__huso" id="header_codigo__huso" value="19" class="input-disabled"  tabindex="-1" required readonly>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="header_codigo__altura">Altura (M.S.N.M.)</label>
+                                <input type="text" name="header_codigo__altura" id="header_codigo__altura" pattern="\d{1,4}(,\d{2})?" maxlength="7>" required>
+                            </div>
+                        </div>
+
+                        <div class="checkbox-section-title">Datos del Personal Técnico Evaluador</div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="id_tec__nom_ape_1">Técnico Evaluador 1 (Nombre Completo)</label>
+                                <input type="text" name="id_tec__nom_ape_1" id="id_tec__nom_ape_1" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="id_tec__tlf_1">Teléfono Contacto</label>
+                                <input type="tel" name="id_tec__tlf_1" id="id_tec__tlf_1" placeholder="0000-0000000" pattern="^\d{4}-\d{7}$" maxlength="12" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_tec__nom_ape_2">Técnico Evaluador 2 (Nombre Completo)</label>
+                                <input type="text" name="id_tec__nom_ape_2" id="id_tec__nom_ape_2">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_tec__tlf_2">Teléfono Contacto 2</label>
+                                <input type="tel" name="id_tec__tlf_2" id="id_tec__tlf_2" placeholder="0000-0000000" pattern="^\d{4}-\d{7}$" maxlength="12">
+                            </div>
+                        </div>
+
+                        
+                        <div class="checkbox-section-title">Datos Territoriales Base</div>
+                        <div class="form-row">
+                        
+                            <div class="form-group">
+                                <label for="datos_cuenta__nombre">Nombre de la Cuenca / Quebrada</label>
+                                <input type="text" name="datos_cuenta__nombre" id="datos_cuenta__nombre" class="first_input" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="datos_cuenta__estado">Estado / Distrito</label>
+                                <input type="text" name="datos_cuenta__estado" id="datos_cuenta__estado" value="Distrito Capital" required readonly>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="datos_cuenta__municipio">Municipio</label>
+                                <input type="text" name="datos_cuenta__municipio" id="datos_cuenta__municipio" value="Libertador" required readonly>
+                            </div>
+                        
+                        </div>
+
+                        <div class="form-row">
+
+                            <div class="form-group">
+                                <label for="datos_cuenta__parroquia">Parroquia</label>
+                                <input type="text" name="datos_cuenta__parroquia" id="datos_cuenta__parroquia" list="parroquias" required>
+                                <datalist id="parroquias">
+                                    <option value="Altagracia">
+                                    <option value="Antímano">
+                                    <option value="Caricuao">
+                                    <option value="Catedral">
+                                    <option value="Coche">
+                                    <option value="El Junquito">
+                                    <option value="El Paraíso">
+                                    <option value="El Recreo">
+                                    <option value="El Valle">
+                                    <option value="La Candelaria">
+                                    <option value="La Pastora">
+                                    <option value="La Vega">
+                                    <option value="Macarao">
+                                    <option value="San Agustín">
+                                    <option value="San Bernardino">
+                                    <option value="San José">
+                                    <option value="San Juan">
+                                    <option value="San Pedro">
+                                    <option value="Santa Rosalía">
+                                    <option value="Santa Teresa">
+                                    <option value="Sucre">
+                                    <option value="23 de Enero">
+                                </datalist>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="datos_cuenta__cent_pobl">Centro Poblado / Comunidad</label>
+                                <input type="text" name="datos_cuenta__cent_pobl" id="datos_cuenta__cent_pobl" class="last_input" required>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div id="view-s-entorno" class="sub-content-view">
+
+                        <div class="checkbox-section-title">Entorno Físico y Variación del Flujo</div>
+
+                        <h6 class="section-subTitle">Covertura Vegetal</h6>
+                        <div class="checkbox-grid">
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="ent_fisi__arboreo" id="ent_fisi__arboreo" value="arboreo">
+                                <label for="ent_fisi__arboreo">ARBOREO</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="ent_fisi__arbustivos" id="ent_fisi__arbustivos" value="arbustivos">
+                                <label for="ent_fisi__arbustivos">ARBUSTIVOS</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="ent_fisi__herbaceos" id="ent_fisi__herbaceos" value="herbaceos">
+                                <label for="ent_fisi__herbaceos">HERBACEOS</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="ent_fisi__area_cult" id="ent_fisi__area_cult" value="area de cultivo">
+                                <label for="ent_fisi__area_cult">AREA DE CULTIVO</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="ent_fisi__sue_des" id="ent_fisi__sue_des" value="suelos desnudos">
+                                <label for="ent_fisi__sue_des">SUELOS DESNUDOS</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="ent_fisi__area_ocu" id="ent_fisi__area_ocu" value="area ocupada">
+                                <label for="ent_fisi__area_ocu">AREA OCUPADA</label>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="ent_fisi__alt_pro">ALTURA PROMEDIO</label>
+                                <input type="text" name="ent_fisi__alt_pro" id="ent_fisi__alt_pro" class="ent_fisi-altura_promedio" maxlength="2" pattern="[0-9]{1,2}" inputmode="numeric">
+                            </div>
+
+                        </div>
+
+                        <h6 class="section-subTitle">Factores Contaminantes</h6>
+                        <div class="checkbox-grid">
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="ent_fisi__agu_neg" id="ent_fisi__agu_neg" value="aguas negras">
+                                <label for="ent_fisi__agu_neg">AGUAS NEGRAS</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="ent_fisi__escom" id="ent_fisi__escom" value="escombros">
+                                <label for="ent_fisi__escom">ESCOMBROS</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="ent_fisi__basura" id="ent_fisi__basura" value="basura">
+                                <label for="ent_fisi__basura">BASURA</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="ent_fisi__resi_fore" id="ent_fisi__resi_fore" value="residuos forestales">
+                                <label for="ent_fisi__resi_fore">RESIDUOS FORESTALES</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="ent_fisi__prese_arbol_caido" id="ent_fisi__prese_arbol_caido" value="presencia de arboles caidos">
+                                <label for="ent_fisi__prese_arbol_caido">PRESENCIA DE ARBOLES CAIDOS</label>
+                            </div>
+                            
+                        </div>
+
+                        <h6 class="section-subTitle">Usos del Suelo en Cercanías de la Obra</h6>
+                        <div class="checkbox-grid">
+                        
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="ent_fisi__agri" id="ent_fisi__agri" value="agricola">
+                                <label for="ent_fisi__agri">Agrícola / Cultivos</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="ent_fisi__indus" id="ent_fisi__indus" value="industrias">
+                                <label for="ent_fisi__indus">Industrias</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="ent_fisi__comer" id="ent_fisi__comer" value="comercios">
+                                <label for="ent_fisi__comer">Comercios</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="ent_fisi__urban" id="ent_fisi__urban" value="urbana">
+                                <label for="ent_fisi__urban">Urbana / Viviendas</label>
+                            </div>
+                            
+                        </div>
+
+                        <h6 class="section-subTitle">Variacion</h6>
+                        <div class="checkbox-grid">
+                            
+                            <div class="checkbox-item">
+                                <input type="radio" name="ent_fisi__variacion" value="permanente" id="ent_fisi__r_perma">
+                                <label for="ent_fisi__r_perma">R. Permanente</label>    
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="radio" name="ent_fisi__variacion" value="intermitente" id="ent_fisi__r_inter">
+                                <label for="ent_fisi__r_inter">R. Intermitente</label>    
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="radio" name="ent_fisi__variacion" value="efimero" id="ent_fisi__r_efi">
+                                <label for="ent_fisi__r_efi">R. Efimero</label>    
+                            </div>
+
+                        </div>
+                        
+                        <h6 class="section-subTitle">Retiro del Cuerpo de Agua</h6>
+                        <div class="checkbox-grid">
+
+                            <div class="checkbox-item">
+                                <input type="radio" name="ent_fisi__retiro_cuerpo_agua" value="proteccion ocupada" id="ent_fisi__a_prote_ocu">
+                                <label for="ent_fisi__a_prote_ocu">A. PROTECCION OCUPADA</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="radio" name="ent_fisi__retiro_cuerpo_agua" value="proteccion 15M" id="ent_fisi__a_prote_15">
+                                <label for="ent_fisi__a_prote_15">A. PROTECCION 15 M</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="radio" name="ent_fisi__retiro_cuerpo_agua" value="proteccion 80M" id="ent_fisi__a_prote_80">
+                                <label for="ent_fisi__a_prote_80">A. PROTECCION 80 M</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="radio" name="ent_fisi__retiro_cuerpo_agua" value="proteccion 100M" id="ent_fisi__a_prote_100">
+                                <label for="ent_fisi__a_prote_100">A. PROTECCION 100 M</label>
+                            </div>
+
+                        </div>
+
+                        <h6 class="section-subTitle">Alteraciones en el Cause</h6>
+                        <div class="checkbox-grid">
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="ent_fisi__soca_marge" id="ent_fisi__soca_marge" value="socavacion de los margenes">
+                                <label for="ent_fisi__soca_marge">SOCAVACION DE LOS MARGENES</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="ent_fisi__flujo_turbu" id="ent_fisi__flujo_turbu" value="flujos turbulentos">
+                                <label for="ent_fisi__flujo_turbu">FLUJOS TURBULENTOS</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="ent_fisi__sedim" id="ent_fisi__sedim" value="sedimentos">
+                                <label for="ent_fisi__sedim">SEDIMENTOS</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="ent_fisi__rocas" id="ent_fisi__rocas" value="rocas">
+                                <label for="ent_fisi__rocas">ROCAS</label>
+                            </div>
+                            
+                        </div>
+
+                        <h6 class="section-subTitle">Presencia de Viviendas</h6>
+                        <div class="checkbox-grid">
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="ent_fisi__a_la_mar" id="ent_fisi__a_la_mar" value="a las margenes">
+                                <label for="ent_fisi__a_la_mar">A LAS MARGENES</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="ent_fisi__dentro_cause" id="ent_fisi__dentro_cause" value="dentro del cause">
+                                <label for="ent_fisi__dentro_cause">DENTRO DEL CAUSE</label>
+                            </div>
+
+                        </div>
+
+                        <h6 class="section-subTitle">Observaciones</h6>
+                        <div class="form-row">
+
+                            <div class="form-group">
+                                <textarea class="textarea_observaciones" name="ent_fisi__obsevaciones" id="ent_fisi__obsevaciones" wrap="soft"></textarea>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div id="view-s-tipo" class="sub-content-view">
+
+                        <div class="checkbox-section-title">Tipología Estructural de la Obra Hidráulica</div>
+
+                        <h6 class="section-subTitle">Tipologia de la Obra</h6>
+                        <div class="form-row">
+                            
+                            <div class="form-group">
+                                <label for="tipo_obra__nombre">NOMBRE:</label>
+                                <input type="text" name="tipo_obra__nombre" id="tipo_obra__nombre">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="tipo_obra__tiempo">TIEMPO DE CONTRUCCION:</label>
+                                <input type="text" name="tipo_obra__tiempo" id="tipo_obra__tiempo" maxlength="2">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="tipo_obra__tiempo_formato">Formato</label>
+                                <select name="tipo_obra__tiempo_formato" id="tipo_obra__tiempo_formato">
+                                    <option value="NULL" selected></option>
+                                    <option value="Años">Años</option>
+                                    <option value="Meses">Meses</option>
+                                </select>
+                            </div>
+
+                        </div>
+                        
+                        <h6 class="section-subTitle">Condicion Actual de la Obra</h6>
+                        <div class="checkbox-grid">
+
+                            <div class="checkbox-item">
+                                <input type="radio" name="tipo_obra" id="tipo_obra__opera" value="operativa" required>
+                                <label for="tipo_obra__opera">OPERATIVA</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="radio" name="tipo_obra" id="tipo_obra__inopera" value="inoperativa" >
+                                <label for="tipo_obra__inopera">INOPERATIVA</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="radio" name="tipo_obra" id="tipo_obra__limit" value="con limitaciones" >
+                                <label for="tipo_obra__limit">CON LIMITACIONES</label>
+                            </div>
+                            
+                        </div>
+
+                        <h6 class="section-subTitle">Elementos de Contruccion</h6>
+                        <div class="checkbox-grid">
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="tipo_obra__con_arm" id="tipo_obra__con_arm" value="concreto armado">
+                                <label for="tipo_obra__con_arm">CONCRETO ARMADO</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="tipo_obra__con_prefab" id="tipo_obra__con_prefab" value="concreto prefabricado">
+                                <label for="tipo_obra__con_prefab">CONCRETO PREFABRICADO</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="tipo_obra__con_cicl" id="tipo_obra__con_cicl" value="contreto ciclopeo">
+                                <label for="tipo_obra__con_cicl">CONCRETO CICLOPEO</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="tipo_obra__ace_estruc" id="tipo_obra__ace_estruc" value="acero estructural">
+                                <label for="tipo_obra__ace_estruc">ACERO ESTRUCTURAL</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="tipo_obra__mampos" id="tipo_obra__mampos" value="mamposteria">
+                                <label for="tipo_obra__mampos">MAMPOSTERIA</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="tipo_obra__madera" id="tipo_obra__madera" value="madera">
+                                <label for="tipo_obra__madera">MADERA</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="tipo_obra__piedra" id="tipo_obra__piedra" value="piedra">
+                                <label for="tipo_obra__piedra">PIEDRA</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="tipo_obra__gavion" id="tipo_obra__gavion" value="gavion">
+                                <label for="tipo_obra__gavion">GAVION</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="tipo_obra__tierra" id="tipo_obra__tierra" value="tierra">
+                                <label for="tipo_obra__tierra">TIERRA</label>
+                            </div>
+                            
+                        </div>
+
+                        <h6 class="section-subTitle">Clasificacion</h6>
+                        <div class="checkbox-grid">
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="tipo_obra__capta" id="tipo_obra__capta" value="captacion">
+                                <label for="tipo_obra__capta">CAPTACION</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="tipo_obra__transp" id="tipo_obra__transp" value="transporte">
+                                <label for="tipo_obra__transp">TRANSPORTE</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="tipo_obra__con_regu" id="tipo_obra__con_regu" value="control y regulacion">
+                                <label for="tipo_obra__con_regu">CONTROL Y REGULACION</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="tipo_obra__distri" id="tipo_obra__distri" value="distribucion">
+                                <label for="tipo_obra__distri">DISTRIBUCION</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="tipo_obra__reco" id="tipo_obra__reco" value="recoleccion">
+                                <label for="tipo_obra__reco">RECOLECCION</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="tipo_obra__trata" id="tipo_obra__trata" value="tratamiento">
+                                <label for="tipo_obra__trata">TRATAMIENTO</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="tipo_obra__pro_mejo" id="tipo_obra__pro_mejo" value="proteccion y mejoras">
+                                <label for="tipo_obra__pro_mejo">PROTECCION Y MEJORAS</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="tipo_obra__trans_ene" id="tipo_obra__trans_ene" value="transformacion de energia">
+                                <label for="tipo_obra__trans_ene">TRANSFORMACION DE ENERGIA</label>
+                            </div>
+                            
+                        </div>
+                        
+                        <h6 class="section-subTitle">Funcion</h6>
+                        <div class="checkbox-grid">
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="tipo_obra__conten" id="tipo_obra__conten" value="contencion">
+                                <label for="tipo_obra__conten">CONTENCION</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="tipo_obra__conduc" id="tipo_obra__conduc" value="conduccion">
+                                <label for="tipo_obra__conduc">CONDUCCION</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="tipo_obra__toma" id="tipo_obra__toma" value="toma">
+                                <label for="tipo_obra__toma">TOMA</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="tipo_obra__con_flu" id="tipo_obra__con_flu" value="control fluvial">
+                                <label for="tipo_obra__con_flu">CONTROL FLUVIAL</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="tipo_obra__evacu" id="tipo_obra__evacu" value="evacuacion">
+                                <label for="tipo_obra__evacu">EVACUACION</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="tipo_obra__espe" id="tipo_obra__espe" value="especiales">
+                                <label for="tipo_obra__espe">ESPECIALES</label>
+                            </div>
+                            
+                        </div>
+
+                        <h6 class="section-subTitle">Dimenciones de Rocas de Prestamo</h6>
+                        <div class="form-group">
+                            <label for="tipo_obra__drp">DIMENCIONES DE ROCAS DE PRESTAMO</label>    
+                            <input type="text" class="lone_input" name="tipo_obra__drp" id="tipo_obra__drp" maxlength="5" placeholder="00,00">
+                        </div>
+
+                        <h6 class="section-subTitle">Otros Materiales Constructivos</h6>
+                        <div class="form-group">
+                            <label for="tipo_obra__omc">OTROS MATERIALES CONTRUCTIVOS</label>    
+                            <input type="text" class="lone_input" name="tipo_obra__omc" id="tipo_obra__omc">
+                        </div>
+
+                        <h6 class="section-subTitle">Observaciones</h6>
+                        <div class="form-group">
+                            <textarea class="textarea_observaciones" name="tipo_obra__observaciones" id="tipo_obra__observaciones" wrap="soft"></textarea>
+                        </div>
+
+                    </div>
+
+                    <div id="view-s-Caracteristicas" class="sub-content-view">
+
+                        <div class="checkbox-section-title">Caracteristicas de la Obra</div>
+
+                        <h6 class="section-subTitle">Diseño de Dique</h6>
+                        <div class="checkbox-grid">
+
+                            <div class="checkbox-item">
+                                <input type="radio" name="carac_obra__diseno_obra" value="gravedad" id="carac_obra__gravedad1">
+                                <label for="carac_obra__gravedad1">GRAVEDAD</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="radio" name="carac_obra__diseno_obra" value="arco" id="carac_obra__arco">
+                                <label for="carac_obra__arco">ARCO</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="radio" name="carac_obra__diseno_obra" value="contrafuente" id="carac_obra__contrafu">
+                                <label for="carac_obra__contrafu">CONTRAFUERTE</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="radio" name="carac_obra__diseno_obra" value="materiales sueltos" id="carac_obra__mate_suel">
+                                <label for="carac_obra__mate_suel">MATERIALES SUELTOS</label>
+                            </div>
+
+                        </div>
+
+                        <h6 class="section-subTitle">Tipo de Dique</h6>
+                        <div class="checkbox-grid">
+                            
+                            <div class="checkbox-item">
+                                <input type="radio" name="carac_obra__tipo_dique" value="ventana" id="carac_obra__vent">
+                                <label for="carac_obra__vent">VENTANA</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="radio" name="carac_obra__tipo_dique" value="ranura" id="carac_obra__ranu">
+                                <label for="carac_obra__ranu">RANURA</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="radio" name="carac_obra__tipo_dique" value="enrejado" id="carac_obra__enrej">
+                                <label for="carac_obra__enrej">ENREJADO</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="radio" name="carac_obra__tipo_dique" value="rastrillo" id="carac_obra__rastri">
+                                <label for="carac_obra__rastri">RASTRILLO</label>
+                            </div>
+                            
+                        </div>
+
+                        <h6 class="section-subTitle">Tipo de Muro</h6>
+                        <div class="checkbox-grid">
+                            
+                            <div class="checkbox-item">
+                                <input type="radio" name="carac_obra__tipo_muro" value="hincado" id="carac_obra__hinca">
+                                <label for="carac_obra__hinca">HINCADO</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="radio" name="carac_obra__tipo_muro" value="anclado" id="carac_obra__anclado">
+                                <label for="carac_obra__anclado">ANCLADO</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="radio" name="carac_obra__tipo_muro" value="contra fuerte" id="carac_obra__cont_fuer">
+                                <label for="carac_obra__cont_fuer">CONTRA FUERTE</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="radio" name="carac_obra__tipo_muro" value="gravedad armado" id="carac_obra__grave_arma">
+                                <label for="carac_obra__grave_arma">GRAVEDAD ARMADO</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="radio" name="carac_obra__tipo_muro" value="gravedad" id="carac_obra__gravedad2">
+                                <label for="carac_obra__gravedad2">GRAVEDAD</label>
+                            </div>
+
+                        </div>
+
+                        <h6 class="section-subTitle">Observaciones</h6>
+                        <div class="form-group">
+                            <textarea class="textarea_observaciones" name="carac_obra__observaciones" id="carac_obra__observaciones" wrap="soft"></textarea>
+                        </div>
+                        
+                        <h6 class="section-subTitle">Tipo de Descanso</h6>
+                        <div class="checkbox-grid">
+                            
+                            <div class="checkbox-item">
+                                <input type="radio" name="carac_obra__tipo_descanso" value="pie" id="carac_obra__pie">
+                                <label for="carac_obra__pie">PIE</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="radio" name="carac_obra__tipo_descanso" value="corte y relleno" id="carac_obra__corte_relle">
+                                <label for="carac_obra__corte_relle">CORTE Y RELLENO</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="radio" name="carac_obra__tipo_descanso" value="corte vanqueta" id="carac_obra__corte_vanq">
+                                <label for="carac_obra__corte_vanq">CORTE BANQUETA</label>
+                            </div>
+                            
+                        </div>
+                        
+                        <h6 class="section-subTitle">Vertederos</h6>
+                        <div class="checkbox-grid">
+                            
+                            <div class="checkbox-item">
+                                <label for="carac_obra__simple">SIMPLE</label>
+                                <input type="radio" name="carac_obra__vertederos" value="simple" id="carac_obra__simple">
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="radio" name="carac_obra__vertederos" value="multiple" id="carac_obra__multi">
+                                <label for="carac_obra__multi">MULTIPLE</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="radio" name="carac_obra__vertederos" value="cantidad" id="carac_obra__canti">
+                                <label for="carac_obra__canti">CANTIDAD</label>
+                            </div>
+                            
+                        </div>
+                        
+                        <h6 class="section-subTitle">Estructuras Auxiliares</h6>
+                        <div class="checkbox-grid">
+
+                            <div class="form-group">
+                                <label for="carac_obra__mechi">MECHINALES</label>
+                                <input type="text" name="carac_obra__mechi" id="carac_obra__mechi" maxlength="2" pattern="[0-9]*" inputmode="numeric">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="carac_obra__disp_ener">DISPARADOR DE ENERGIA</label>
+                                <input type="text" name="carac_obra__disp_ener" id="carac_obra__disp_ener" maxlength="2" pattern="[0-9]*" inputmode="numeric">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="carac_obra__malla_cont">MALLA DE CONTENCION</label>
+                                <input type="text" name="carac_obra__malla_cont" id="carac_obra__malla_cont" maxlength="2" pattern="[0-9]*" inputmode="numeric">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="carac_obra__alivi">ALIVIADEROS</label>
+                                <input type="text" name="carac_obra__alivi" id="carac_obra__alivi" maxlength="2" pattern="[0-9]*" inputmode="numeric">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="carac_obra__peine_debas">PEINE DE DESBASTE</label>
+                                <input type="text" name="carac_obra__peine_debas" id="carac_obra__peine_debas" maxlength="2" pattern="[0-9]*" inputmode="numeric">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="carac_obra__contradic">CONTRADIQUE</label>
+                                <input type="text" name="carac_obra__contradic" id="carac_obra__contradic" maxlength="2" pattern="[0-9]*" inputmode="numeric">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="carac_obra__espigo">ESPIGONES</label>
+                                <input type="text" name="carac_obra__espigo" id="carac_obra__espigo" maxlength="2" pattern="[0-9]*" inputmode="numeric">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="carac_obra__enroca">ENROCADO</label>
+                                <input type="text" name="carac_obra__enroca" id="carac_obra__enroca" maxlength="2" pattern="[0-9]*" inputmode="numeric">
+                            </div>
+                            
+                        </div>
+                        
+                        <h6 class="section-subTitle">Canales</h6>
+                        <div class="checkbox-grid">
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="carac_obra__disenos__canales__rectangular" id="carac_obra__disenos__canales__rectangular" value="rectangular">
+                                <label for="carac_obra__disenos__canales__rectangular">
+                                    <img src="./imgs/canales/canales-rectangular.png" alt="Canal Rectangular">
+                                    <h3>Rectangular</h3>
+                                </label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="carac_obra__disenos__canales__trapezoidal" id="carac_obra__disenos__canales__trapezoidal" value="trapezoidal">
+                                <label for="carac_obra__disenos__canales__trapezoidal">
+                                    <img src="./imgs/canales/canales-trapezoidal.png" alt="Canal Trapezoidal">
+                                    <h3>Trapezoidal</h3>
+                                </label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="carac_obra__disenos__canales__triangular" id="carac_obra__disenos__canales__triangular" value="triangular">
+                                <label for="carac_obra__disenos__canales__triangular">
+                                    <img src="./imgs/canales/canales-triangular.png" alt="Canal Triangular">
+                                    <h3>Triangular</h3>
+                                </label>
+                            </div>
+
+                        </div>
+
+                        <h6 class="section-subTitle">Otros diseños de canales:</h6>
+                        <div class="form-row">
+
+                            <div class="form-group">
+                                <input type="text" name="carac_obra__otros_canales" id="carac_obra__otros_canales">
+                            </div>
+
+                        </div>
+
+                        <h6 class="section-subTitle">Diques Cerrados</h6>
+                        <div class="checkbox-grid">
+
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="carac_obra__disenos__diques_cerrados__rectangular" id="carac_obra__disenos__diques_cerrados__rectangular" value="rectangular">
+                                <label for="carac_obra__disenos__diques_cerrados__rectangular">
+                                    <img src="./imgs/diques-cerrados/diques_cerrados-rectangular.png" alt="Dique cerrado Rectangular">
+                                    <h3>Rectangular</h3>
+                                </label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="carac_obra__disenos__diques_cerrados__trapezoidal" id="carac_obra__disenos__diques_cerrados__trapezoidal" value="trapezoidal">
+                                <label for="carac_obra__disenos__diques_cerrados__trapezoidal">
+                                    <img src="./imgs/diques-cerrados/diques_cerrados-trapezoidal.png" alt="Dique cerrado Trapezoidal">
+                                    <h3>Trapezoidal</h3>
+                                </label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="carac_obra__disenos__diques_cerrados__circular" id="carac_obra__disenos__diques_cerrados__circular" value="circular">
+                                <label for="carac_obra__disenos__diques_cerrados__circular">
+                                    <img src="./imgs/diques-cerrados/diques_cerrados-circular.png" alt="Dique cerrado Circular">
+                                    <h3>Triangular</h3>
+                                </label>
+                            </div>
+
+                        </div>
+                        
+                        <h6 class="section-subTitle">Diques Abiertos</h6>
+                        <div class="checkbox-grid">
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="carac_obra__disenos__diques_abiertos__ranura" id="carac_obra__disenos__diques_abiertos__ranura" value="ranura">
+                                <label for="carac_obra__disenos__diques_abiertos__ranura">
+                                    <img src="./imgs/diques_abiertos/diques_abiertos-ranura.png" alt="Diques abiertos Ranura">
+                                    <h3>Ranura</h3>
+                                </label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="carac_obra__disenos__diques_abiertos__rastrillo" id="carac_obra__disenos__diques_abiertos__rastrillo" value="rastrillo">
+                                <label for="carac_obra__disenos__diques_abiertos__rastrillo">
+                                    <img src="./imgs/diques_abiertos/diques_abiertos-rastrillo.png" alt="Diques abiertos Rastrillo">
+                                    <h3>Rastrillo</h3>
+                                </label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="carac_obra__disenos__diques_abiertos__enrejado" id="carac_obra__disenos__diques_abiertos__enrejado" value="enrejado">
+                                <label for="carac_obra__disenos__diques_abiertos__enrejado">
+                                    <img src="./imgs/diques_abiertos/diques_abiertos-enrejado.png" alt="Diques abiertos Enrejado">
+                                    <h3>Enrejado</h3>
+                                </label>
+                            </div>
+                        
+                        </div>
+
+                        <h6 class="section-subTitle">Medidas</h6>
+                        <div class="form-row">
+                            
+                            <div class="form-group">
+                                <label for="carac_obra__altura">ALTURA:</label>
+                                <input type="text" name="carac_obra__altura" id="carac_obra__altura" inputmode="numeric" pattern="\d{1,3}(,\d{2})?" maxlength="6" placeholder="000,00">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="carac_obra__base">BASE:</label>
+                                <input type="text" name="carac_obra__base" id="carac_obra__base" inputmode="numeric" pattern="\d{1,5}(,\d{2})?" maxlength="8" placeholder="00000,00">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="carac_obra__ancho">ANCHO:</label>
+                                <input type="text" name="carac_obra__ancho" id="carac_obra__ancho" inputmode="numeric" pattern="\d{1,5}(,\d{2})?" maxlength="8" placeholder="00000,00">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="carac_obra__longitud">LONGITUD:</label>
+                                <input type="text" name="carac_obra__longitud" id="carac_obra__longitud" inputmode="numeric" pattern="\d{1,5}(,\d{2})?" maxlength="8" placeholder="00000,00">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="carac_obra__diametro">DIAMETRO:</label>
+                                <input type="text" name="carac_obra__diametro" id="carac_obra__diametro" inputmode="numeric" pattern="\d{1,4}(,\d{2})?" maxlength="7" placeholder="0000,00">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="carac_obra__area">AREA:</label>
+                                <input type="text" name="carac_obra__area" id="carac_obra__area" inputmode="numeric" pattern="\d{1,5}(,\d{2})?" maxlength="8" placeholder="00000,00">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="carac_obra__volumen">VOLUMEN:</label>
+                                <input type="text" name="carac_obra__volumen" id="carac_obra__volumen" inputmode="numeric" pattern="\d{1,5}(,\d{2})?" maxlength="8" placeholder="00000,00">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div id="view-s-danos" class="sub-content-view">
+
+                        <div class="checkbox-section-title">Daños Estructurares</div>
+                        <div class="checkbox-grid">
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="danos_estruc__ex_ace_su" value="exposicion del acero superficial" id="danos_estruc__ex_ace_su">
+                                <label for="danos_estruc__ex_ace_su">EXPOSICION DEL ACERO SUPERFICIAL</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="danos_estruc__ero_estruc_inter" value="erocion de estructura interna" id="danos_estruc__ero_estruc_inter">
+                                <label for="danos_estruc__ero_estruc_inter">EROSION DE ESTRUCTURA INTERNA</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="danos_estruc__ero_cober_inter" value="erocion de cobertura interno" id="danos_estruc__ero_cober_inter">
+                                <label for="danos_estruc__ero_cober_inter">EROSION DE COBERTURA INTERNO</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="danos_estruc__def_exce_alza" value="deformacion excesiva del alzado" id="danos_estruc__def_exce_alza">
+                                <label for="danos_estruc__def_exce_alza">DEFORMACION EXCESIVA DEL ALZADO</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="danos_estruc__efec_sismi" value="efecto sismico" id="danos_estruc__efec_sismi">
+                                <label for="danos_estruc__efec_sismi">EFECTO SISMICO</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="danos_estruc__desli_exter" value="deslizamiento externo" id="danos_estruc__desli_exter">
+                                <label for="danos_estruc__desli_exter">DESLIZAMIENTO EXTERNO</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="danos_estruc__ruptu_fricc" value="ruptura por friccion" id="danos_estruc__ruptu_fricc">
+                                <label for="danos_estruc__ruptu_fricc">RUPTURA POR FRICCION</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="danos_estruc__despla_profu" value="desplazamiento profundo" id="danos_estruc__despla_profu">
+                                <label for="danos_estruc__despla_profu">DESPLAZAMIENTO PROFUNDO</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="danos_estruc__desliza" value="deslizamiento" id="danos_estruc__desliza">
+                                <label for="danos_estruc__desliza">DESLIZAMIENTO</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="danos_estruc__desplaza" value="desplazamiento" id="danos_estruc__desplaza">
+                                <label for="danos_estruc__desplaza">DESPLAZAMIENTO</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="danos_estruc__sobre_paso" value="sobre paso" id="danos_estruc__sobre_paso">
+                                <label for="danos_estruc__sobre_paso">SOBRE PASO</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="danos_estruc__vuelco" value="vuelco" id="danos_estruc__vuelco">
+                                <label for="danos_estruc__vuelco">VUELCO</label>
+                            </div>
+
+                        </div>
+
+                        <div class="checkbox-section-title">Daños Visibles</div>
+                        <div class="checkbox-grid">
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="danos_visivles__rup_es_cort" value="ruptura por esfuerzo cortante" id="danos_visivles__rup_es_cort">
+                                <label for="danos_visivles__rup_es_cort">RUPTURA POR ESFUERZO CORTANTE</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="danos_visivles__rup_falla_cort" value="ruptura por falla de solape" id="danos_visivles__rup_falla_cort">
+                                <label for="danos_visivles__rup_falla_cort">RUPTURA POR FALLA DE SOLAPE</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="danos_visivles__rup_esfu_raspan" value="ruptura por esfuerzo raspante" id="danos_visivles__rup_esfu_raspan">
+                                <label for="danos_visivles__rup_esfu_raspan">RUPTURA POR ESFUERZO RASPANTE</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="danos_visivles__fisu_capa_concre" value="fisura en la capa de concreto" id="danos_visivles__fisu_capa_concre">
+                                <label for="danos_visivles__fisu_capa_concre">FISURA EN LA CAPA DE CONCRETO</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="danos_visivles__super_giro_exce" value="superficial giro excesivo" id="danos_visivles__super_giro_exce">
+                                <label for="danos_visivles__super_giro_exce">SUPERFICIAL GIRO EXCESIVO</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="danos_visivles__eroci_superfi" value="erocion de superficie" id="danos_visivles__eroci_superfi">
+                                <label for="danos_visivles__eroci_superfi">EROCION DE SUPERFICIE</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="danos_visivles__socava_base" value="socavacion de la base" id="danos_visivles__socava_base">
+                                <label for="danos_visivles__socava_base">SOCAVACION DE LA BASE</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="danos_visivles__discon_concre" value="discontinuidad del concreto" id="danos_visivles__discon_concre">
+                                <label for="danos_visivles__discon_concre">DISCONTINUIDAD DEL CONCRETO</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="danos_visivles__figu_exce" value="figuracion excesiva" id="danos_visivles__figu_exce">
+                                <label for="danos_visivles__figu_exce">FIGURACION EXCESIVA</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="danos_visivles__colma" value="colmatada" id="danos_visivles__colma">
+                                <label for="danos_visivles__colma">COLMATADA</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="danos_visivles__carca" value="carcavas" id="danos_visivles__carca">
+                                <label for="danos_visivles__carca">CARCAVAS</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="danos_visivles__asenta" value="asentamiento" id="danos_visivles__asenta">
+                                <label for="danos_visivles__asenta">ASENTAMIENTO</label>
+                            </div>
+
+                        </div>
+
+                        <div class="checkbox-section-title">Daños Funcionales</div>
+                        <div class="checkbox-grid">
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="danos_funci__gene_duct" value="generacion de ductos" id="danos_funci__gene_duct">
+                                <label for="danos_funci__gene_duct">GENERACION DE DUCTOS</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="danos_funci__frac_comp" value="fracturas de compuertas" id="danos_funci__frac_comp">
+                                <label for="danos_funci__frac_comp">FRACTURAS DE COMPUERTAS</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="danos_funci__obst_alivi" value="obstruccion de aliviaderos" id="danos_funci__obst_alivi">
+                                <label for="danos_funci__obst_alivi">OBSTRUCCION DE ALIVIADEROS</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="danos_funci__perme_cober_inter" value="permeabilidad de cobertura interna" id="danos_funci__perme_cober_inter">
+                                <label for="danos_funci__perme_cober_inter">PERMEABILIDAD DE COBERTURA INTERNA</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="danos_funci__sedi_alt_max_obra" value="sedimiento a la altura maxima de la obra" id="danos_funci__sedi_alt_max_obra">
+                                <label for="danos_funci__sedi_alt_max_obra">SEDIMIENTO A LA ALTURA MAXIMA DE LA OBRA</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" name="danos_funci__infil" value="infiltracion" id="danos_funci__infil">
+                                <label for="danos_funci__infil">INFILTRACION</label>
+                            </div>
+
+                        </div>
+                        
+                        <div class="checkbox-section-title">Daños en el Concreto</div>
+                        <div class="checkbox-grid">
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="danos_concr__desag" name="danos_concr__desag" value="desagregacion">
+                                <label for="danos_concr__desag">DESAGREGACIÓN</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="danos_concr__disgr" name="danos_concr__disgr" value="disgregacion">
+                                <label for="danos_concr__disgr">DISGREGACIÓN</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="danos_concr__cavit" name="danos_concr__cavit" value="cavitacion">
+                                <label for="danos_concr__cavit">CAVITACIÓN</label>
+                            </div>
+
+                        </div>
+
+                        <div class="checkbox-section-title">Daños en el Acero</div>
+                        <div class="checkbox-grid">
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="danos_acero__oxida" name="danos_acero__oxida" value="oxidación">
+                                <label for="danos_acero__oxida">OXIDACIÓN</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="danos_acero__corro" name="danos_acero__corro" value="corroción">
+                                <label for="danos_acero__corro">CORROCIÓN</label>
+                            </div>
+
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="danos_acero__defor" name="danos_acero__defor" value="deformación">
+                                <label for="danos_acero__defor">DEFORMACIÓN</label>
+                            </div>
+
+                        </div>
+
+                    </div>  
+
+                    <div id="view-s-metodologia" class="sub-content-view">
+                        
+                        <div class="checkbox-section-title">Metodologias Aplicadas</div>
+
+                        <h6 class="section-subTitle">Boceto de la Obra y Niveles de Colmatacion</h6>
+
+                        <h6 class="section-subTitle">Prueba del Mortero</h6>
+                        <div class="checkbox-grid">
+
+                            <div class="checkbox-item">
+                                <input type="radio" name="meto_apli__prueba_mortero" value="mortero grandes" id="meto_apli__mortero__grandes">
+                                <label for="meto_apli__mortero__grandes">
+                                    <img src="imgs/morteros/mortero-grandes.png" alt="Mortero Grande">
+                                </label>
+
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="radio" name="meto_apli__prueba_mortero" value="mortero medianos" id="meto_apli__mortero__medianos">
+                                <label for="meto_apli__mortero__medianos">
+                                    <img src="imgs/morteros/mortero-medianos.png" alt="Mortero Mediano">
+                                </label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="radio" name="meto_apli__prueba_mortero" value="mortero borilla" id="meto_apli__mortero__borilla">
+                                <label for="meto_apli__mortero__borilla">
+                                    <img src="imgs/morteros/mortero-boronilla.png" alt="Mortero Borilla (viruta)">
+                                </label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="radio" name="meto_apli__prueba_mortero" value="mortero polvo" id="meto_apli__mortero__polvo">
+                                <label for="meto_apli__mortero__polvo">
+                                    <img src="imgs/morteros/mortero-polvo.png" alt="Mortero Polvo">
+                                </label>
+                            </div>
+                            
+                        </div>
+
+                        <h6 class="section-subTitle">Niveles de Colmatacion</h6>
+                        <div class="checkbox-grid">
+                            
+                            <div class="checkbox-item">
+                                <input type="radio" name="nivel_contaminacion" value="alto" id="nivel_contaminacion__alto">
+                                <label for="nivel_contaminacion__alto">A: ALTO</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="radio" name="nivel_contaminacion" value="medio" id="nivel_contaminacion__medio">
+                                <label for="nivel_contaminacion__medio">M: MEDIO </label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="radio" name="nivel_contaminacion" value="bajo" id="nivel_contaminacion__bajo">
+                                <label for="nivel_contaminacion__bajo">B: BAJO </label>
+                            </div>
+                            
+                        </div>
+
+                        <h6 class="section-subTitle">Observaciones</h6>
+                        <div class="form-group">
+                            <textarea class="textarea_observaciones" name="meto_apli__observaciones" id="meto_apli__observaciones" wrap="soft"></textarea>
+                        </div>
+
+                    </div>
+
+                    <div id="view-s-organizaciones" class="sub-content-view">
+                        
+                        <div class="checkbox-section-title">Organizaciones Participantes</div>
+
+                        <div class="form-row">
+                            
+                            <div class="form-group">
+                                <label for="org_parti__nom_ape_1">Nombre y Apellido</label>
+                                <input type="text" name="org_parti__nom_ape_1" id="org_parti__nom_ape_1" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="org_parti__insti_1">Institucion</label>
+                                <input type="text" name="org_parti__insti_1" id="org_parti__insti_1" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="org_parti__tlf_1">Telefono</label>
+                                <input type="tel" name="org_parti__tlf_1" id="org_parti__tlf_1" placeholder="0000-0000000"  maxlength="12" required> 
+                            </div>
+
+                        </div>
+
+                        <div class="form-row">
+                            
+                            <div class="form-group">
+                                <label for="org_parti__nom_ape_2">Nombre y Apellido</label>
+                                <input type="text" name="org_parti__nom_ape_2" id="org_parti__nom_ape_2">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="org_parti__insti_2">Institucion</label>
+                                <input type="text" name="org_parti__insti_2" id="org_parti__insti_2">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="org_parti__tlf_2">Telefono</label>
+                                <input type="tel" name="org_parti__tlf_2" id="org_parti__tlf_2" placeholder="0000-0000000" maxlength="12"> 
+                            </div>
+
+                        </div>
+
+                        <div class="form-row">
+                            
+                            <div class="form-group">
+                                <label for="org_parti__nom_ape_3">Nombre y Apellido</label>
+                                <input type="text" name="org_parti__nom_ape_3" id="org_parti__nom_ape_3">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="org_parti__insti_3">Institucion</label>
+                                <input type="text" name="org_parti__insti_3" id="org_parti__insti_3">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="org_parti__tlf_3">Telefono</label>
+                                <input type="tel" name="org_parti__tlf_3" id="org_parti__tlf_3" placeholder="0000-0000000" maxlength="12"> 
+                            </div>
+
+                        </div>
+                       
+                        <button type="submit" class="btn btn-success" style="width:100%; font-size:13px;">💾 Registrar Inspección Completa en Base de Datos SIROH</button>
+
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+
+        <div id="page-meteorologia" class="page-section">
+            
+            <div id="met-subview-estaciones" style="display:none;">
+                <div class="card-panel">
+                    <h2>Catálogo e Inventario de la Red Pluviométrica</h2>
+                    <div class="subtitle">Estaciones Meteorológicas de Monitoreo Comunitario e Institucional</div>
+                    
+                    <div style="overflow-x:auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Cód. Equipo</th>
+                                    <th>Asignado</th>
+                                    <th>Parroquia</th>
+                                    <th>Responsable</th>
+                                    <th>Estatus</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-estaciones-met"></tbody>
+                        </table>
+                    </div>
+
+                    <div id="ficha-estacion-detalle" style="display:none;" class="ficha-estacion-modal"></div>
+                    
+                    <div id="form-edicion-estacion-box" style="display:none; background:#fff; border:1px solid var(--border-muted); padding:20px; margin-top:15px; border-radius:6px;">
+                        <h3 style="color:var(--primary-blue); font-size:14px; margin-bottom:15px; text-transform:uppercase;">Editar Parámetros de Estación</h3>
+                        <form id="form-editar-estacion" onsubmit="guardarEdicionEstacion(event)">
+                            <input type="hidden" id="edit-est-id">
+                            <div class="form-row">
+                                <div class="form-group"><label>Sector</label><input type="text" id="edit-est-sector"></div>
+                                <div class="form-group"><label>Dirección del Equipo</label><input type="text" id="edit-est-direccion"></div>
+                                <div class="form-group"><label>Estatus del Equipo</label>
+                                    <select id="edit-est-estatus">
+                                        <option value="ACTIVO">ACTIVO</option>
+                                        <option value="INACTIVO">INACTIVO</option>
+                                        <option value="EQUIPO RETIRADO Y BAJO RESGUARDO">EQUIPO RETIRADO Y BAJO RESGUARDO</option>
+                                        <option value="RETIRO DE EQUIPO">RETIRO DE EQUIPO</option>
+                                        <option value="ENTREGADO A MINEC - UTEC CARACAS">ENTREGADO A MINEC - UTEC CARACAS</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group" style="margin-bottom:15px;"><label>Observación del Equipo</label><input type="text" id="edit-est-observacion"></div>
+                            <button type="submit" class="btn btn-small btn-success">Actualizar Estación</button>
+                            <button type="button" class="btn btn-small" style="background:#64748b;" onclick="document.getElementById('form-edicion-estacion-box').style.display='none'">Cancelar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div id="met-subview-carga" style="display:none;">
+                <div class="card-panel">
+                    <h2>Ingesta y Carga de Valores Pluviométricos</h2>
+                    <div class="subtitle">Captura simultánea para la red de monitoreo en tiempo real</div>
+                    <form onsubmit="procesarCargaLecturas(event)">
+                        <div class="form-row" style="max-width:300px; margin-bottom:20px;">
+                            <div class="form-group">
+                                <label>Fecha de Captura de Datos</label>
+                                <input type="date" id="carga-lectura-fecha" required>
+                            </div>
+                        </div>
+                        <div style="max-height:400px; overflow-y:auto; border:1px solid var(--border-muted); border-radius:6px; margin-bottom:15px;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Código Equipo</th>
+                                        <th>Parroquia / Sector / Responsable</th>
+                                        <th style="width:180px;">Precipitación Acumulada (mm)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabla-carga-lecturas-cuerpo"></tbody>
+                            </table>
+                        </div>
+                        <button type="submit" class="btn btn-success">💾 Inyectar Lecturas al Dashboard</button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="met-subview-historico" style="display:none;">
+                <div class="card-panel">
+                    <h2>Historial y Registro Cronológico de Ingestas</h2>
+                    <div class="subtitle">Base de datos de lecturas registradas en la plataforma</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Fecha de Lectura</th>
+                                <th>Código Equipo</th>
+                                <th>Parroquia</th>
+                                <th>Precipitación (mm)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-historico-lecturas">
+                            <tr><td colspan="4" style="text-align:center; color:#64748b;">No se han inyectado lecturas en la sesión actual.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="met-subview-anual" style="display:none;">
+                <div class="card-panel">
+                    <h2>Matriz Pluviométrica Histórica Anual Consolidadas</h2>
+                    <div class="subtitle">Acumulado mensual del Municipio Libertador (mm) registrado desde el 2019</div>
+                    <div style="overflow-x:auto;">
+                        <table style="text-align:center;">
+                            <thead>
+                                <tr>
+                                    <th>AÑO</th><th>ENE</th><th>FEB</th><th>MAR</th><th>ABR</th><th>MAY</th><th>JUN</th>
+                                    <th>JUL</th><th>AGO</th><th>SEP</th><th>OCT</th><th>NOV</th><th>DIC</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-matriz-anual-cuerpo"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="met-subview-dashboard" style="display:none;">
+                <div class="card-panel">
+                    <h2>Panel Integral Meteorológico</h2>
+                    <div class="subtitle">Dashboard Interactivo de Alerta Temprana - IMGRAD</div>
+                    
+                    <div class="kpi-grid">
+                        <div class="kpi-card"><p>Red Total de Equipos</p><h3 id="dash-kpi-total">27 Estaciones</h3></div>
+                        <div class="kpi-card" style="border-left-color:var(--success-green);"><p>Equipos Operativos Activos</p><h3 id="dash-kpi-activos">19 Activos</h3></div>
+                        <div class="kpi-card" style="border-left-color:var(--warning-orange);"><p>Pico de Lluvia en Sesión</p><h3 id="dash-kpi-pico">0.0 mm</h3></div>
+                    </div>
+
+                    <div style="background:#1e293b; color:white; padding:25px; border-radius:6px; font-family:monospace; font-size:12.5px; line-height:1.6;">
+                        <span style="color:#10b981; font-weight:bold;">// MAPA DE CALOR Y ALERTAS POR PARROQUIAS URBANO/RURALES</span><br>
+                        <div id="dash-grafico-simulado">Cargue lecturas diarias en la sección "Carga" para calcular la distribución espacial de las lluvias de hoy.</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="page-hidrologia" class="page-section">
+            <div class="card-panel">
+                <h2>Inventario y Caracterización Macro de Cuencas</h2>
+                <div class="subtitle">Repositorio de expedientes digitales de las subcuencas del municipio</div>
+                
+                <div style="display:grid; grid-template-columns: 1fr 2fr; gap:20px;">
+                    <div style="border-right: 1px solid var(--border-muted); padding-right:15px;">
+                        <h3 style="font-size:12px; text-transform:uppercase; margin-bottom:10px; color:var(--primary-blue)">Subcuencas Disponibles</h3>
+                        <div onclick="verCuenca('macarao')" style="padding:10px; background:var(--light-blue); margin-bottom:6px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:13px;">Subcuenca Alta Quebrada Macarao</div>
+                        <div onclick="verCuenca('caruata')" style="padding:10px; background:#f1f5f9; margin-bottom:6px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:13px;">Subcuenca Quebrada Caroata</div>
+                        <div onclick="verCuenca('valle')" style="padding:10px; background:#f1f5f9; margin-bottom:6px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:13px;">Subcuenca Río El Valle Poniente</div>
+                    </div>
+                    <div id="detalle-cuenca-box" style="background:#fafafa; padding:20px; border-radius:6px; border:1px solid var(--border-muted);">
+                        <h3 id="c-nombre" style="color:var(--primary-blue); font-size:16px;">Selecciona una subcuenca para abrir el expediente</h3>
+                        <div id="c-contenido" style="margin-top:15px; font-size:13px; color:#475569; line-height:1.5;">
+                            Haz clic en el panel izquierdo para consultar las variables de drenaje, coeficientes de escorrentía calculados y las principales vulnerabilidades registradas por el IMGRAD.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-morfometria" class="page-section">
+            <div class="card-panel">
+                <h2>Estudios de Parámetros de Forma y Relieve</h2>
+                <div class="subtitle">Cálculo de Variables Geométricas en Cuerpos de Agua</div>
+
+                <div class="tab-container">
+                    <button class="tab-btn active-tab" onclick="switchSubTab('morfo', 'mo-carga')" id="btn-mo-carga">Módulo A) Procesamiento Secuencial</button>
+                    <button class="tab-btn" onclick="switchSubTab('morfo', 'mo-banco')" id="btn-mo-banco">Módulo B) Banco de Morfometría</button>
+                </div>
+
+                <div id="view-mo-carga" class="sub-content-view active-sub">
+                    <form id="form-morfometria" onsubmit="guardarMorfometria(event)">
+                        <input type="hidden" id="morfo-id">
+                        <div class="checkbox-section-title">Variables Iniciales del Cuerpo de Agua</div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Nombre del Cuerpo / Quebrada</label><input type="text" id="mo-nombre" placeholder="Ej. Quebrada Pomosa" required></div>
+                            <div class="form-group"><label>Área de la Cuenca (A) [km²]</label><input type="number" step="0.01" id="mo-area" required></div>
+                            <div class="form-group"><label>Perímetro de Cuenca (P) [km]</label><input type="number" step="0.01" id="mo-perimetro" required></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Longitud Cauce Principal (L) [km]</label><input type="number" step="0.01" id="mo-long" required></div>
+                            <div class="form-group"><label>Cota Máxima (Hmax) [msnm]</label><input type="number" id="mo-cmax" required></div>
+                            <div class="form-group"><label>Cota Mínima (Hmin) [msnm]</label><input type="number" id="mo-cmin" required></div>
+                        </div>
+                        <div style="margin-top:15px; text-align:right;">
+                            <button type="submit" class="btn" style="background:var(--primary-blue);">⚡ Procesar Parámetros y Almacenar</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="view-mo-banco" class="sub-content-view">
+                    <h3 style="font-size:13px; text-transform:uppercase; color:var(--primary-blue); margin-bottom:10px;">Catálogo de Estudios Guardados</h3>
+                    <table>
+                        <thead>
+                            <tr><th>Cuerpo de Agua</th><th>Área (km²)</th><th>Gravelius (Kc)</th><th>Pendiente (λ)</th><th>Acciones Técnicas</th></tr>
+                        </thead>
+                        <tbody id="tabla-morfometria-cuerpo"></tbody>
+                    </table>
+                    <div id="print-area" class="print-preview-container" style="display:none;"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="./js/services/verificar_sesion.js" defer></script>
+    <script src="./js/base.js" defer></script>
+    <script type="module" src="./js/components/mainNav.js" defer></script>
+    <script type="module" src="./js/components/mainForm.js" defer></script>
+
+    <script src="./js/helpers/inputRules.js" defer></script>
+    
+    
+    <script type="module" src="./js/services/google_maps_api/map.js" defer></script>
+     <!-- GOOGLE MAPS (COMPONENTES) -->
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.1.1/model-viewer.min.js" defer></script>
+    <!-- Este es el importante para los componentes de Maps -->
+    <script type="module" src="https://unpkg.com/@googlemaps/extended-component-library" defer></script>
+
+    <!-- GOOGLE MAPS API -->
+    <script id="gp_api" defer>
+        (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b[q]||(b[q]={}),f=d.libraries||(d.libraries={}),e=a=Symbol();k=new Promise((f,r)=>{h={key: "AIzaSyAPA21v1E06YuptbIYOjUp9Fd2VtOZ9BIA", v: "weekly", libraries: ["places", "marker"]};a=c=>{f(h);};m.head.append(a=m.createElement("script"));a.src=`https://maps.googleapis.com/maps/api/js?v=beta&key=${h.key}&callback=initMap&libraries=${h.libraries.join(",")}&loading=async`;});d[l]=c=>f[c]||(f[c]=k.then(()=>f[c]||(f[c]=new Promise((p,r)=>b[l](c,p,r)))));})
+        ({});
+    </script>
+    
+</body>
+</html>

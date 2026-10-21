@@ -4,3 +4,15 @@
     --color-sub: rgb(8, 178, 240);
     --color-error: rgba(255, 0, 0, 0.2);
 }
+
+/* Sutil animación de gradiente de fondo para la sección corporativa */
+@keyframes gradientBg {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+.animated-grad {
+    background: linear-gradient(-45deg, #1e3a8a, #0f172a, #1e40af, #020617);
+    background-size: 400% 400%;
+    animation: gradientBg 15s ease infinite;
+}

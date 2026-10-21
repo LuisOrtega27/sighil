@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIROH - Morfometría Municipal</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex flex-col">
+
+    <header class="bg-slate-950 border-b border-slate-800 p-4 sticky top-0 z-50 shadow-lg">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-blue-600 rounded-lg text-white">
+                    <i class="fa-solid fa-mountain-subway text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wider text-blue-400">SIROH</h1>
+                    <p class="text-xs text-slate-400 font-mono">Módulo V: Morfometría Municipal</p>
+                </div>
+            </div>
+            
+            <nav class="flex flex-wrap gap-2 bg-slate-900 p-1.5 rounded-xl border border-slate-800">
+                <button onclick="switchTab('banco')" id="btn-banco" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 bg-blue-600 text-white shadow-md">
+                    <i class="fa-solid fa-database text-blue-300"></i> Banco de Morfometrías
+                </button>
+                <button onclick="switchTab('ingresar')" id="btn-ingresar" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800">
+                    <i class="fa-solid fa-file-medical text-emerald-400"></i> Ingresar Morfometría
+                </button>
+                <button onclick="switchTab('hidrograma')" id="btn-hidrograma" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 flex items-center gap-2 text-slate-400 hover:text-white hover:bg-slate-800">
+                    <i class="fa-solid fa-chart-line text-amber-400"></i> Hidrograma Unitario
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-6 flex-grow">
+
+        <section id="sec-banco" class="tab-content block animate-fadeIn">
+            <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800 shadow-xl mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-200">Historial y Banco de Cuencas Municipales</h2>
+                        <p class="text-xs text-slate-400">Registros consolidados de parámetros físico-geométricos.</p>
+                    </div>
+                    <div class="relative">
+                        <input type="text" placeholder="Buscar cuenca..." class="bg-slate-900 border border-slate-800 rounded-lg pl-8 pr-4 py-1.5 text-xs focus:outline-none focus:border-blue-500 w-48 md:w-64">
+                        <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-500 text-xs"></i>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto rounded-xl border border-slate-800">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-900/50 border-b border-slate-800 text-slate-400 text-xs uppercase tracking-wider">
+                                <th class="p-3">Código / Nombre</th>
+                                <th class="p-3 text-center">Área ($Km^2$)</th>
+                                <th class="p-3 text-center">Gravelius ($K_c$)</th>
+                                <th class="p-3 text-center">Orden (Strahler)</th>
+                                <th class="p-3 text-center">Caudal Est. ($m^3/s$)</th>
+                                <th class="p-3 text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-xs divide-y divide-slate-800 text-slate-300">
+                            <tr class="hover:bg-slate-900/30 transition-colors">
+                                <td class="p-3 font-medium text-blue-400">
+                                    <div>CH-01 - Quebrada El Limón</div>
+                                    <span class="text-[10px] text-slate-500 font-mono">Exutorio: Tramo Vial Norte</span>
+                                </td>
+                                <td class="p-3 text-center font-mono">14.50</td>
+                                <td class="p-3 text-center font-mono text-amber-400">1.21 (Alta Torrencialidad)</td>
+                                <td class="p-3 text-center font-mono">Orden 4</td>
+                                <td class="p-3 text-center font-mono text-emerald-400 font-bold">42.35</td>
+                                <td class="p-3 text-right">
+                                    <button class="text-blue-400 hover:text-blue-300 mr-2"><i class="fa-solid fa-eye"></i></button>
+                                    <button class="text-slate-500 hover:text-red-400"><i class="fa-solid fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-slate-900/30 transition-colors">
+                                <td class="p-3 font-medium text-blue-400">
+                                    <div>CH-02 - Subcuenca Río San Juan</div>
+                                    <span class="text-[10px] text-slate-500 font-mono">Exutorio: Sector Las Flores</span>
+                                </td>
+                                <td class="p-3 text-center font-mono">38.20</td>
+                                <td class="p-3 text-center font-mono text-slate-400">1.45 (Oval-Alargada)</td>
+                                <td class="p-3 text-center font-mono">Orden 5</td>
+                                <td class="p-3 text-center font-mono text-emerald-400 font-bold">98.10</td>
+                                <td class="p-3 text-right">
+                                    <button class="text-blue-400 hover:text-blue-300 mr-2"><i class="fa-solid fa-eye"></i></button>
+                                    <button class="text-slate-500 hover:text-red-400"><i class="fa-solid fa-trash"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="sec-ingresar" class="tab-content hidden animate-fadeIn">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <div class="lg:col-span-2 bg-slate-950 p-5 md:p-6 rounded-2xl border border-slate-800 shadow-xl">
+                    <div class="border-b border-slate-800 pb-3 mb-5 flex justify-between items-center">
+                        <div>
+                            <h2 class="text-base font-bold text-slate-200 uppercase tracking-wide flex items-center gap-2">
+                                <i class="fa-solid fa-file-signature text-emerald-500"></i> Ficha de Registro: Morfometría de Cuencas
+                            </h2>
+                            <p class="text-[11px] text-slate-400">DGMCI / Dirección de Mitigación de Riesgos</p>
+                        </div>
+                        <span class="bg-emerald-950 text-emerald-400 text-[10px] font-mono px-2 py-0.5 rounded border border-emerald-800">Formulario Activo</span>
+                    </div>
+
+                    <form id="form-morfometria" class="space-y-6">
+                        <div>
+                            <h3 class="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2 font-mono"><i class="fa-solid fa-map-location-dot"></i> 1. Ubicación y Control</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <div>
+                                    <label class="block text-[10px] uppercase text-slate-400 mb-1">Código de Cuenca</label>
+                                    <input type="text" value="CH-03" class="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] uppercase text-slate-400 mb-1">Nombre Río Principal</label>
+                                    <input type="text" placeholder="Ej. Río Grande" class="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] uppercase text-slate-400 mb-1">Huso / Coordenada E</label>
+                                    <input type="text" placeholder="20N - 741025" class="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-mono">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2 font-mono"><i class="fa-solid fa-vector-square"></i> 2. Parámetros de Superficie y Relieve</h3>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <div>
+                                    <label class="block text-[10px] uppercase text-slate-400 mb-1">Área ($A$ - $Km^2$)</label>
+                                    <input type="number" id="inp-area" step="0.01" value="25.00" oninput="calcularCaudalRacional()" class="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] uppercase text-slate-400 mb-1">Perímetro ($P$ - $Km$)</label>
+                                    <input type="number" step="0.01" value="22.4" class="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] uppercase text-slate-400 mb-1">Long. Cauce ($L_c$ - $Km$)</label>
+                                    <input type="number" step="0.01" value="9.8" class="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] uppercase text-slate-400 mb-1">Cota Máx / Mín ($m$)</label>
+                                    <input type="text" value="1450 / 420" class="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-mono">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2 font-mono"><i class="fa-solid fa-shapes"></i> 3. Índices de Forma y Drenaje</h3>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <div>
+                                    <label class="block text-[10px] uppercase text-slate-400 mb-1">Horton ($R_f$)</label>
+                                    <input type="number" step="0.01" value="0.26" class="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] uppercase text-slate-400 mb-1">Gravelius ($K_c$)</label>
+                                    <input type="number" step="0.01" value="1.26" class="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] uppercase text-slate-400 mb-1">Orden de Cuenca</label>
+                                    <select class="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
+                                        <option>Orden 3</option>
+                                        <option selected>Orden 4</option>
+                                        <option>Orden 5</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] uppercase text-slate-400 mb-1">Tipo de Flujo</label>
+                                    <select class="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
+                                        <option>Permanente</option>
+                                        <option selected>Intermitente</option>
+                                        <option>Efímero</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-900/60 p-4 rounded-xl border border-blue-900/40">
+                            <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-3 font-mono">
+                                <i class="fa-solid fa-calculator"></i> Opción de Estimación Hidráulica (Caudal de Diseño)
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                                <div>
+                                    <label class="block text-[10px] uppercase text-slate-400 mb-1">Coef. Escorrentía ($C$)</label>
+                                    <input type="number" id="inp-coef-c" step="0.01" value="0.45" oninput="calcularCaudalRacional()" class="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-emerald-400 focus:outline-none focus:border-emerald-500 font-mono">
+                                    <span class="text-[9px] text-slate-500">Rango: 0.1 - 0.9 (Suelos semi-urbanos)</span>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] uppercase text-slate-400 mb-1">Intensidad ($I$ - $mm/h$)</label>
+                                    <input type="number" id="inp-intensidad" step="0.1" value="65.0" oninput="calcularCaudalRacional()" class="w-full bg-slate-950 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-emerald-400 focus:outline-none focus:border-emerald-500 font-mono">
+                                    <span class="text-[9px] text-slate-500">Para un Período de Retorno $T = 50$ años</span>
+                                </div>
+                                <div class="bg-slate-950 p-3 rounded-lg border border-emerald-900/50 text-center">
+                                    <span class="text-[9px] uppercase tracking-widest block text-slate-400">Caudal Estimado ($Q$)</span>
+                                    <span id="lbl-caudal-resultado" class="text-xl font-mono font-bold text-emerald-400">203.13</span> 
+                                    <span class="text-xs font-mono text-emerald-500">$m^3/s$</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end gap-2 pt-2">
+                            <button type="reset" class="px-4 py-2 bg-slate-900 border border-slate-800 text-slate-400 rounded-lg text-xs font-medium hover:bg-slate-800 hover:text-white transition-all">Limpiar</button>
+                            <button type="button" onclick="alert('Ficha Guardada con éxito en el Banco de Morfometrías')" class="px-5 py-2 bg-emerald-600 text-white rounded-lg text-xs font-medium hover:bg-emerald-500 transition-all shadow-md shadow-emerald-950"><i class="fa-solid fa-floppy-disk"></i> Guardar Ficha en Base de Datos</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800 shadow-xl h-fit">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-300 mb-3"><i class="fa-solid fa-circle-info text-blue-400"></i> Memoria Técnica del Módulo</h3>
+                    <div class="space-y-3 text-xs text-slate-400">
+                        <p>El cálculo automático implementado emplea el **Método Racional**, estándar internacional para cuencas menores a $250\text{ }Km^2$:</p>
+                        <div class="bg-slate-900 p-2 rounded text-center text-blue-400 font-mono text-sm border border-slate-800">
+                            $Q = \frac{C \cdot I \cdot A}{3.6}$
+                        </div>
+                        <ul class="space-y-1 text-[11px] list-disc list-inside">
+                            <li><strong>$Q$:</strong> Caudal máximo de descarga ($m^3/s$).</li>
+                            <li><strong>$C$:</strong> Coeficiente de escorrentía dimensional.</li>
+                            <li><strong>$I$:</strong> Intensidad máxima de la lluvia ($mm/h$).</li>
+                            <li><strong>$A$:</strong> Área captación superficial ($Km^2$).</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="sec-hidrograma" class="tab-content hidden animate-fadeIn">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <div class="bg-slate-950 p-5 md:p-6 rounded-2xl border border-slate-800 shadow-xl h-fit">
+                    <div class="border-b border-slate-800 pb-3 mb-4">
+                        <h2 class="text-base font-bold text-slate-200 uppercase tracking-wide flex items-center gap-2">
+                            <i class="fa-solid fa-clock text-amber-500"></i> Ficha de Hidrograma Unitario
+                        </h2>
+                        <p class="text-[11px] text-slate-400">Método Sintético Adimensional del SCS / USDA</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-[10px] uppercase text-slate-400 mb-1">Área de la Cuenca ($A$ - $Km^2$)</label>
+                            <input type="number" id="hu-area" value="15.0" class="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500 font-mono">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] uppercase text-slate-400 mb-1">Tiempo de Concentración ($T_c$ - Horas)</label>
+                            <input type="number" id="hu-tc" step="0.1" value="2.5" class="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-amber-500 font-mono">
+                            <span class="text-[9px] text-slate-500">Tiempo que tarda una gota desde el punto más lejano.</span>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] uppercase text-slate-400 mb-1">Precipitación Efectiva ($P_e$ - $mm$)</label>
+                            <input type="number" id="hu-pe" value="1.0" readonly class="w-full bg-slate-900 border border-slate-800 rounded px-2.5 py-1.5 text-xs text-slate-500 bg-slate-950/50 cursor-not-allowed font-mono">
+                            <span class="text-[9px] text-amber-500/80">Fijado a 1.0 mm por definición de Hidrograma Unitario.</span>
+                        </div>
+
+                        <button onclick="generarHidrograma()" class="w-full py-2.5 bg-amber-600 text-white rounded-lg text-xs font-semibold hover:bg-amber-500 transition-all shadow-md shadow-amber-950 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-square-poll-horizontal"></i> Procesar y Graficar Hidrograma
+                        </button>
+                    </div>
+
+                    <div class="mt-5 pt-4 border-t border-slate-800 space-y-2.5">
+                        <h4 class="text-[11px] font-bold text-slate-300 uppercase tracking-wider">Parámetros Sintéticos Resultantes</h4>
+                        <div class="grid grid-cols-3 gap-2 text-center">
+                            <div class="bg-slate-900 p-2 rounded border border-slate-800">
+                                <span class="text-[9px] text-slate-400 block">$T_{pico}$ (hr)</span>
+                                <span id="res-tp" class="text-sm font-mono font-bold text-amber-400">-</span>
+                            </div>
+                            <div class="bg-slate-900 p-2 rounded border border-slate-800">
+                                <span class="text-[9px] text-slate-400 block">$T_{base}$ (hr)</span>
+                                <span id="res-tb" class="text-sm font-mono font-bold text-amber-400">-</span>
+                            </div>
+                            <div class="bg-slate-900 p-2 rounded border border-slate-800">
+                                <span class="text-[9px] text-slate-400 block">$Q_{pico}$ ($m^3/s$)</span>
+                                <span id="res-qp" class="text-sm font-mono font-bold text-emerald-400">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 bg-slate-950 p-5 rounded-2xl border border-slate-800 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-200 mb-1"><i class="fa-solid fa-chart-area text-blue-500"></i> Curva del Hidrograma Unitario Sintético</h3>
+                        <p class="text-xs text-slate-400 mb-4">Respuesta hidrológica superficial de la cuenca ante una tormenta unitaria.</p>
+                    </div>
+                    <div class="relative w-full h-72 md:h-80 bg-slate-900/50 p-2 rounded-xl border border-slate-800">
+                        <canvas id="chartHidrograma"></canvas>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-950 border-t border-slate-800 text-center py-3 text-[11px] text-slate-500 font-mono">
+        SIROH 2026 - Sistema Integrado de Registro de Obras Hidrológicas y Morfometría Municipal
+    </footer>
+
+    <script>
+        // CONTROL DE NAVEGACIÓN (SUB-MENÚS)
+        function switchTab(tabName) {
+            // Ocultar todos los contenidos
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            // Mostrar contenido seleccionado
+            document.getElementById(`sec-${tabName}`).classList.remove('hidden');
+
+            // Quitar estilos activos de todos los botones
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-600', 'text-white', 'shadow-md');
+                btn.classList.add('text-slate-400', 'hover:text-white', 'hover:bg-slate-800');
+            });
+
+            // Añadir estilos activos al botón presionado
+            const activeBtn = document.getElementById(`btn-${tabName}`);
+            activeBtn.classList.add('bg-blue-600', 'text-white', 'shadow-md');
+            activeBtn.classList.remove('text-slate-400', 'hover:text-white', 'hover:bg-slate-800');
+
+            // Inicializar gráfico automáticamente si se entra al hidrograma
+            if(tabName === 'hidrograma' && !hidrogramaChart) {
+                generarHidrograma();
+            }
+        }
+
+        // CÁLCULO EN TIEMPO REAL: MÉTODO RACIONAL (CAUDAL)
+        function calcularCaudalRacional() {
+            const area = parseFloat(document.getElementById('inp-area').value) || 0;
+            const coefC = parseFloat(document.getElementById('inp-coef-c').value) || 0;
+            const intensidad = parseFloat(document.getElementById('inp-intensidad').value) || 0;
+
+            // Fórmula Q = (C * I * A) / 3.6
+            const caudal = (coefC * intensidad * area) / 3.6;
+            
+            document.getElementById('lbl-caudal-resultado').innerText = caudal.toFixed(2);
+        }
+
+        // INICIALIZACIÓN Y CÁLCULO DEL HIDROGRAMA UNITARIO
+        let hidrogramaChart = null;
+
+        function generarHidrograma() {
+            const area = parseFloat(document.getElementById('hu-area').value) || 15;
+            const tc = parseFloat(document.getElementById('hu-tc').value) || 2.5;
+
+            // Constantes y aproximaciones del método SCS (Soil Conservation Service)
+            // Duración de la tormenta efectiva D = 0.133 * Tc
+            const D = 0.133 * tc;
+            // Tiempo al pico Tp = 0.6 * Tc + D / 2
+            const tp = (0.6 * tc) + (D / 2);
+            // Caudal de pico Qp = (0.208 * A) / Tp  (En sistema métrico)
+            const qp = (0.208 * area) / tp;
+            // Tiempo base Tb = 2.67 * Tp
+            const tb = 2.67 * tp;
+
+            // Actualizar etiquetas en la ficha
+            document.getElementById('res-tp').innerText = tp.toFixed(2);
+            document.getElementById('res-tb').innerText = tb.toFixed(2);
+            document.getElementById('res-qp').innerText = qp.toFixed(2);
+
+            // Generar los pares de puntos (Tiempo, Caudal) aproximando la curva adimensional del SCS
+            const puntosX = [0, tp * 0.2, tp * 0.5, tp * 0.8, tp, tp * 1.2, tp * 1.5, tp * 1.8, tp * 2.2, tb];
+            const factoresY = [0, 0.12, 0.43, 0.78, 1.0, 0.83, 0.45, 0.22, 0.06, 0];
+            const datosGrafico = puntosX.map((x, index) => ({ x: parseFloat(x.toFixed(2)), y: parseFloat((factoresY[index] * qp).toFixed(2)) }));
+
+            // Renderizar o actualizar gráfico con Chart.js
+            const ctx = document.getElementById('chartHidrograma').getContext('2d');
+            
+            if (hidrogramaChart) {
+                hidrogramaChart.destroy();
+            }
+
+            hidrogramaChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: 'Gasto / Descarga (m³/s)',
+                        data: datosGrafico,
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        borderWidth: 2.5,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#f59e0b'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            title: { display: true, text: 'Tiempo (Horas)', color: '#94a3b8', font: { size: 10 } },
+                            grid: { color: '#1e293b' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        y: {
+                            title: { display: true, text: 'Caudal Q (m³/s)', color: '#94a3b8', font: { size: 10 } },
+                            grid: { color: '#1e293b' },
+                            ticks: { color: '#94a3b8' }
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#f8fafc', font: { size: 11 } } }
+                    }
+                }
+            });
+        }
+
+        // Ejecutar el cálculo racional de caudal inicial por defecto
+        calcularCaudalRacional();
+    </script>
+</body>
+</html>

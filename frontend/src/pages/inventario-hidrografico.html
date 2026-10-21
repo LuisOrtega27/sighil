@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGHIL - Inventario Hidrográfico</title>
+    <style>
+        :root {
+            --slate-50: #f8fafc;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-300: #cbd5e1;
+            --slate-500: #64748b;
+            --slate-700: #334155;
+            --slate-800: #1e293b;
+            --slate-900: #0f172a;
+            --blue-50: #eff6ff;
+            --blue-500: #3b82f6;
+            --blue-600: #2563eb;
+            --red-50: #fef2f2;
+            --red-200: #fecaca;
+            --red-700: #b91c1c;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--slate-50);
+            color: var(--slate-900);
+            margin: 0;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1024px;
+            margin: 0 auto;
+        }
+
+        /* Encabezado */
+        .header-modulo {
+            border-bottom: 1px solid var(--slate-200);
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+        }
+        .breadcrumb {
+            font-size: 12px;
+            color: var(--slate-500);
+            margin-bottom: 4px;
+        }
+        .breadcrumb span.active {
+            color: var(--slate-900);
+            font-weight: 500;
+        }
+        .title-modulo {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+        .subtitle-modulo {
+            font-size: 14px;
+            color: var(--slate-500);
+            margin: 4px 0 0 0;
+        }
+
+        /* Paneles del Formulario */
+        form { display: grid; gap: 24px; }
+        .card-seccion {
+            background: #ffffff;
+            border: 1px solid var(--slate-200);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid var(--slate-100);
+            padding-bottom: 8px;
+            margin-bottom: 16px;
+        }
+        .badge-numero {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: var(--blue-50);
+            color: var(--blue-600);
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .card-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--slate-700);
+            margin: 0;
+        }
+
+        /* Rejilla de campos */
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 16px; }
+
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        label { font-size: 12px; font-weight: 600; color: var(--slate-700); }
+        .required { color: var(--red-700); }
+
+        input[type="text"], input[type="number"], select, textarea {
+            font-size: 14px;
+            padding: 10px 12px;
+            border: 1px solid var(--slate-300);
+            border-radius: 8px;
+            outline: none;
+            transition: all 0.2s;
+            background-color: #ffffff;
+        }
+        select:disabled { opacity: 0.5; cursor: not-allowed; background-color: var(--slate-100); }
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--blue-500);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        /* Radio Buttons */
+        .radio-group { display: flex; gap: 24px; margin-top: 4px; }
+        .radio-label { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--slate-700); cursor: pointer; font-weight: 400; }
+        .radio-label input { width: 16px; height: 16px; accent-color: var(--blue-600); }
+
+        /* Alertas */
+        .alert-error {
+            display: none;
+            align-items: center;
+            gap: 12px;
+            background-color: var(--red-50);
+            border: 1px solid var(--red-200);
+            color: var(--red-700);
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* Botones de acción */
+        .form-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px; }
+        .btn { padding: 10px 20px; font-size: 14px; font-weight: 600; border-radius: 8px; cursor: pointer; border: none; transition: all 0.2s; }
+        .btn-secondary { background-color: var(--slate-100); color: var(--slate-700); }
+        .btn-secondary:hover { background-color: var(--slate-200); }
+        .btn-primary { background-color: var(--blue-600); color: #ffffff; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .btn-primary:hover { background-color: var(--blue-700); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-modulo">
+        <nav class="breadcrumb">SIGHIL &gt; Administración Territorial &gt; <span class="active">Inventario Hidrográfico</span></nav>
+        <h1 class="title-modulo">Inventario Hidrográfico</h1>
+        <p class="subtitle-modulo">Registro centralizado de la red fluvial y estructuras hidráulicas del Municipio Libertador.</p>
+    </div>
+
+    <form id="form-hidro" action="procesar-inventario.php" method="POST">
+        
+        <div class="card-seccion">
+            <div class="card-header">
+                <span class="badge-numero">1</span>
+                <h2 class="card-title">Identificación y Clasificación Básica</h2>
+            </div>
+            <div class="grid-3">
+                <div class="form-group">
+                    <label>Tipo de Cuerpo de Agua <span class="required">*</span></label>
+                    <select name="tipo_cuerpo_agua" required>
+                        <option value="" disabled selected>Seleccione una opción...</option>
+                        <option value="Rio">Río</option>
+                        <option value="Quebrada">Quebrada</option>
+                        <option value="Torrentera">Torrentera</option>
+                    </select>
+                </div>
+                <div class="form-group" style="grid-column: span 2;">
+                    <label>Nombre del Cuerpo de Agua <span class="required">*</span></label>
+                    <input type="text" name="nombre" placeholder="Ej. Catuche" required>
+                </div>
+            </div>
+            <div class="form-group" style="margin-top: 16px;">
+                <label>Jerarquía del Flujo <span class="required">*</span></label>
+                <div class="radio-group">
+                    <label class="radio-label"><input type="radio" name="jerarquia_flujo" value="Principal" checked> Curso Principal</label>
+                    <label class="radio-label"><input type="radio" name="jerarquia_flujo" value="Secundario"> Curso Secundario / Afluente</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-seccion">
+            <div class="card-header">
+                <span class="badge-numero">2</span>
+                <h2 class="card-title">Zonificación Hidrográfica</h2>
+            </div>
+            <div class="grid-3">
+                <div class="form-group">
+                    <label>Cuenca Principal <span class="required">*</span></label>
+                    <select id="cuenca_principal" name="cuenca_principal" required>
+                        <option value="" disabled selected>Seleccione...</option>
+                        <option value="Guaire">Guaire</option>
+                        <option value="Tacagua">Tacagua</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Sub-cuenca <span class="required">*</span></label>
+                    <select id="sub_cuenca" name="sub_cuenca" disabled required>
+                        <option value="" disabled selected>Seleccione una sub-cuenca...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Micro-cuenca</label>
+                    <input type="text" name="micro_cuenca" placeholder="Ej. Tramo Alto">
+                </div>
+            </div>
+        </div>
+
+        <div class="card-seccion">
+            <div class="card-header">
+                <span class="badge-numero">3</span>
+                <h2 class="card-title">Parámetros Técnicos y Georreferenciación</h2>
+            </div>
+            
+            <div id="alerta-cotas" class="alert-error">
+                Inconsistencia Hidráulica: La cota mínima de desembocadura no puede ser mayor o igual a la cota de nacimiento.
+            </div>
+
+            <div class="grid-4" style="margin-top: 12px;">
+                <div class="form-group">
+                    <label>Cota Máxima (msnm) <span class="required">*</span></label>
+                    <input type="number" id="cota_maxima" name="cota_maxima" placeholder="Naciente" required>
+                </div>
+                <div class="form-group">
+                    <label>Cota Mínima (msnm) <span class="required">*</span></label>
+                    <input type="number" id="cota_minima" name="cota_minima" placeholder="Desembocadura" required>
+                </div>
+                <div class="form-group">
+                    <label>Coordenada Este (X) <span class="required">*</span></label>
+                    <input type="number" name="utm_este" placeholder="Ej. 727639" required>
+                </div>
+                <div class="form-group">
+                    <label>Coordenada Norte (Y) <span class="required">*</span></label>
+                    <input type="number" name="utm_norte" placeholder="Ej. 1164731" required>
+                </div>
+            </div>
+
+            <div class="grid-2" style="margin-top: 16px;">
+                <div class="form-group">
+                    <label>Tipo de Lecho / Cauce</label>
+                    <select name="tipo_lecho">
+                        <option value="Rocoso">Rocoso (Natural)</option>
+                        <option value="Sedimentario">Sedimentario / Tierra</option>
+                        <option value="Canalizado">Canalizado en Concreto</option>
+                        <option value="Mixto">Mixto</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Estatus de Riesgo de Torrencialidad</label>
+                    <select name="nivel_riesgo">
+                        <option value="Bajo">Bajo</option>
+                        <option value="Moderado" selected>Moderado</option>
+                        <option value="Alto">Alto (Respuesta de crecida rápida crítica)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 16px;">
+                <label>Observaciones Hidráulicas Generales</label>
+                <textarea name="observaciones" rows="3" placeholder="Indicar presencia de obras..."></textarea>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="reset" id="btn-limpiar" class="btn btn-secondary">Limpiar</button>
+            <button type="submit" id="btn-guardar" class="btn btn-primary">Guardar en Inventario Central</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Banco de datos estático geográfico de Caracas
+    const bancoSubCuencas = {
+        Guaire: [
+            'Catuche', 'Anauco', 'Mariperez', 'La florida', 'Chacaito', 'El valle', 
+            'Juan teheran', 'La hacienda', 'Guaire', 'Macarao', 'Adentro', 'Saaneta', 
+            'Peonia', 'Mamera', 'La pedrera', 'Las torres', 'Algodonal', 'San martin', 'Caroata'
+        ],
+        Tacagua: [
+            'Las trincheras', 'El limon', 'El Asno', 'Tacagua arriba', 'Topo'
+        ]
+    };
+
+    const selectCuenca = document.getElementById('cuenca_principal');
+    const selectSubCuenca = document.getElementById('sub_cuenca');
+    const cotaMax = document.getElementById('cota_maxima');
+    const cotaMin = document.getElementById('cota_minima');
+    const alertCotas = document.getElementById('alerta-cotas');
+    const btnGuardar = document.getElementById('btn-guardar');
+
+    // Lógica dependiente: Cuenca -> Sub-cuenca
+    selectCuenca.addEventListener('change', function() {
+        const cuencaSeleccionada = this.value;
+        
+        // Limpiar opciones previas
+        selectSubCuenca.innerHTML = '<option value="" disabled selected>Seleccione una sub-cuenca...</option>';
+        
+        if (bancoSubCuencas[cuencaSeleccionada]) {
+            bancoSubCuencas[cuencaSeleccionada].forEach(sub => {
+                const option = document.createElement('option');
+                option.value = sub;
+                option.textContent = sub;
+                selectSubCuenca.appendChild(option);
+            });
+            selectSubCuenca.disabled = false;
+        } else {
+            selectSubCuenca.disabled = true;
+        }
+    });
+
+    // Validación hidráulica de Cotas
+    function validarCotas() {
+        const valMax = parseFloat(cotaMax.value);
+        const valMin = parseFloat(cotaMin.value);
+
+        if (!isNaN(valMax) && !isNaN(valMin)) {
+            if (valMin >= valMax) {
+                alertCotas.style.display = 'flex';
+                btnGuardar.disabled = true;
+            } else {
+                alertCotas.style.display = 'none';
+                btnGuardar.disabled = false;
+            }
+        } else {
+            alertCotas.style.display = 'none';
+            btnGuardar.disabled = false;
+        }
+    }
+
+    cotaMax.addEventListener('input', validarCotas);
+    cotaMin.addEventListener('input', validarCotas);
+
+    // Resetear bloqueo al limpiar
+    document.getElementById('btn-limpiar').addEventListener('click', () => {
+        selectSubCuenca.disabled = true;
+        alertCotas.style.display = 'none';
+        btnGuardar.disabled = false;
+    });
+</script>
+</body>
+</html>
