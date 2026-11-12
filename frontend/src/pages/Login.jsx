@@ -1,27 +1,53 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { useForm } from "react-hook-form"
 import { useNavigate } from "react-router-dom"
+
 import logoAlcaldia from "../assets/imgs/logos/LOGO ALCALDIA NUEVO.fw.png"
 
+import {useAuth} from "../context/AuthContext"
+
 export const Login = () => {
+  
+  const navigate = useNavigate();
+  const {register,handleSubmit, watch, formState:{errors}, reset} = useForm()
   const [view, setView] = useState("login")
-  const navigate = useNavigate()
+  const [passMatch, setPassMatch] = useState(false);
 
-  const handleLoginSubmit = (e) => {
-    e.preventDefault()
-    alert("Accediendo al Panel Principal de SIGHIL...")
-    navigate("/")
-  }
+  const {signUp, signIn, isAuthenticated} = useAuth();
 
-  const handleRegisterSubmit = (e) => {
-    e.preventDefault()
-    alert("Solicitud de registro enviada. El administrador del sistema validará tus credenciales.")
+  useEffect(()=>{
+    if(isAuthenticated) navigate("/");
+  },[isAuthenticated])
+
+  const onSubmitLogin = handleSubmit(async (values)=>{
+
+    const res = await signIn(values);
+
+    if (!res) return ("user or password is incorrect")
+
+    console.log(res)
+    alert("Bienbenido al sistema SIGHIL");
+    reset();
+
+  })
+
+  const onSubmitRegister = handleSubmit( async (values)=>{
+    if(!passMatch ) return console.log("password does not match");
+
+    const res = await signUp(values)
+
+    console.log(res)
+    
+    alert("Solicitud de registro enviada. El administrador del sistema validará tus credenciales.");
     setView("login")
-  }
+    reset()
+   
+  })
 
   return (
     <div className="bg-slate-950 text-slate-100 font-sans min-h-screen flex items-center justify-center p-4 md:p-8">
 
-      <div className="w-full max-w-5xl bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-slate-800 flex flex-col md:flex-row min-h-[600px]">
+      <div className="w-full max-w-5xl bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border border-slate-800 flex flex-col md:flex-row min-h-150">
 
         {/* ============ PANEL CORPORATIVO ============ */}
         <div className="md:w-1/2 animated-grad p-8 md:p-12 flex flex-col justify-between border-b md:border-b-0 md:border-r border-slate-800 relative overflow-hidden">
@@ -69,11 +95,15 @@ export const Login = () => {
                 <p className="text-xs text-slate-400">Introduce tus credenciales autorizadas para acceder a los módulos.</p>
               </div>
 
-              <form className="space-y-4" onSubmit={handleLoginSubmit}>
+              <form className="space-y-4" onSubmit={onSubmitLogin}>
                 <div>
                   <label className="block text-[10px] uppercase font-mono tracking-wider text-slate-400 mb-1">Usuario Institucional</label>
                   <div className="relative">
-                    <input type="text" placeholder="ej. jgomez" required className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 transition-colors font-mono" />
+                    <input 
+                      type="text" 
+                      placeholder="ej. jgomez"
+                      {...register("email", {required: true})} 
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 transition-colors font-mono" />
                     {/* Icono: fa-user-tie (absolute left-3.5 top-3.5) — pendiente de agregar */}
                   </div>
                 </div>
@@ -84,7 +114,11 @@ export const Login = () => {
                     <a href="#" className="text-[10px] text-blue-400 hover:underline">¿La olvidaste?</a>
                   </div>
                   <div className="relative">
-                    <input type="password" placeholder="••••••••••••" required className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 transition-colors font-mono" />
+                    <input 
+                      type="password" 
+                      placeholder="••••••••••••"
+                      {...register("password", {required: true})}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 transition-colors font-mono" />
                     {/* Icono: fa-lock (absolute left-3.5 top-3.5) — pendiente de agregar */}
                   </div>
                 </div>
@@ -117,26 +151,53 @@ export const Login = () => {
                 <p className="text-xs text-slate-400">Crea una cuenta técnica. La cuenta requerirá aprobación del administrador.</p>
               </div>
 
-              <form className="space-y-3" onSubmit={handleRegisterSubmit}>
+              <form className="space-y-3" onSubmit={onSubmitRegister}>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-[10px] uppercase font-mono tracking-wider text-slate-400 mb-1">Nombre</label>
-                    <input type="text" placeholder="Ej. Juan" required className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 transition-colors" />
+                    <input 
+                      type="text" 
+                      placeholder="Ej. Juan" 
+                      {...register("fname", {required: {value: true, message:"name is required"}})} 
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 transition-colors" />
+                      {errors.fname && <span>{errors.fname.message}</span>}
                   </div>
                   <div>
                     <label className="block text-[10px] uppercase font-mono tracking-wider text-slate-400 mb-1">Apellido</label>
-                    <input type="text" placeholder="Ej. Pérez" required className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 transition-colors" />
+                    <input 
+                      type="text" 
+                      placeholder="Ej. Pérez" 
+                      {...register("lname", {required: true})} 
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 transition-colors" />
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] uppercase font-mono tracking-wider text-slate-400 mb-1">Cedula de Identidad</label>
+                  <input 
+                    type="text" 
+                    placeholder="00.000.000" 
+                    {...register("ci", {
+                      required: {value: true, message: "C.I. is required"},
+                      pattern: {value: /^\d{1,2}\.\d{3}\.\d{3}/, message: "value does not match the pattern"}
+                    })} 
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 transition-colors font-mono" />
                 </div>
 
                 <div>
                   <label className="block text-[10px] uppercase font-mono tracking-wider text-slate-400 mb-1">Correo Institucional</label>
-                  <input type="email" placeholder="jperez@alcaldia.gob" required className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 transition-colors font-mono" />
+                  <input 
+                    type="email" 
+                    placeholder="jperez@alcaldia.gob" 
+                    {...register("email", {required: true})} 
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 transition-colors font-mono" />
                 </div>
 
                 <div>
                   <label className="block text-[10px] uppercase font-mono tracking-wider text-slate-400 mb-1">Área o Departamento</label>
-                  <select className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500 transition-colors">
+                  <select 
+                    {...register("coordinacion", {required: true})} 
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500 transition-colors">
                     <option>Ingeniería Hidráulica / Cuencas</option>
                     <option>Meteorología y Estaciones</option>
                     <option>Mitigación de Riesgos e Inspección</option>
@@ -147,11 +208,37 @@ export const Login = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-[10px] uppercase font-mono tracking-wider text-slate-400 mb-1">Contraseña</label>
-                    <input type="password" placeholder="••••••••" required className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 transition-colors font-mono" />
+                    <input 
+                      type="password" 
+                      placeholder="••••••••" 
+                      {...register("password", {
+                        required: {value: true, message: "the pasword is required"},
+                        minLength: {value: 6, message: "the password must have alt least 6 characters"},
+                        maxLength: {value: 6, message: "password max length is 20 characters"}
+                      })}  
+                      className={`
+                        w-full bg-slate-950 
+                        border  rounded-xl 
+                        px-3 py-2 
+                        text-xs text-slate-200 font-mono
+                        focus:outline-none 
+                        ${passMatch ? "border-emerald-500" : "border-alert"}
+                        transition-colors`}/>
                   </div>
                   <div>
                     <label className="block text-[10px] uppercase font-mono tracking-wider text-slate-400 mb-1">Confirmar</label>
-                    <input type="password" placeholder="••••••••" required className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 transition-colors font-mono" />
+                    <input 
+                      type="password" 
+                      placeholder="••••••••"
+                      onChange={e=> e.target.value === watch("password") ? setPassMatch(true) : setPassMatch(false)}
+                      className={`
+                        w-full bg-slate-950 
+                        border  rounded-xl 
+                        px-3 py-2 
+                        text-xs text-slate-200 font-mono
+                        focus:outline-none 
+                        ${passMatch ? "border-emerald-500" : "border-alert"}
+                        transition-colors`}/>
                   </div>
                 </div>
 

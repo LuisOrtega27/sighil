@@ -3,21 +3,24 @@ import { Home } from "./pages/Home"
 import { Login } from "./pages/Login"
 import { Siroh } from "./pages/Siroh"
 import { SirohRawForm } from "./pages/SirohRawForm"
+import { AuthProvider } from "./context/AuthContext"
 function App() {
 
   return (
-    <BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
 
-      <Routes>
-        <Route path="/login" element={<Login/>}></Route>
+        <Routes>
+          <Route path="/login" element={<Login/>}></Route>
 
-        {/* Protected routes */}
-        <Route path="/" element={<Home/>}></Route>
-        <Route path="/siroh" element={<Siroh/>}></Route>
-        <Route path="/siroh-raw-Form" element={<SirohRawForm/>}></Route>
-      
-      </Routes>
-    </BrowserRouter>
+          {/* Protected routes */}
+          <Route path="/" element={<Home/>}></Route>
+          <Route path="/siroh" element={<Siroh/>}></Route>
+          <Route path="/siroh-raw-Form" element={<SirohRawForm/>}></Route>
+        
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   )
 }
 

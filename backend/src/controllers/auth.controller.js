@@ -9,9 +9,12 @@ const register = async (req,res)=>{
     const {fname, lname, ci, email, password} = req.body
 
     try {
+        const userFound = await pool.query(`SELECT * FROM users WHERE ci = "${ci}" `);
+        if(userFound) return res.status(409).json({message: "This user already exist"});
+
         
         const passwordHash = await bcrypt.hash(password, 10);
-        const newUser = await pool.query(`INSERT INTO users (fname, lname, ci, email, password, status) VALUES ("${fname}", "${lname}", "${ci}", "${email}", "${passwordHash}", "pendiente")`)
+        const newUser = await pool.query(`INSERT INTO users (fname, lname, ci, email, password, status) VALUES ("${fname}", "${lname}", "${ci}", "${email}", "${passwordHash}", "pendiente")`);
         if(!newUser) return console.log("error creating user");
 
         const token = createAccessToken({id: newUser.insertId})
@@ -40,8 +43,8 @@ const login = async (req,res)=>{
         const [userFound] = rows;
         if(!userFound) return res.status(401).json({message: "user not found"})
     
-        const isMatch = bcrypt.compare(password, userFound.password);
-        if(!isMatch) return res.status(200).json({message: "incorrect password"})
+        const isMatch = await bcrypt.compare(password, userFound.password);
+        if(!isMatch) return res.status(400).json({message: "incorrect password"})
     
         const token = await createAccessToken({id: userFound.id})
     
