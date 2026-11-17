@@ -4,6 +4,7 @@ import { Login } from "./pages/Login"
 import { Siroh } from "./pages/Siroh"
 import { SirohRawForm } from "./pages/SirohRawForm"
 import { AuthProvider } from "./context/AuthContext"
+import { ProtectedRoute } from "./ProtectedRoute"
 function App() {
 
   return (
@@ -14,9 +15,11 @@ function App() {
           <Route path="/login" element={<Login/>}></Route>
 
           {/* Protected routes */}
-          <Route path="/" element={<Home/>}></Route>
-          <Route path="/siroh" element={<Siroh/>}></Route>
-          <Route path="/siroh-raw-Form" element={<SirohRawForm/>}></Route>
+          <Route element={<ProtectedRoute/>}>
+            <Route path="/" element={<Home/>}></Route>
+            <Route path="/siroh" element={<Siroh/>}></Route>
+            <Route path="/siroh-raw-Form" element={<SirohRawForm/>}></Route>
+          </Route>
         
         </Routes>
       </BrowserRouter>

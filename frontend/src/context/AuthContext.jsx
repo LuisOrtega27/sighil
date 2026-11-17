@@ -1,5 +1,7 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import { loginRequest, registerRequest } from '../api/auth';
+
+import Cookies from "js-cookie"
 
 export const AuthContext = createContext();
 
@@ -15,6 +17,13 @@ export const useAuth = ()=>{
 export const AuthProvider = ({children})=>{
     const [user, setUser] = useState()
     const [isAuthenticated, setIsAuthenticated] = useState(false)
+
+    useEffect(()=>{
+        const cookies = Cookies.get()
+
+        console.log(cookies.token)
+        if(cookies.token) console.log(cookies.token)
+    }, [])
 
 
     const signUp = async(user)=>{
