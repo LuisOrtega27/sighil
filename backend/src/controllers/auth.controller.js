@@ -5,25 +5,31 @@ import bcrypt from "bcryptjs";
 import createAccessToken from "../lib/jwt.js";
 
 
+/* Opciones compartidas por todas las respuestas que escriben/borran la cookie.
+   Con httpOnly el token no es legible desde JS (js-cookie ya no se usa). */
+const cookieOptions = (remember = false) => ({
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    ...(remember ? { maxAge: 30 * 24 * 60 * 60 * 1000 } : {}),
+});
+
 const register = async (req,res)=>{
     const {fname, lname, ci, email, password} = req.body
 
     try {
-        const userFound = await pool.query(`SELECT * FROM users WHERE ci = "${ci}" `);
-        if(userFound) return res.status(409).json({message: "This user already exist"});
+        // La consulta devuelve [rows]; una cuenta pendiente NO debe autenticarse.
+        const [found] = await pool.query("SELECT id FROM users WHERE ci = ?", [ci]);
+        if(found.length) return res.status(409).json({message: "This user already exist"});
 
-        
         const passwordHash = await bcrypt.hash(password, 10);
-        const newUser = await pool.query(`INSERT INTO users (fname, lname, ci, email, password, status) VALUES ("${fname}", "${lname}", "${ci}", "${email}", "${passwordHash}", "pendiente")`);
-        if(!newUser) return console.log("error creating user");
+        await pool.query(
+            `INSERT INTO users (fname, lname, ci, email, password, status)
+             VALUES (?, ?, ?, ?, ?, "pendiente")`,
+            [fname, lname, ci, email, passwordHash]
+        );
 
-        const token = createAccessToken({id: newUser.insertId})
-
-        if(!token) return console.log("error creating token");
-
-        res.cookie("token", token);
-        
-        res.status(200).json({message: "register successfull", data: newUser})
+        res.status(200).json({message: "register successfull"})
 
     } catch (error) {
         console.log(error.message);
@@ -35,11 +41,14 @@ const register = async (req,res)=>{
 }
 
 const login = async (req,res)=>{
-    const {email, password} = req.body;
+    const {email, password, remember} = req.body;
 
     try {
         
-        const [rows] = await pool.query(`SELECT * FROM users WHERE email = "${email}" AND status = "activado" `);
+        const [rows] = await pool.query(
+            `SELECT * FROM users WHERE email = ? AND status = "activado"`,
+            [email]
+        );
         const [userFound] = rows;
         if(!userFound) return res.status(401).json({message: "user not found"})
     
@@ -48,7 +57,7 @@ const login = async (req,res)=>{
     
         const token = await createAccessToken({id: userFound.id})
     
-        res.cookie("token", token);
+        res.cookie("token", token, cookieOptions(remember));
         res.status(200).json({
             rol_id: userFound.rol_id,
             fname: userFound.fname,
@@ -59,12 +68,22 @@ const login = async (req,res)=>{
         
     } catch (error) {
         console.log(error)
-        res.status(500).json(error)
+        res.status(500).json({message: "internal server error"})
     }
 }
 
+/* Restaura la sesion al recargar: authRequired ya valido la cookie y cargo req.user. */
+const me = (req,res)=>{
+    const {id, rol_id, fname, lname, ci, email} = req.user
+    res.status(200).json({id, rol_id, fname, lname, ci, email})
+}
+
 const logout = (req,res)=>{
-    res.cookie("token", "", new Date(0))
+    res.clearCookie("token", {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+    })
     res.status(200).json({message: "User logout"});
 }
 
@@ -72,5 +91,6 @@ const logout = (req,res)=>{
 export {
     register,
     login,
+    me,
     logout
 }

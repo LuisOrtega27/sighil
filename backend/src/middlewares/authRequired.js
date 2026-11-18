@@ -9,14 +9,20 @@ const TOKEN_SECRET = process.env.TOKEN_SECRET;
 
 const authRequired = async (req,res,next)=>{
 
-    console.log("validating token")
-
     try {
         const {token} = req.cookies
         if(!token) return res.status(401).json({message: "no cookie, user is not authorized"});
-        const decoded = await jwt.verify(token, TOKEN_SECRET);
-        const [rows] = await pool.query(`SELECT * FROM users WHERE id = ${decoded.id}`);
+
+        let decoded;
+        try {
+            decoded = jwt.verify(token, TOKEN_SECRET);
+        } catch (error) {
+            return res.status(401).json({message: "invalid or expired token"});
+        }
+
+        const [rows] = await pool.query("SELECT * FROM users WHERE id = ?", [decoded.id]);
         const [userFound] = rows;
+        if(!userFound) return res.status(401).json({message: "user not found"});
 
         req.user = userFound;
 
@@ -24,7 +30,7 @@ const authRequired = async (req,res,next)=>{
 
     } catch (error) {
         console.log(error)
-        res.status(500).json(error)
+        res.status(500).json({message: "internal server error"})
     }
     
 }

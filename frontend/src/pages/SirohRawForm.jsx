@@ -75,19 +75,6 @@ const RadioOption = ({ id, name, value, label, first = false, required = false }
 );
 
 
-/* Boton flotante de demarcacion: icono de poligono/limites. */
-const DemarcacionActionButton = ({ onClick, className }) => (
-  <button
-    type="button"
-    id="select-demartacion"
-    onClick={onClick}
-    aria-label="Seleccionar demarcación"
-    className={className}
-  >
-    <FaDrawPolygon className="h-5 w-5" />
-  </button>
-);
-
 const NAV_BUTTON = "rounded bg-[#2288ee] px-4 py-2 font-bold text-white transition hover:bg-[#1a6cb8] active:scale-95";
 
 export const SirohRawForm = () => {
@@ -360,10 +347,15 @@ export const SirohRawForm = () => {
                         
                         <label htmlFor="ficha_n" ref={fichaLabelRef} className={`${LABEL_NOWRAP} header_codigo-ficha_n`}>FICHA Nº:</label>
 
-                        <DemarcacionActionButton
-                            onClick={handleDemarcacionOpen}
-                            className="absolute -left-20 top-0 flex h-9 w-9 items-center justify-center rounded-full border border-[#2288ee] bg-white p-1.5 shadow-lg transition hover:text-[#2288ee] active:scale-95"
-                        />
+                        <button
+                          type="button"
+                          id="select-demartacion"
+                          onClick={handleDemarcacionOpen}
+                          aria-label="Seleccionar demarcación"
+                          className="absolute -left-20 top-0 flex h-9 w-9 items-center justify-center rounded-full border border-[#2288ee] bg-white p-1.5 shadow-lg transition hover:text-[#2288ee] active:scale-95"
+                        >
+                          <FaDrawPolygon className="h-5 w-5" />
+                        </button>
                         
                         <input
                             type="text"

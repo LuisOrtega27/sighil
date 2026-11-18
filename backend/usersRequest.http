@@ -28,3 +28,19 @@ Content-Type: application/json
 
 ### deleteUser
 DELETE  http://localhost:4000/api/users/3
+
+### login (remember = true -> cookie de 30 dias; false/omitido -> cookie de sesion)
+POST http://localhost:4000/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "usuario@ejemplo.com",
+    "password": "123456",
+    "remember": true
+}
+
+### me (restaura la sesion al recargar; requiere la cookie del login)
+GET http://localhost:4000/api/auth/me
+
+### logout (borra la cookie)
+POST http://localhost:4000/api/auth/logout
