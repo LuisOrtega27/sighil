@@ -14,6 +14,7 @@
    - Los formularios ocultos (edicion de estacion) se conservan en el
      marcado listos para cuando exista ese backend. */
 
+import { INSTITUTION } from "../../config/institution";
 import {
   BTN_SMALL_GRAY,
   BTN_SMALL_SUCCESS,
@@ -207,7 +208,7 @@ const Meteorologia = ({ sub }) => {
             Matriz Pluviométrica Histórica Anual Consolidadas
           </h2>
           <div className={CARD_SUB}>
-            Acumulado mensual del Municipio Libertador (mm) registrado desde el 2019
+            Acumulado mensual del Municipio {INSTITUTION.municipio} (mm) registrado desde el 2019
           </div>
           <div className="overflow-x-auto">
             <table className={`${TABLE} text-center`}>
@@ -244,7 +245,7 @@ const Meteorologia = ({ sub }) => {
         <div className={CARD}>
           <h2 className={CARD_TITLE}>Panel Integral Meteorológico</h2>
           <div className={CARD_SUB}>
-            Dashboard Interactivo de Alerta Temprana - IMGRAD
+            Dashboard Interactivo de Alerta Temprana - {INSTITUTION.organismoSigla}
           </div>
 
           <div className={KPI_GRID}>

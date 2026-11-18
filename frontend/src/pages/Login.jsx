@@ -1,47 +1,63 @@
 import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useNavigate } from "react-router-dom"
+import {
+  FaArrowLeft,
+  FaLock,
+  FaRightToBracket,
+  FaShieldHalved,
+  FaUserPlus,
+  FaUserTie,
+  FaWater,
+} from "react-icons/fa6"
 
-import logoAlcaldia from "../assets/imgs/logos/LOGO ALCALDIA NUEVO.fw.png"
-
-import {useAuth} from "../context/AuthContext"
+import {useAuth} from "../context/auth"
+import { INSTITUTION } from "../config/institution"
 
 export const Login = () => {
   
   const navigate = useNavigate();
-  const {register,handleSubmit, watch, formState:{errors}, reset} = useForm()
+  const {register,handleSubmit, getValues, formState:{errors}, reset} = useForm()
   const [view, setView] = useState("login")
   const [passMatch, setPassMatch] = useState(false);
+  const [loginError, setLoginError] = useState("")
+  const [registerError, setRegisterError] = useState("")
 
   const {signUp, signIn, isAuthenticated} = useAuth();
 
   useEffect(()=>{
     if(isAuthenticated) navigate("/");
-  },[isAuthenticated])
+  },[isAuthenticated, navigate])
 
   const onSubmitLogin = handleSubmit(async (values)=>{
+    setLoginError("")
 
-    const res = await signIn(values);
-
-    if (!res) return ("user or password is incorrect")
-
-    console.log(res)
-    alert("Bienbenido al sistema SIGHIL");
-    reset();
+    try {
+      await signIn(values)
+      alert("Bienbenido al sistema SIGHIL");
+      reset();
+    } catch (error) {
+      setLoginError(error.response?.data?.message ?? "No se pudo iniciar sesión")
+    }
 
   })
 
   const onSubmitRegister = handleSubmit( async (values)=>{
-    if(!passMatch ) return console.log("password does not match");
+    setRegisterError("")
+    if(!passMatch ) {
+      setRegisterError("Las contraseñas no coinciden")
+      return
+    }
 
-    const res = await signUp(values)
+    try {
+      await signUp(values)
+      alert("Solicitud de registro enviada. El administrador del sistema validará tus credenciales.");
+      setView("login")
+      reset()
+    } catch (error) {
+      setRegisterError(error.response?.data?.message ?? "No se pudo enviar la solicitud")
+    }
 
-    console.log(res)
-    
-    alert("Solicitud de registro enviada. El administrador del sistema validará tus credenciales.");
-    setView("login")
-    reset()
-   
   })
 
   return (
@@ -52,35 +68,35 @@ export const Login = () => {
         {/* ============ PANEL CORPORATIVO ============ */}
         <div className="md:w-1/2 animated-grad p-8 md:p-12 flex flex-col justify-between border-b md:border-b-0 md:border-r border-slate-800 relative overflow-hidden">
           <div className="absolute inset-0 opacity-10 pointer-events-none flex items-center justify-center">
-            {/* Icono: fa-water (text-[300px]) — pendiente de agregar */}
+            <FaWater className="text-[300px]" />
           </div>
 
           <div className="relative z-10 flex items-center gap-3">
-            <img src={logoAlcaldia} alt="Logo Alcaldía" className="h-12 w-auto" />
+            <img src={INSTITUTION.logo} alt={`Logo ${INSTITUTION.alcaldia}`} className="h-12 w-auto" />
             <div>
-              <span className="text-[10px] font-mono tracking-widest uppercase text-red-400 block font-bold">Alcaldía de Caracas</span>
-              <span className="text-xs text-slate-300 tracking-wider">Coordinación de Monitoreo de Quebradas y Obras Hidraulicas</span>
+              <span className="text-[10px] font-mono tracking-widest uppercase text-red-400 block font-bold">{INSTITUTION.alcaldia}</span>
+              <span className="text-xs text-slate-300 tracking-wider">{INSTITUTION.coordinacion}</span>
             </div>
           </div>
 
           <div className="relative z-10 my-8 md:my-0">
             <h1 className="text-4xl md:text-5xl font-black tracking-tight text-white mb-4">
-              SIGHIL
+              {INSTITUTION.sigla}
             </h1>
             <div className="h-1 w-16 bg-blue-500 rounded mb-6"></div>
             <p className="text-slate-300 text-sm leading-relaxed mb-4">
-              <strong>Sistema de Información Geográfica e Hidrológica de Libertador</strong>.
+              <strong>{INSTITUTION.nombre}</strong>.
             </p>
             <p className="text-slate-400 text-xs leading-relaxed">
-              Una plataforma analítica geoespacial diseñada para la gestión, control y monitoreo en tiempo real de la infraestructura hídrica, redes de drenaje urbano, variables meteorológicas y parámetros morfométricos de las cuencas del municipio. Optimizado para la mitigación de riesgos y soporte en la toma de decisiones ingenieriles.
+              {INSTITUTION.descripcion}
             </p>
           </div>
 
           <div className="relative z-10 pt-4 border-t border-slate-800/60 flex items-center justify-between text-[11px] text-slate-400 font-mono">
-            <span>Versión v2.0 (2026)</span>
+            <span>{INSTITUTION.version}</span>
             <span className="flex items-center gap-1.5">
-              {/* Icono: fa-shield-halved text-blue-400 — pendiente de agregar */}
-              Acceso Restringido
+              <FaShieldHalved className="text-blue-400" />
+              {INSTITUTION.acceso}
             </span>
           </div>
         </div>
@@ -104,7 +120,7 @@ export const Login = () => {
                       placeholder="ej. jgomez"
                       {...register("email", {required: true})} 
                       className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 transition-colors font-mono" />
-                    {/* Icono: fa-user-tie (absolute left-3.5 top-3.5) — pendiente de agregar */}
+                    <FaUserTie className="absolute left-3.5 top-3.5 text-slate-500" />
                   </div>
                 </div>
 
@@ -119,17 +135,19 @@ export const Login = () => {
                       placeholder="••••••••••••"
                       {...register("password", {required: true})}
                       className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 transition-colors font-mono" />
-                    {/* Icono: fa-lock (absolute left-3.5 top-3.5) — pendiente de agregar */}
+                    <FaLock className="absolute left-3.5 top-3.5 text-slate-500" />
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2 pt-1">
-                  <input type="checkbox" id="remember" className="accent-blue-600 rounded" />
+                  <input type="checkbox" id="remember" {...register("remember")} className="accent-blue-600 rounded" />
                   <label htmlFor="remember" className="text-[11px] text-slate-400 cursor-pointer select-none">Mantener sesión iniciada en este terminal</label>
                 </div>
 
+                {loginError && <p role="alert" className="text-[11px] text-alert">{loginError}</p>}
+
                 <button type="submit" className="w-full py-2.5 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-500 transition-all shadow-md shadow-blue-950/50 flex items-center justify-center gap-2">
-                  {/* Icono: fa-right-to-bracket — pendiente de agregar */}
+                  <FaRightToBracket />
                   Autenticar Entrada
                 </button>
               </form>
@@ -145,7 +163,7 @@ export const Login = () => {
             <div className="space-y-6 block">
               <div>
                 <h2 className="text-xl font-bold text-slate-100 tracking-wide flex items-center gap-2">
-                  {/* Icono: fa-user-plus text-emerald-400 — pendiente de agregar */}
+                  <FaUserPlus className="text-emerald-400" />
                   Solicitud de Registro
                 </h2>
                 <p className="text-xs text-slate-400">Crea una cuenta técnica. La cuenta requerirá aprobación del administrador.</p>
@@ -230,7 +248,7 @@ export const Login = () => {
                     <input 
                       type="password" 
                       placeholder="••••••••"
-                      onChange={e=> e.target.value === watch("password") ? setPassMatch(true) : setPassMatch(false)}
+                      onChange={e=> e.target.value === getValues("password") ? setPassMatch(true) : setPassMatch(false)}
                       className={`
                         w-full bg-slate-950 
                         border  rounded-xl 
@@ -242,6 +260,8 @@ export const Login = () => {
                   </div>
                 </div>
 
+                {registerError && <p role="alert" className="text-[11px] text-alert">{registerError}</p>}
+
                 <button type="submit" className="w-full mt-2 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-500 transition-all shadow-md shadow-emerald-950/50">
                   Enviar Solicitud de Alta
                 </button>
@@ -249,7 +269,7 @@ export const Login = () => {
 
               <div className="text-center pt-2">
                 <button onClick={() => setView("login")} className="text-xs text-slate-400 hover:text-white transition-colors flex items-center justify-center gap-1.5 mx-auto">
-                  {/* Icono: fa-arrow-left — pendiente de agregar */}
+                  <FaArrowLeft />
                   Volver al inicio de sesión
                 </button>
               </div>

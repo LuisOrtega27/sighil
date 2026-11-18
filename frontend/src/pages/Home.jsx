@@ -1,28 +1,9 @@
-import { Link } from "react-router-dom"
-
-const institucion = {
-  nombre: "Nombre de la Institución",
-  eslogan: "Eslogan o lema institucional (placeholder)",
-  descripcion:
-    "Espacio reservado para la información de la institución: misión, objeto social o breve descripción del organismo. Reemplaza este texto con el contenido oficial.",
-  direccion: "Dirección de la institución (placeholder)",
-  telefono: "(000) 000-0000",
-  correo: "contacto@institucion.gob",
-}
+import { Link, useNavigate } from "react-router-dom"
+import { useAuth } from "../context/auth"
+import { canAccess, ROUTE_ACCESS } from "../auth/permissions"
+import { INSTITUTION } from "../config/institution"
 
 const menu = [
-  {
-    to: "/",
-    titulo: "Inicio",
-    descripcion: "Página principal del sistema.",
-    icono: "🏠",
-  },
-  {
-    to: "/login",
-    titulo: "Iniciar sesión",
-    descripcion: "Acceso al panel con usuario y contraseña.",
-    icono: "🔐",
-  },
   {
     to: "/siroh",
     titulo: "SIROH",
@@ -38,45 +19,54 @@ const menu = [
 ]
 
 export const Home = () => {
+  const { role, signOut } = useAuth()
+  const navigate = useNavigate()
+  const visibleMenu = menu.filter(({ to }) => canAccess(ROUTE_ACCESS[to], role))
+
+  const handleLogout = async () => {
+    await signOut()
+    navigate("/login", { replace: true })
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800">
       {/* ============ BANNER ============ */}
       <header className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white shadow-lg">
         <div className="mx-auto max-w-6xl px-6 py-10 flex flex-col md:flex-row items-center gap-8">
-          {/* Placeholder del logo / imagen institucional */}
-          <div className="shrink-0 w-32 h-32 md:w-40 md:h-40 rounded-2xl border-2 border-dashed border-white/40 bg-white/10 flex flex-col items-center justify-center text-center text-white/70 text-xs md:text-sm p-3">
-            <span className="text-3xl md:text-4xl mb-1">🏛️</span>
-            <span>Logo / imagen de la institución (placeholder)</span>
+          <div className="shrink-0 rounded-2xl bg-white/10 p-4">
+            <img
+              src={INSTITUTION.logo}
+              alt={`Logo ${INSTITUTION.alcaldia}`}
+              className="h-20 w-auto md:h-28"
+            />
           </div>
 
-          {/* Información de la institución */}
+          {/* Información institucional (fuente: config/institution.js) */}
           <div className="text-center md:text-left">
             <p className="text-xs md:text-sm uppercase tracking-widest text-sub">
-              Información de la institución (placeholder)
+              {INSTITUTION.alcaldia}
             </p>
             <h1 className="mt-1 text-3xl md:text-4xl font-extrabold">
-              {institucion.nombre}
+              {INSTITUTION.nombre}
             </h1>
             <p className="mt-2 text-sm md:text-base text-slate-300">
-              {institucion.eslogan}
+              {INSTITUTION.sigla} • {INSTITUTION.tagline}
+            </p>
+            <p className="mt-1 text-xs text-slate-400">
+              {INSTITUTION.coordinacion}
             </p>
             <p className="mt-4 max-w-2xl text-sm md:text-base text-slate-400 leading-relaxed">
-              {institucion.descripcion}
+              {INSTITUTION.descripcion}
             </p>
 
             <div className="mt-5 flex flex-wrap justify-center md:justify-start gap-3">
-              <Link
-                to="/login"
-                className="rounded-lg bg-sub px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="rounded-lg bg-alert px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
               >
-                Iniciar sesión
-              </Link>
-              <Link
-                to="/siroh"
-                className="rounded-lg border border-white/40 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10"
-              >
-                Ir a SIROH
-              </Link>
+                Cerrar sesión
+              </button>
             </div>
           </div>
         </div>
@@ -93,7 +83,7 @@ export const Home = () => {
           </p>
 
           <nav className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {menu.map(({ to, titulo, descripcion, icono }) => (
+            {visibleMenu.map(({ to, titulo, descripcion, icono }) => (
               <Link
                 key={to}
                 to={to}
@@ -120,9 +110,10 @@ export const Home = () => {
         <div className="mx-auto max-w-6xl px-6 py-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {/* Institución */}
           <div>
-            <h4 className="text-white font-bold text-lg">{institucion.nombre}</h4>
-            <p className="mt-3 text-sm text-slate-400 leading-relaxed">
-              {institucion.descripcion}
+            <h4 className="text-white font-bold text-lg">{INSTITUTION.sigla}</h4>
+            <p className="mt-2 text-sm text-slate-400">{INSTITUTION.nombre}</p>
+            <p className="mt-3 text-xs text-slate-400 leading-relaxed">
+              {INSTITUTION.descripcion}
             </p>
           </div>
 
@@ -130,7 +121,7 @@ export const Home = () => {
           <div>
             <h4 className="text-white font-bold text-lg">Enlaces rápidos</h4>
             <ul className="mt-3 space-y-2 text-sm">
-              {menu.map(({ to, titulo }) => (
+              {visibleMenu.map(({ to, titulo }) => (
                 <li key={to}>
                   <Link to={to} className="transition hover:text-sub">
                     {titulo}
@@ -140,21 +131,21 @@ export const Home = () => {
             </ul>
           </div>
 
-          {/* Contacto (placeholder) */}
+          {/* Acceso */}
           <div>
-            <h4 className="text-white font-bold text-lg">Contacto</h4>
+            <h4 className="text-white font-bold text-lg">Acceso</h4>
             <ul className="mt-3 space-y-2 text-sm text-slate-400">
-              <li>📍 {institucion.direccion}</li>
-              <li>📞 {institucion.telefono}</li>
-              <li>✉️ {institucion.correo}</li>
+              <li>{INSTITUTION.alcaldiaMunicipio}</li>
+              <li>{INSTITUTION.gestion}</li>
+              <li>{INSTITUTION.version}</li>
+              <li>{INSTITUTION.acceso}</li>
             </ul>
           </div>
         </div>
 
         <div className="border-t border-slate-800">
           <div className="mx-auto max-w-6xl px-6 py-4 text-center text-xs text-slate-500">
-            © {new Date().getFullYear()} {institucion.nombre} — Todos los
-            derechos reservados.
+            © {new Date().getFullYear()} {INSTITUTION.alcaldia} — {INSTITUTION.sigla}
           </div>
         </div>
       </footer>

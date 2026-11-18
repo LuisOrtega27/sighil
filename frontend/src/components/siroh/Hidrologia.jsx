@@ -13,6 +13,7 @@
      estado de seleccion. */
 
 import { useState } from "react";
+import { INSTITUTION } from "../../config/institution";
 import {
   CARD,
   CARD_SUB,
@@ -67,7 +68,7 @@ const Hidrologia = () => {
                  (lo cargaba el JS original, inexistente en el repo). */
               "Expediente sin datos disponibles — pendiente de conexión con el backend."
             ) : (
-              "Haz clic en el panel izquierdo para consultar las variables de drenaje, coeficientes de escorrentía calculados y las principales vulnerabilidades registradas por el IMGRAD."
+              `Haz clic en el panel izquierdo para consultar las variables de drenaje, coeficientes de escorrentía calculados y las principales vulnerabilidades registradas por el ${INSTITUTION.organismoSigla}.`
             )}
           </div>
         </div>

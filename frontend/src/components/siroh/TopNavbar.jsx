@@ -9,6 +9,7 @@
    pagina activa; el texto del geoportal se conserva tal cual. */
 
 import { LOGOUT_BTN, TOP_DESC, TOP_NAVBAR, TOP_TITLE, USER_BADGE } from "./styles";
+import { INSTITUTION } from "../../config/institution";
 
 const PAGE_META = {
   territorial: {
@@ -51,7 +52,7 @@ const TopNavbar = ({ page, onLogout }) => {
         <button type="button" onClick={onLogout} className={LOGOUT_BTN}>
           cerrar sesion
         </button>
-        <div className={USER_BADGE}>IMGRAD: Sala Técnica de Control</div>
+        <div className={USER_BADGE}>{INSTITUTION.sala}</div>
       </div>
     </div>
   );

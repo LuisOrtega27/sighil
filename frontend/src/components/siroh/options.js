@@ -249,7 +249,7 @@ export const NIVELES_COLMATAcion = [
 ];
 
 /* ---- Sidebar: opciones de submenus ---- */
-export const SIROH_SUB_LINKS = ["Nuevo", "Ver", "Otro"];
+export const SIROH_SUB_LINKS = ["Efitar ficha"];
 
 export const MET_SUB_LINKS = [
   { key: "estaciones", label: "Estaciones" },

@@ -17,6 +17,7 @@
    - El contenedor es "mock" (mapa representativo), igual que el original. */
 
 import { useEffect } from "react";
+import { INSTITUTION } from "../../config/institution";
 import {
   BTN_SMALL,
   CARD,
@@ -46,7 +47,7 @@ const Geoportal = () => {
     <div className={CARD}>
       <h2 className={CARD_TITLE}>Consulta y Cruce de Datos Territoriales</h2>
       <div className={CARD_SUB}>
-        Análisis espacial en tiempo real de la poligonal del Municipio Libertador
+        Análisis espacial en tiempo real de la poligonal del Municipio {INSTITUTION.municipio}
       </div>
 
       <div className={MOCK_MAP}>

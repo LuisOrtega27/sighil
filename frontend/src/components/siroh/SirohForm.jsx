@@ -14,11 +14,29 @@
      (incluidos errores de tipeo del original: "Covertura", "Dimenciones",
      "Estructurares", "Construccion", etc.).
    - #map-btn: su accion vivia en js/services/google_maps_api/map.js
-     (inexistente); se deja alert + TODO. El input sigue oculto como en el
-     original (#map-btn { display: none }). */
+     (inexistente); ahora abre CoordinateMapModal (Leaflet/OSM) y escribe
+     E/N en UTM. El input sigue oculto como en el original.
+   - #ficha_n: los selects #filter-cuenca / #filter-sub-cuenca /
+     #filter-parroquia se llenan desde /api/catalogos. El campo se genera
+     como "id cuenca - codigo subcuenca - id parroquia - abreviatura - NN";
+     solo los ultimos 2 digitos son editables por el usuario.
+   - Guardado en dos pasos: "Nuevo registro" crea la fila en ficha_eoh y
+     devuelve cod_n = LPAD(id, 6, '0'); el submit actualiza esa fila con
+     los name del formulario como columnas. */
 
-import { useRef, useState } from "react";
 import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
+/* Leaflet se carga solo cuando se abre el modal (mantiene ligero el bundle inicial). */
+const CoordinateMapModal = lazy(() => import("./CoordinateMapModal"));
+import {
+  BTN_SMALL,
   BTN_SUCCESS_BLOCK,
   CARD,
   CARD_SUB,
@@ -42,6 +60,16 @@ import {
   SubTitle,
   TabBtn,
 } from "./helpers";
+import { INSTITUTION } from "../../config/institution";
+import {
+  getCuencas,
+  getParroquias,
+  getSubcuencas,
+} from "../../api/catalogos";
+import {
+  createInspeccion,
+  updateInspeccion,
+} from "../../api/siroh";
 import {
   ALTERACIONES_CAUSE,
   CANALES,
@@ -64,7 +92,6 @@ import {
   NIVELES_COLMATAcion,
   PARROQUIAS,
   RETIRO_CUERPO_AGUA,
-  SHORT_CODES,
   TIPO_DESCANSO,
   TIPO_DIQUE,
   TIPO_MURO,
@@ -130,8 +157,218 @@ const ORGANIZACIONES = [
 
 const SirohForm = () => {
   const [activeTab, setActiveTab] = useState("s-id");
+  const [mapOpen, setMapOpen] = useState(false);
+  const [mapInitial, setMapInitial] = useState({ e: "", n: "" });
+
+  /* Catalogos de la ficha: cuencas + parroquias se piden al montar;
+     subcuencas depende de la cuenca elegida. */
+  const [cuencas, setCuencas] = useState([]);
+  const [subcuencas, setSubcuencas] = useState([]);
+  const [parroquias, setParroquias] = useState([]);
+  const [cuencaId, setCuencaId] = useState("");
+  const [subcuencaId, setSubcuencaId] = useState("");
+  const [parroquiaId, setParroquiaId] = useState("");
+  const [catalogLoading, setCatalogLoading] = useState(true);
+  const [catalogError, setCatalogError] = useState(false);
+  const [fichaPrefix, setFichaPrefix] = useState("");
+  const [fichaEditable, setFichaEditable] = useState(false);
+
+  /* Guardado en dos pasos: primero se crea la fila (cod_n) y luego se
+     actualizan las columnas con los name del formulario. */
+  const [inspeccionId, setInspeccionId] = useState(null);
+  const [creating, setCreating] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [saveMessage, setSaveMessage] = useState(null);
+
   const formRef = useRef(null);
   const viewRefs = useRef({});
+  const eastRef = useRef(null);
+  const northRef = useRef(null);
+  const fichaRef = useRef(null);
+  const codRef = useRef(null);
+
+  /* 2 peticiones iniciales: cuencas y parroquias (catalogo independiente). */
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadCatalogos = async () => {
+      try {
+        const [cuencasData, parroquiasData] = await Promise.all([
+          getCuencas(),
+          getParroquias(),
+        ]);
+        if (!cancelled) {
+          setCuencas(cuencasData);
+          setParroquias(parroquiasData);
+        }
+      } catch {
+        if (!cancelled) setCatalogError(true);
+      } finally {
+        if (!cancelled) setCatalogLoading(false);
+      }
+    };
+
+    loadCatalogos();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  /* Tercera peticion, dependiente de la cuenca elegida. */
+  useEffect(() => {
+    if (!cuencaId) return;
+
+    let cancelled = false;
+
+    const loadSubcuencas = async () => {
+      try {
+        const data = await getSubcuencas(cuencaId);
+        if (!cancelled) setSubcuencas(data);
+      } catch {
+        if (!cancelled) setCatalogError(true);
+      }
+    };
+
+    loadSubcuencas();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [cuencaId]);
+
+  const setFichaValue = (prefix) => {
+    setFichaPrefix(prefix);
+    setFichaEditable(Boolean(prefix));
+    if (fichaRef.current) fichaRef.current.value = prefix;
+  };
+
+  /* id de cuenca - codigo de subcuenca - id de parroquia - abreviatura - NN */
+  const buildFichaPrefix = (cId, sId, pId) => {
+    const cuenca = cuencas.find((item) => String(item.id) === String(cId));
+    const subcuenca = subcuencas.find((item) => String(item.id) === String(sId));
+    const parroquia = parroquias.find(
+      (item) => String(item.id) === String(pId)
+    );
+    if (!cuenca || !subcuenca || !parroquia) return "";
+
+    const twoDigits = (value) => String(value).padStart(2, "0");
+    const abreviatura = String(subcuenca.abreviatura ?? "")
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, "")
+      .slice(0, 3);
+
+    return `${twoDigits(cuenca.id)}-${twoDigits(subcuenca.codigo)}-${twoDigits(parroquia.id)}-${abreviatura}-`;
+  };
+
+  const handleCuencaChange = (event) => {
+    const value = event.target.value;
+    setCuencaId(value);
+    setSubcuencaId("");
+    setParroquiaId("");
+    setSubcuencas([]);
+    setFichaValue("");
+  };
+
+  const handleSubcuencaChange = (event) => {
+    setSubcuencaId(event.target.value);
+    setParroquiaId("");
+    setFichaValue("");
+  };
+
+  const handleParroquiaChange = (event) => {
+    const value = event.target.value;
+    setParroquiaId(value);
+    const prefix = buildFichaPrefix(cuencaId, subcuencaId, value);
+    setFichaValue(prefix);
+    if (prefix && fichaRef.current) fichaRef.current.focus();
+  };
+
+  /* El prefijo generado no se puede borrar: solo se aceptan 2 digitos finales. */
+  const handleFichaChange = (event) => {
+    if (!fichaPrefix) return;
+
+    const raw = event.target.value;
+    const suffix = raw.startsWith(fichaPrefix)
+      ? raw.slice(fichaPrefix.length)
+      : "";
+    const digits = suffix.replace(/\D/g, "").slice(0, 2);
+    const next = `${fichaPrefix}${digits}`;
+
+    if (fichaRef.current) fichaRef.current.value = next;
+  };
+
+  const construirPayload = () => {
+    const formData = new FormData(formRef.current);
+    const payload = {};
+
+    for (const [name, valor] of formData.entries()) {
+      /* cod_n lo asigna el backend; los selects de catalogo no tienen name
+         y por eso FormData ya los ignora. */
+      if (name === "cod_n") continue;
+      const value =
+        typeof valor === "string" && valor.trim() === "" ? null : valor;
+      payload[name] = Array.isArray(value) ? value.join(",") : value;
+    }
+
+    return payload;
+  };
+
+  const limpiarFormulario = () => {
+    formRef.current?.reset();
+    setCuencaId("");
+    setSubcuencaId("");
+    setParroquiaId("");
+    setSubcuencas([]);
+    setFichaPrefix("");
+    setFichaEditable(false);
+    setMapInitial({ e: "", n: "" });
+    setInspeccionId(null);
+
+    if (fichaRef.current) fichaRef.current.value = "";
+    if (codRef.current) codRef.current.value = "";
+  };
+
+  const handleCrearRegistro = async () => {
+    if (creating || inspeccionId) return;
+
+    setCreating(true);
+    setSaveMessage(null);
+
+    try {
+      const registro = await createInspeccion();
+      if (codRef.current) codRef.current.value = registro.cod_n;
+      setInspeccionId(registro.id);
+      setSaveMessage({
+        tipo: "ok",
+        texto: `Registro creado con código ${registro.cod_n}.`,
+      });
+    } catch {
+      setSaveMessage({
+        tipo: "error",
+        texto: "No se pudo crear el registro. Intente nuevamente.",
+      });
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  /* Los inputs se dejan no controlados para conservar pattern/required y la
+     validacion nativa del formulario original; el mapa solo escribe sus values. */
+  const handleMapSelect = useCallback(({ e, n }) => {
+    if (eastRef.current) eastRef.current.value = e;
+    if (northRef.current) northRef.current.value = n;
+  }, []);
+  const handleMapClose = useCallback(() => setMapOpen(false), []);
+  const handleMapOpen = useCallback(() => {
+    /* Se capturan los values actuales para que el modal marque el punto
+       ya registrado en la ficha (si ambos campos son validos). */
+    setMapInitial({
+      e: eastRef.current?.value ?? "",
+      n: northRef.current?.value ?? "",
+    });
+    setMapOpen(true);
+  }, []);
 
   const goToTab = (key) => {
     setActiveTab(key);
@@ -147,12 +384,28 @@ const SirohForm = () => {
     if (el) viewRefs.current[el.id.replace("view-", "")] = el;
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // TODO(backend): persistir la inspeccion en la base de datos SIROH.
-    alert(
-      "Inspección registrada (pendiente de conexión con la base de datos SIROH)."
-    );
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (!inspeccionId || submitting) return;
+
+    setSubmitting(true);
+    setSaveMessage(null);
+
+    try {
+      await updateInspeccion(inspeccionId, construirPayload());
+      limpiarFormulario();
+      setSaveMessage({
+        tipo: "ok",
+        texto: "Inspección registrada correctamente.",
+      });
+    } catch {
+      setSaveMessage({
+        tipo: "error",
+        texto: "No se pudo guardar la inspección. Intente nuevamente.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -161,8 +414,7 @@ const SirohForm = () => {
         MINISTERIO DEL PODER POPULAR DE LAS AGUAS • VICEMINISTERIO DE
         ADMINISTRACIÓN DE CUENCAS HIDROGRÁFICAS
         <br />
-        DIRECCIÓN GENERAL DE MITIGACIÓN Y CONTROL DE INUNDACIONES • ALCALDÍA DE
-        LIBERTADOR (IMGRAD)
+        DIRECCIÓN GENERAL DE MITIGACIÓN Y CONTROL DE INUNDACIONES • {`ALCALDÍA DE ${INSTITUTION.municipio.toUpperCase()} (${INSTITUTION.organismoSigla})`}
       </div>
       <h2 className={CARD_TITLE}>
         Sistema de Inspección y Registro de Obras Hidráulicas (SIROH)
@@ -213,11 +465,107 @@ const SirohForm = () => {
               />
             </Field>
 
+            <Field label="CODIGO Nº:" htmlFor="cod_n">
+              <input
+                type="text"
+                name="cod_n"
+                id="cod_n"
+                ref={codRef}
+                pattern="\d{6}"
+                required
+                readOnly
+                className={INPUT}
+              />
+              <button
+                type="button"
+                onClick={handleCrearRegistro}
+                disabled={creating || Boolean(inspeccionId)}
+                className={`${BTN_SMALL} mt-1 disabled:opacity-50`}
+              >
+                {creating
+                  ? "Creando…"
+                  : inspeccionId
+                    ? "Registro creado"
+                    : "Nuevo registro"}
+              </button>
+              {saveMessage && (
+                <p
+                  className={`mt-1 text-[10px] ${
+                    saveMessage.tipo === "error"
+                      ? "text-red-600"
+                      : "text-green-700"
+                  }`}
+                >
+                  {saveMessage.texto}
+                </p>
+              )}
+            </Field>
+          </FormRow>
+
+
             <Field label="FICHA Nº:" htmlFor="ficha_n">
+
+              <div className="flex">
+                <select
+                  id="filter-cuenca"
+                  className={SELECT}
+                  value={cuencaId}
+                  onChange={handleCuencaChange}
+                >
+                  <option value="">----Cuenca----</option>
+                  {cuencas.map((cuenca) => (
+                    <option key={cuenca.id} value={cuenca.id}>
+                      {cuenca.nombre}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  id="filter-sub-cuenca"
+                  className={SELECT}
+                  value={subcuencaId}
+                  onChange={handleSubcuencaChange}
+                  disabled={!cuencaId}
+                >
+                  <option value="">----Sub Cuenca----</option>
+                  {subcuencas.map((subcuenca) => (
+                    <option key={subcuenca.id} value={subcuenca.id}>
+                      {subcuenca.nombre}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  id="filter-parroquia"
+                  className={SELECT}
+                  value={parroquiaId}
+                  onChange={handleParroquiaChange}
+                  disabled={!subcuencaId}
+                >
+                  <option value="">----Parroquia----</option>
+                  {parroquias.map((parroquia) => (
+                    <option key={parroquia.id} value={parroquia.id}>
+                      {parroquia.nombre}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {(catalogLoading || catalogError) && (
+                <p className="text-[10px] text-slate-500">
+                  {catalogError
+                    ? "Sin datos — pendiente de conexión con el backend."
+                    : "Cargando catálogos…"}
+                </p>
+              )}
+
               <input
                 type="text"
                 name="ficha_n"
                 id="ficha_n"
+                ref={fichaRef}
+                onChange={handleFichaChange}
+                readOnly={!fichaEditable}
                 pattern="\d{2}-\d{2}-\d{2}-\w{3}-\d{2}"
                 placeholder="00-00-00-ABC-00"
                 title="Patron esperado: '00-00-00-ABC-00'"
@@ -228,27 +576,13 @@ const SirohForm = () => {
                 required
                 className={INPUT}
               />
-              {/* Nota: el original deja list="" (sin referenciar este datalist);
-                  se conserva tal cual. */}
-              <datalist id="short-code">
-                {SHORT_CODES.map((code) => (
-                  <option key={code} value={code} />
-                ))}
-              </datalist>
-            </Field>
 
-            <Field label="CODIGO Nº:" htmlFor="cod_n">
-              <input
-                type="text"
-                name="cod_n"
-                id="cod_n"
-                pattern="\d{6}"
-                required
-                readOnly
-                className={INPUT}
-              />
+              {fichaEditable && (
+                <p className="text-[10px] text-slate-500">
+                  Solo puede editar los últimos 2 dígitos.
+                </p>
+              )}
             </Field>
-          </FormRow>
 
           <SectionTitle>Ubicación Espacial y Georreferenciación</SectionTitle>
           <FormRow>
@@ -257,6 +591,7 @@ const SirohForm = () => {
                 type="text"
                 name="coor_utm__e"
                 id="coor_utm__e"
+                ref={eastRef}
                 pattern="^\d{6}.\d{1,2}$"
                 placeholder="000006.12"
                 title="Patron esperado: 123456.12"
@@ -271,6 +606,7 @@ const SirohForm = () => {
                 type="text"
                 name="coor_utm__n"
                 id="coor_utm__n"
+                ref={northRef}
                 pattern="^\d{7}.\d{1,2}$"
                 placeholder="0000007.12"
                 title="Patron esperado: 1234567.12"
@@ -281,7 +617,12 @@ const SirohForm = () => {
             </Field>
 
             <div className={FORM_GROUP}>
-              <label htmlFor="map-btn" id="label-map-btn" className="map-img-label">
+              <label
+                htmlFor="map-btn"
+                id="label-map-btn"
+                className="map-img-label"
+                onClick={handleMapOpen}
+              >
                 <img
                   src={mapLocationIcon}
                   alt="abrir mapa"
@@ -289,14 +630,13 @@ const SirohForm = () => {
                   className="map-img"
                 />
               </label>
-              {/* TODO(mapa): la accion original vivia en
-                  js/services/google_maps_api/map.js (inexistente en el repo). */}
+              {/* El marcado original dispara #map-btn desde la etiqueta de imagen. */}
               <input
                 type="button"
                 value="abrir mapa"
                 id="map-btn"
                 className="hidden"
-                onClick={() => alert("Mapa no disponible: integración pendiente.")}
+                onClick={handleMapOpen}
               />
             </div>
 
@@ -402,7 +742,7 @@ const SirohForm = () => {
                 type="text"
                 name="datos_cuenta__municipio"
                 id="datos_cuenta__municipio"
-                defaultValue="Libertador"
+                defaultValue={INSTITUTION.municipio}
                 required
                 readOnly
                 className={INPUT}
@@ -843,11 +1183,45 @@ const SirohForm = () => {
             </FormRow>
           ))}
 
-          <button type="submit" className={BTN_SUCCESS_BLOCK}>
-            💾 Registrar Inspección Completa en Base de Datos SIROH
+          <button
+            type="submit"
+            className={`${BTN_SUCCESS_BLOCK} disabled:opacity-60`}
+            disabled={submitting || !inspeccionId}
+          >
+            {submitting
+              ? "Guardando…"
+              : "💾 Registrar Inspección Completa en Base de Datos SIROH"}
           </button>
+          {saveMessage && (
+            <p
+              className={`mt-2 text-center text-xs ${
+                saveMessage.tipo === "error"
+                  ? "text-red-600"
+                  : "text-green-700"
+              }`}
+            >
+              {saveMessage.texto}
+            </p>
+          )}
         </div>
       </form>
+
+      {mapOpen && (
+        <Suspense
+          fallback={
+            <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-slate-950/70 text-sm text-white">
+              Cargando mapa…
+            </div>
+          }
+        >
+          <CoordinateMapModal
+            onClose={handleMapClose}
+            onSelect={handleMapSelect}
+            initialE={mapInitial.e}
+            initialN={mapInitial.n}
+          />
+        </Suspense>
+      )}
     </div>
   );
 };

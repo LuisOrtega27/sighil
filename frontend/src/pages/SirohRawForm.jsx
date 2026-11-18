@@ -1,5 +1,16 @@
-import redStarIcon from "../assets/icons/redStar_icon.png";
-import IMGRADLogo from "../assets/imgs/logos/IMGRAD_logo.png";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useRef,
+  useState,
+} from "react";
+import { FaArrowLeft, FaDrawPolygon, FaMapLocationDot } from "react-icons/fa6";
+import { Link } from "react-router-dom";
+
+import { createInspeccion, updateInspeccion } from "../api/siroh";
+
+import { INSTITUTION } from "../config/institution";
 import canalRectangular from "../assets/imgs/canales/canales-rectangular.png";
 import canalTrapezoidal from "../assets/imgs/canales/canales-trapezoidal.png";
 import canalTriangular from "../assets/imgs/canales/canales-triangular.png";
@@ -13,6 +24,10 @@ import morteroGrandes from "../assets/imgs/morteros/mortero-grandes.png";
 import morteroMedianos from "../assets/imgs/morteros/mortero-medianos.png";
 import morteroBoronilla from "../assets/imgs/morteros/mortero-boronilla.png";
 import morteroPolvo from "../assets/imgs/morteros/mortero-polvo.png";
+
+/* El modal se carga solo cuando se pulsa #modal-map-btn. */
+const CoordinateMapModal = lazy(() => import("../components/siroh/CoordinateMapModal"));
+const DemarcacionModal = lazy(() => import("../components/siroh/DemarcacionModal"));
 
 /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    Constantes de estilo (migracion de SirohRawForm.css a Tailwind v4)
@@ -59,16 +74,217 @@ const RadioOption = ({ id, name, value, label, first = false, required = false }
   </div>
 );
 
+
+/* Boton flotante de demarcacion: icono de poligono/limites. */
+const DemarcacionActionButton = ({ onClick, className }) => (
+  <button
+    type="button"
+    id="select-demartacion"
+    onClick={onClick}
+    aria-label="Seleccionar demarcación"
+    className={className}
+  >
+    <FaDrawPolygon className="h-5 w-5" />
+  </button>
+);
+
 const NAV_BUTTON = "rounded bg-[#2288ee] px-4 py-2 font-bold text-white transition hover:bg-[#1a6cb8] active:scale-95";
 
 export const SirohRawForm = () => {
+  const [mapOpen, setMapOpen] = useState(false);
+  const [mapInitial, setMapInitial] = useState({ e: "", n: "" });
+
+  const [demarcacionOpen, setDemarcacionOpen] = useState(false);
+  const [fichaSnapshot, setFichaSnapshot] = useState("");
+  const [fichaPrefix, setFichaPrefix] = useState("");
+
+  /* Guardado en dos pasos, igual que SirohForm.jsx. */
+  const [inspeccionId, setInspeccionId] = useState(null);
+  const [creating, setCreating] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [saveMessage, setSaveMessage] = useState(null);
+
+  const formRef = useRef(null);
+  const codRef = useRef(null);
+  const eastRef = useRef(null);
+  const northRef = useRef(null);
+  const fichaLabelRef = useRef(null);
+  const fichaRef = useRef(null);
+
+  /* Los inputs se dejan no controlados para conservar pattern/required;
+     el mapa solo escribe directamente sus values. */
+  const handleMapSelect = useCallback(({ e, n }) => {
+    if (eastRef.current) eastRef.current.value = e;
+    if (northRef.current) northRef.current.value = n;
+  }, []);
+  const handleMapClose = useCallback(() => setMapOpen(false), []);
+  const handleMapOpen = useCallback(() => {
+    /* Si la ficha ya tiene E/N, el modal marca el punto al abrirse. */
+    setMapInitial({
+      e: eastRef.current?.value ?? "",
+      n: northRef.current?.value ?? "",
+    });
+    setMapOpen(true);
+  }, []);
+
+  const handleDemarcacionClose = useCallback(() => setDemarcacionOpen(false), []);
+  const handleDemarcacionOpen = useCallback(() => {
+    setFichaSnapshot(fichaRef.current?.value ?? "");
+    setDemarcacionOpen(true);
+  }, []);
+
+  const handleDemarcacionApply = useCallback((prefix) => {
+    const actual = fichaRef.current?.value ?? "";
+    const suffix =
+      prefix && actual.startsWith(prefix)
+        ? actual.slice(prefix.length)
+        : actual.slice(-2);
+    const digits = suffix.replace(/\D/g, "").slice(0, 2);
+    const next = prefix ? `${prefix}${digits}` : "";
+
+    if (fichaRef.current) fichaRef.current.value = next;
+    setFichaPrefix(prefix);
+    setDemarcacionOpen(false);
+    if (prefix) fichaRef.current?.focus();
+  }, []);
+
+  /* El prefijo generado no se puede borrar: solo se aceptan 2 digitos finales. */
+  const handleFichaChange = useCallback(
+    (event) => {
+      if (!fichaPrefix) return;
+
+      const raw = event.target.value;
+      const suffix = raw.startsWith(fichaPrefix)
+        ? raw.slice(fichaPrefix.length)
+        : "";
+      const digits = suffix.replace(/\D/g, "").slice(0, 2);
+      const next = `${fichaPrefix}${digits}`;
+
+      if (fichaRef.current) fichaRef.current.value = next;
+    },
+    [fichaPrefix]
+  );
+
+  const construirPayload = () => {
+    const formData = new FormData(formRef.current);
+    const payload = {};
+
+    for (const [name, valor] of formData.entries()) {
+      /* cod_n lo asigna el backend; los selects de catalogo no tienen name
+         y por eso FormData ya los ignora. */
+      if (name === "cod_n") continue;
+      const value =
+        typeof valor === "string" && valor.trim() === "" ? null : valor;
+      payload[name] = Array.isArray(value) ? value.join(",") : value;
+    }
+
+    return payload;
+  };
+
+  const resetEstado = () => {
+    setFichaPrefix("");
+    setMapInitial({ e: "", n: "" });
+    setInspeccionId(null);
+
+    if (fichaRef.current) fichaRef.current.value = "";
+    if (codRef.current) codRef.current.value = "";
+  };
+
+  const limpiarFormulario = () => {
+    formRef.current?.reset();
+    resetEstado();
+  };
+
+  const handleReset = () => {
+    /* El navegador ya limpia los values; aqui solo se reinicia el estado. */
+    resetEstado();
+    setSaveMessage(null);
+  };
+
+  const handleCrearRegistro = async () => {
+    if (creating || inspeccionId) return;
+
+    setCreating(true);
+    setSaveMessage(null);
+
+    try {
+      const registro = await createInspeccion();
+      if (codRef.current) codRef.current.value = registro.cod_n;
+      setInspeccionId(registro.id);
+      setSaveMessage({
+        tipo: "ok",
+        texto: `Registro creado con código ${registro.cod_n}.`,
+      });
+    } catch {
+      setSaveMessage({
+        tipo: "error",
+        texto: "No se pudo crear el registro. Intente nuevamente.",
+      });
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (!inspeccionId || submitting) return;
+
+    setSubmitting(true);
+    setSaveMessage(null);
+
+    try {
+      await updateInspeccion(inspeccionId, construirPayload());
+      limpiarFormulario();
+      setSaveMessage({
+        tipo: "ok",
+        texto: "Inspección registrada correctamente.",
+      });
+    } catch {
+      setSaveMessage({
+        tipo: "error",
+        texto: "No se pudo guardar la inspección. Intente nuevamente.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <>
         <nav className="main_nav sticky top-0 z-50 flex items-center justify-between gap-4 bg-[#0f2c59] px-6 py-3 shadow-md">
-            <img src={redStarIcon} alt="Alcaldia de Caracas - Instituto Municipal de Gestion de Riesgos y Administracion de desastres" title="Alcaldia de Caracas - Instituto Municipal de Gestion de Riesgos y Administracion de desastres" className="h-14 w-auto"/>
+            <img src={INSTITUTION.logo} alt={`${INSTITUTION.alcaldia} - ${INSTITUTION.organismo}`} title={`${INSTITUTION.alcaldia} - ${INSTITUTION.organismo}`} className="h-14 w-auto"/>
+            <div className="hidden text-white md:block">
+              <p className="text-sm font-bold">{INSTITUTION.sigla}</p>
+              <p className="text-[11px]">{INSTITUTION.nombre}</p>
+            </div>
 
             <ul className="main_menu flex items-center gap-2">
-                <li> <button type="button" id="main_menu__createRegistry" className={NAV_BUTTON}>Nuevo</button> </li>
+                <li>
+                  <Link
+                    to="/siroh"
+                    id="main_menu__backToSiroh"
+                    className={`${NAV_BUTTON} inline-flex items-center gap-2`}
+                  >
+                    <FaArrowLeft className="h-4 w-4" />
+                    Volver a SIROH
+                  </Link>
+                </li>
+                <li className="relative">
+                  <button
+                    type="button"
+                    id="main_menu__createRegistry"
+                    onClick={handleCrearRegistro}
+                    disabled={creating || Boolean(inspeccionId)}
+                    className={`${NAV_BUTTON} disabled:opacity-50`}
+                  >
+                    {creating ? "Creando…" : inspeccionId ? "Registro creado" : "Nuevo"}
+                  </button>
+                  {saveMessage && (
+                    <p className={`absolute left-1/2 top-full z-50 mt-1 w-56 -translate-x-1/2 rounded bg-white px-2 py-1 text-center text-[10px] shadow ${saveMessage.tipo === "error" ? "text-red-600" : "text-green-700"}`}>
+                      {saveMessage.texto}
+                    </p>
+                  )}
+                </li>
                 <li> <button type="button" id="main_menu__updateRegistry" className={NAV_BUTTON}>Actualizacion</button> </li>
                 <li> <button type="button" id="main_menu__showHistory" className={NAV_BUTTON}>Historico</button> </li>
             </ul>
@@ -90,7 +306,7 @@ export const SirohRawForm = () => {
         </nav>
 
 
-        <form  className="main_form flex flex-col gap-10 p-5" id="main_form">
+        <form ref={formRef} onSubmit={handleSubmit} onReset={handleReset} className="main_form flex flex-col gap-10 p-5" id="main_form">
 
             {/* <!--  ++++++++++++++++++++++++++++++++++++++++ PAGINA 1 ++++++++++++++++++++++++++++++++++++++++  --> */}
 
@@ -101,11 +317,11 @@ export const SirohRawForm = () => {
                 <header className={`${FORM_SECTION} header_secction grid grid-cols-3 items-center`}>
 
                     <div className="header_logo flex">
-                        <img src={IMGRADLogo} alt="Logo del Instituto Municipal de Gestion de Riesgos y Administracion de Desastres" className="m-auto w-full"/>
+                        <img src={INSTITUTION.logoImgrad} alt={`Logo del ${INSTITUTION.organismo}`} className="m-auto w-full"/>
                     </div>
 
                     <div className="header_title text-center">
-                        <h1>COORDINACION DE MONITOREO DE QUEBRADAS Y OBRAS HIDRAULICAS</h1>
+                        <h1 className="uppercase">{INSTITUTION.coordinacion}</h1>
                         <SubTitle>FICHA DE EVALUCACION DE OBRAS HIDRAULICAS</SubTitle>
                     </div>
 
@@ -122,27 +338,40 @@ export const SirohRawForm = () => {
                             <span>COORDENADAS UTM</span>
                             <div className="coor_utm_container relative grid grid-cols-[auto_1fr_auto_1fr] items-center border border-black p-0.5">
                                 <label htmlFor="coor_utm__e">E:</label>
-                                <input type="text" name="coor_utm__e" id="coor_utm__e" pattern="^\d{6}.\d{1,2}$" placeholder="000006.12" title="Patron esperado: 123456.12" maxLength="9" required className={`${INPUT_NO_BORDER} w-4/5`}/>
+                                <input type="text" name="coor_utm__e" id="coor_utm__e" ref={eastRef} pattern="^\d{6}.\d{1,2}$" placeholder="000006.12" title="Patron esperado: 123456.12" maxLength="9" required className={`${INPUT_NO_BORDER} w-4/5`}/>
                                 <label htmlFor="coor_utm__n">N:</label>
-                                <input type="text" name="coor_utm__n" id="coor_utm__n" pattern="^\d{7}.\d{1,2}$" placeholder="0000007.12" title="Patron esperado: 1234567.12" maxLength="10" required className={`${INPUT_NO_BORDER} w-4/5`}/>
+                                <input type="text" name="coor_utm__n" id="coor_utm__n" ref={northRef} pattern="^\d{7}.\d{1,2}$" placeholder="0000007.12" title="Patron esperado: 1234567.12" maxLength="10" required className={`${INPUT_NO_BORDER} w-4/5`}/>
 
-                                <button type="button" id="modal-map-btn" className="absolute right-0 top-1/2 inline-block cursor-pointer p-1 translate-x-20 -translate-y-1/2 transition active:scale-[0.8] hover:fill-[#2288ee]">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" className="aspect-square h-5">
-                                        {/* <!--!Font Awesome Free v7.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2026 Fonticons, Inc.--> */}
-                                        <path d="M576 112C576 100.9 570.3 90.6 560.8 84.8C551.3 79 539.6 78.4 529.7 83.4L413.5 141.5L234.1 81.6C226 78.9 217.3 79.5 209.7 83.3L81.7 147.3C70.8 152.8 64 163.9 64 176L64 528C64 539.1 69.7 549.4 79.2 555.2C88.7 561 100.4 561.6 110.3 556.6L226.4 498.5L399.7 556.3C395.4 549.9 391.2 543.2 387.1 536.4C376.1 518.1 365.2 497.1 357.1 474.6L255.9 440.9L255.9 156.4L383.9 199.1L383.9 298.4C414.9 262.6 460.9 240 511.9 240C534.5 240 556.1 244.4 575.9 252.5L576 112zM512 288C445.7 288 392 340.8 392 405.9C392 474.8 456.1 556.3 490.6 595.2C502.2 608.2 521.9 608.2 533.5 595.2C568 556.3 632.1 474.8 632.1 405.9C632.1 340.8 578.4 288 512.1 288zM472 408C472 385.9 489.9 368 512 368C534.1 368 552 385.9 552 408C552 430.1 534.1 448 512 448C489.9 448 472 430.1 472 408z"/>
-                                    </svg>
+                                <button
+                                    type="button"
+                                    id="modal-map-btn"
+                                    onClick={handleMapOpen}
+                                    aria-label="Abrir mapa para coordenadas UTM"
+                                    className="absolute -right-20 top-0 flex h-9 w-9 items-center justify-center rounded-full border border-[#2288ee] bg-white p-1.5 shadow-lg transition hover:text-[#2288ee] active:scale-95"
+                                >
+                                    <FaMapLocationDot className="h-5 w-5" />
                                 </button>
 
                             </div>
                         </div>
                     </div>
 
-                    <div className="header_codigo col-span-3 flex items-center gap-5">
-                        <label htmlFor="ficha_n" className={`${LABEL_NOWRAP} header_codigo-ficha_n`}>FICHA Nº:</label>
+                    <div className="header_codigo col-span-3 flex items-center gap-5 relative">
+                        
+                        <label htmlFor="ficha_n" ref={fichaLabelRef} className={`${LABEL_NOWRAP} header_codigo-ficha_n`}>FICHA Nº:</label>
+
+                        <DemarcacionActionButton
+                            onClick={handleDemarcacionOpen}
+                            className="absolute -left-20 top-0 flex h-9 w-9 items-center justify-center rounded-full border border-[#2288ee] bg-white p-1.5 shadow-lg transition hover:text-[#2288ee] active:scale-95"
+                        />
+                        
                         <input
                             type="text"
                             name="ficha_n"
                             id="ficha_n"
+                            ref={fichaRef}
+                            onChange={handleFichaChange}
+                            readOnly={!fichaPrefix}
                             pattern="\d{2}-\d{2}-\d{2}-\w{3}-\d{2}"
                             placeholder="00-00-00-ABC-00"
                             title="Patron esperado: '00-00-00-ABC-00'"
@@ -150,39 +379,13 @@ export const SirohRawForm = () => {
                             autoFocus
                             maxLength="15"
                             autoComplete="off"
-                            list=""
                             className={INPUT_BASE}
                         />
-                        <datalist id="short-code">
-                            <option value="CAT"></option>
-                            <option value="ANA"></option>
-                            <option value="MAR"></option>
-                            <option value="FLO"></option>
-                            <option value="CHA"></option>
-                            <option value="VAL"></option>
-                            <option value="JUA"></option>
-                            <option value="HAC"></option>
-                            <option value="GUA"></option>
-                            <option value="MAC"></option>
-                            <option value="ADE"></option>
-                            <option value="SAB"></option>
-                            <option value="PEO"></option>
-                            <option value="MAM"></option>
-                            <option value="PED"></option>
-                            <option value="TOR"></option>
-                            <option value="ALG"></option>
-                            <option value="SAN"></option>
-                            <option value="CAR"></option>
-                            <option value="TRI"></option>
-                            <option value="LIM"></option>
-                            <option value="ASN"></option>
-                            <option value="TAC"></option>
-                            <option value="TOP"></option>
-                        </datalist>
 
                         <input type="hidden" name="modification" id="modification" value="00"/>
+                        
                         <label htmlFor="cod_n" className={`${LABEL_NOWRAP} header_codigo-cod_n`}>CODIGO Nº:</label>
-                        <input type="text" className={INPUT_DISABLED} name="cod_n" id="cod_n" tabIndex="-1" pattern="\d{6}" required/>
+                        <input type="text" className={INPUT_DISABLED} name="cod_n" id="cod_n" ref={codRef} tabIndex="-1" pattern="\d{6}" required readOnly/>
 
                         <div className="flex items-center gap-1 border border-black p-0.5">
                             <label htmlFor="header_codigo__huso">HUSO:</label>
@@ -229,7 +432,7 @@ export const SirohRawForm = () => {
                         <input type="text" className={INPUT_DISABLED} name="datos_cuenta__estado" id="datos_cuenta__estado" value="Distrito_Capital" tabIndex="-1" readOnly/>
 
                         <label htmlFor="datos_cuenta__municipio">MUNICIPIO:</label>
-                        <input type="text" className={INPUT_DISABLED} name="datos_cuenta__municipio" id="datos_cuenta__municipio" value="Libertador" tabIndex="-1" readOnly/>
+                        <input type="text" className={INPUT_DISABLED} name="datos_cuenta__municipio" id="datos_cuenta__municipio" value={INSTITUTION.municipio} tabIndex="-1" readOnly/>
 
                         <label htmlFor="datos_cuenta__parroquia">PARROQUIA:</label>
                         <input type="text" name="datos_cuenta__parroquia" id="datos_cuenta__parroquia" list="parroquias" required className={INPUT_BASE}/>
@@ -939,12 +1142,61 @@ export const SirohRawForm = () => {
 
             </section>
 
-            <div className="form_buttons mt-2 flex items-center justify-center gap-4">
-                <button type="submit" className="btn_submit rounded bg-[#2288ee] px-6 py-2 font-bold text-white transition hover:bg-[#1a6cb8] active:scale-95" id="main_form-submit">ENVIAR</button>
-                <button type="reset" className="btn_reset rounded bg-[#e2e8f0] px-6 py-2 font-bold text-[#1e293b] transition hover:bg-[#cbd5e1] active:scale-95">REINICIAR</button>
+            <div className="form_buttons mt-2 flex flex-col items-center justify-center gap-2">
+                <div className="flex items-center justify-center gap-4">
+                    <button
+                      type="submit"
+                      id="main_form-submit"
+                      disabled={submitting || !inspeccionId}
+                      className="btn_submit rounded bg-[#2288ee] px-6 py-2 font-bold text-white transition hover:bg-[#1a6cb8] active:scale-95 disabled:opacity-60"
+                    >
+                      {submitting ? "Guardando…" : "ENVIAR"}
+                    </button>
+                    <button type="reset" className="btn_reset rounded bg-[#e2e8f0] px-6 py-2 font-bold text-[#1e293b] transition hover:bg-[#cbd5e1] active:scale-95">REINICIAR</button>
+                </div>
+                {saveMessage && (
+                  <p className={`text-xs ${saveMessage.tipo === "error" ? "text-red-600" : "text-green-700"}`}>
+                    {saveMessage.texto}
+                  </p>
+                )}
             </div>
 
         </form>
+
+        
+
+        {mapOpen && (
+          <Suspense
+            fallback={
+              <div className="fixed inset-0 z-2000 flex items-center justify-center bg-slate-950/70 text-sm text-white">
+                Cargando mapa…
+              </div>
+            }
+          >
+            <CoordinateMapModal
+              onClose={handleMapClose}
+              onSelect={handleMapSelect}
+              initialE={mapInitial.e}
+              initialN={mapInitial.n}
+            />
+          </Suspense>
+        )}
+
+        {demarcacionOpen && (
+          <Suspense
+            fallback={
+              <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-slate-950/70 text-sm text-white">
+                Cargando demarcación…
+              </div>
+            }
+          >
+            <DemarcacionModal
+              onClose={handleDemarcacionClose}
+              onApply={handleDemarcacionApply}
+              currentFicha={fichaSnapshot}
+            />
+          </Suspense>
+        )}
 
     </>
   )
