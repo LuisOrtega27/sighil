@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form"
 import { useNavigate } from "react-router-dom"
 import {
   FaArrowLeft,
+  FaCircleRight,
   FaLock,
   FaRightToBracket,
   FaShieldHalved,
@@ -34,7 +35,6 @@ export const Login = () => {
 
     try {
       await signIn(values)
-      alert("Bienbenido al sistema SIGHIL");
       reset();
     } catch (error) {
       setLoginError(error.response?.data?.message ?? "No se pudo iniciar sesión")
@@ -190,16 +190,31 @@ export const Login = () => {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-[10px] uppercase font-mono tracking-wider text-slate-400 mb-1">Cedula de Identidad</label>
-                  <input 
-                    type="text" 
-                    placeholder="00.000.000" 
-                    {...register("ci", {
-                      required: {value: true, message: "C.I. is required"},
-                      pattern: {value: /^\d{1,2}\.\d{3}\.\d{3}/, message: "value does not match the pattern"}
-                    })} 
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 transition-colors font-mono" />
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[10px] uppercase font-mono tracking-wider text-slate-400 mb-1">Cedula de Identidad</label>
+                    <input 
+                      type="text" 
+                      placeholder="00.000.000" 
+                      {...register("ci", {
+                        required: {value: true, message: "C.I. is required"},
+                        pattern: {value: /^\d{1,2}\.\d{3}\.\d{3}/, message: "value does not match the pattern"}
+                      })} 
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 transition-colors font-mono" />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] uppercase font-mono tracking-wider text-slate-400 mb-1">Numero de Telefono</label>
+                    <input 
+                      type="text" 
+                      placeholder="0000-0000000" 
+                      {...register("phone", {
+                        required: {value: true, message: "C.I. is required"},
+                        pattern: {value: /^\d{4}\-\d{7}/, message: "value does not match the pattern"}
+                      })} 
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 transition-colors font-mono" />
+                  </div>
+                    
                 </div>
 
                 <div>
@@ -214,12 +229,15 @@ export const Login = () => {
                 <div>
                   <label className="block text-[10px] uppercase font-mono tracking-wider text-slate-400 mb-1">Área o Departamento</label>
                   <select 
-                    {...register("coordinacion", {required: true})} 
+                    {...register("direccion_id", {required: true})} 
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none focus:border-emerald-500 transition-colors">
-                    <option>Ingeniería Hidráulica / Cuencas</option>
-                    <option>Meteorología y Estaciones</option>
-                    <option>Mitigación de Riesgos e Inspección</option>
-                    <option>Supervisión General / Coordinador</option>
+                    <option value={1}>Presidencia</option>
+                    <option value={2}>Coordinación de Quebradas</option>
+                    <option value={3}>Direción de Riesgos</option>
+                    <option value={4}>Protección Civil</option>
+                    <option value={5}>Sala de Riesgo</option>
+                    <option value={6}>Visitante</option>
+                    <option value={7}>Informatica</option>
                   </select>
                 </div>
 

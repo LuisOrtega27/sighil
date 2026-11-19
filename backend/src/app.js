@@ -23,7 +23,25 @@ app.set('port', process.env.PORT || 4001);
 
 
 // Middlewares
-app.use(cors({ origin: "http://localhost:5173", credentials: true}));
+const allowedOrigins = (
+    process.env.CORS_ORIGINS || "http://localhost:5173,http://172.16.110.154:5173"
+)
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+app.use(
+    cors({
+        origin: (origin, callback) => {
+            // Peticiones sin Origin (curl, server-to-server) se permiten.
+            if (!origin || allowedOrigins.includes(origin)) {
+                return callback(null, true);
+            }
+            return callback(null, false);
+        },
+        credentials: true,
+    })
+);
 app.use(express.json());
 app.use(cookieParser());
 // app.use(express.urlencoded({ extended: true }));

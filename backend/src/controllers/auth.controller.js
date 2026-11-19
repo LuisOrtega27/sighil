@@ -15,7 +15,7 @@ const cookieOptions = (remember = false) => ({
 });
 
 const register = async (req,res)=>{
-    const {fname, lname, ci, email, password} = req.body
+    const {fname, lname, direccion_id, ci, phone, email, password} = req.body
 
     try {
         // La consulta devuelve [rows]; una cuenta pendiente NO debe autenticarse.
@@ -24,9 +24,9 @@ const register = async (req,res)=>{
 
         const passwordHash = await bcrypt.hash(password, 10);
         await pool.query(
-            `INSERT INTO users (fname, lname, ci, email, password, status)
-             VALUES (?, ?, ?, ?, ?, "pendiente")`,
-            [fname, lname, ci, email, passwordHash]
+            `INSERT INTO users (fname, lname, direccion_id, ci, phone, email, password, status)
+             VALUES (?, ?, ?, ?, ?, ?, ?, "pendiente")`,
+            [fname, lname, direccion_id, ci, phone, email, passwordHash]
         );
 
         res.status(200).json({message: "register successfull"})
