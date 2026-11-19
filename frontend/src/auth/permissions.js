@@ -26,6 +26,7 @@ export const ROUTE_ACCESS = Object.freeze({
   "/login": TODOS,
   "/siroh": TODOS,
   "/siroh-raw-Form": GESTION,
+  "/prmau": GESTION,
   "/acceso-denegado": TODOS,
 })
 

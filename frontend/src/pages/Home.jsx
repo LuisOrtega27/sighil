@@ -11,10 +11,10 @@ const menu = [
     icono: "📋",
   },
   {
-    to: "/siroh-raw-Form",
-    titulo: "SIROH (Formato original)",
-    descripcion: "Formulario SIROH en su formato original.",
-    icono: "📝",
+    to: "/prmau",
+    titulo: "PRMAU",
+    descripcion: "Programa de Microzonificación y Asentamientos Urbanos.",
+    icono: "🏘️",
   },
 ]
 

@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estudio Socioeconómico - IMGRAD</title>
+    <style>
+        :root {
+            --primary-color: #1a365d;
+            --secondary-color: #2b6cb0;
+            --border-color: #cbd5e0;
+            --bg-light: #f7fafc;
+            --text-dark: #2d3748;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #edf2f7;
+            color: var(--text-dark);
+            line-height: 1.5;
+            margin: 0;
+            padding: 20px;
+
+        }
+
+        .form-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Encabezado */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+
+        .header-title {
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        .header-title h1 {
+            font-size: 20px;
+            color: var(--primary-color);
+            margin: 0 0 5px 0;
+            text-transform: uppercase;
+        }
+
+        .header-title h2 {
+            font-size: 15px;
+            color: var(--secondary-color);
+            margin: 0 0 5px 0;
+        }
+
+        .header-title h3 {
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin: 8px 0 0 0;
+            color: #2d3748;
+        }
+
+        .meta-info {
+            text-align: right;
+            font-size: 13px;
+        }
+
+        .meta-info div {
+            margin-bottom: 5px;
+        }
+
+        /* Sistema de Pestañas (Tabs) */
+        .tabs-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 5px;
+        }
+
+        .tab-button {
+            background-color: #e2e8f0;
+            color: #4a5568;
+            border: none;
+            padding: 10px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-button:hover {
+            background-color: #cbd5e0;
+        }
+
+        .tab-button.active {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Contenido de Pestañas */
+        .tab-content {
+            display: none;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 25px;
+            background-color: var(--bg-light);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-title {
+            font-size: 15px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .sub-section-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--secondary-color);
+            margin: 15px 0 10px 0;
+            text-transform: uppercase;
+        }
+
+        /* Grillas */
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+
+        /* Grilla especial para Código Catastral Responsive */
+        .grid-catastral {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(65px, 1fr));
+            gap: 8px;
+            background: #fff;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 10px;
+        }
+
+        .form-group label {
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #4a5568;
+            text-transform: uppercase;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group select,
+        .form-group textarea {
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 13px;
+            background-color: #fff;
+            box-sizing: border-box;
+        }
+
+        .catastral-input {
+            text-align: center;
+            font-weight: bold;
+            letter-spacing: 1px;
+            padding: 6px 2px !important;
+        }
+
+        /* Opciones Checkbox / Radio */
+        .checkbox-group, .radio-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .checkbox-item, .radio-item {
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+            background: #fff;
+            padding: 8px 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .checkbox-item input, .radio-item input {
+            margin-right: 8px;
+            width: 15px;
+            height: 15px;
+        }
+
+        /* Tablas para Ocupantes */
+        .table-responsive {
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            background: #fff;
+            min-width: 900px;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 6px 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #e2e8f0;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        td input, td select {
+            width: 100%;
+            padding: 4px;
+            border: 1px solid #e2e8f0;
+            border-radius: 3px;
+            font-size: 12px;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .risk-box {
+            background: #fff;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        /* Botones */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 12px;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary { background-color: #cbd5e0; color: #2d3748; }
+        .btn-primary { background-color: var(--secondary-color); color: white; }
+        .btn-submit { background-color: #2f855a; color: white; }
+        .btn-add { background-color: #319795; color: white; margin-top: 12px; }
+        .btn-add:hover { background-color: #2c7a7b; }
+        .btn-remove { background-color: #e53e3e; color: white; padding: 2px 6px; font-size: 11px; border-radius: 3px; border: none; cursor: pointer; }
+
+        @media (max-width: 768px) {
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            .header { flex-direction: column; text-align: center; }
+            .meta-info { text-align: center; margin-top: 15px; }
+            .tabs-nav { flex-direction: column; }
+            .risk-box { flex-direction: column; gap: 10px; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    
+    <!-- ENCABEZADO -->
+    <header class="header">
+        <div class="header-title">
+            <h1>Alcaldía de Caracas</h1>
+            <h2>Instituto Municipal de Gestión de Riesgos y Administración de Desastres</h2>
+            <h3>ESTUDIO SOCIOECONÓMICO</h3>
+        </div>
+        <div class="meta-info">
+            <div><strong>CONTROL Nº:</strong> <span style="color: #e53e3e; font-weight: bold; font-size: 16px;">94000</span></div>
+            <div><strong>Nº de Hogar:</strong> <input type="text" style="width: 45px; text-align: center;" placeholder="---"> de <input type="text" style="width: 45px; text-align: center;" placeholder="---"></div>
+        </div>
+    </header>
+
+    <!-- NAVEGACIÓN POR PESTAÑAS -->
+    <div class="tabs-nav">
+        <button class="tab-button active" onclick="openTab(event, 'tab1')">1. Ubicación y Empadronador</button>
+        <button class="tab-button" onclick="openTab(event, 'tab2')">2. Ocupantes (Censo)</button>
+        <button class="tab-button" onclick="openTab(event, 'tab3')">3. Fuerza de Trabajo</button>
+        <button class="tab-button" onclick="openTab(event, 'tab4')">4. Situación de Riesgo</button>
+    </div>
+
+    <form onsubmit="event.preventDefault(); alert('Estudio Socioeconómico guardado exitosamente.');">
+        
+        <!-- PESTAÑA 1: DATOS GENERALES Y UBICACIÓN DEL INMUEBLE -->
+        <div id="tab1" class="tab-content active">
+            <div class="section-title">Datos Generales y Ubicación del Inmueble</div>
+            
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Nombre y Apellido del Empadronador</label>
+                    <input type="text" placeholder="Nombre del empadronador">
+                </div>
+                <div class="form-group">
+                    <label>Cédula de Identidad (C.I.)</label>
+                    <input type="text" placeholder="V-00000000">
+                </div>
+            </div>
+
+            <div class="sub-section-title">I. Datos de Ubicación del Inmueble</div>
+            
+            <div class="grid-3">
+                <div class="form-group">
+                    <label>Estado (Edo.)</label>
+                    <input type="text" value="Distrito Capital">
+                </div>
+                <div class="form-group">
+                    <label>Municipio (Mun.)</label>
+                    <input type="text" value="Libertador">
+                </div>
+                <div class="form-group">
+                    <label>Parroquia (Prr.)</label>
+                    <input type="text" placeholder="Escriba la parroquia">
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Sector / Ámbitos (Amb. / Sect.)</label>
+                    <input type="text" placeholder="Nombre del Sector">
+                </div>
+                <div class="form-group">
+                    <label>Manzana / Comunidad (Manz.)</label>
+                    <input type="text" placeholder="N° o Nombre de Manzana">
+                </div>
+            </div>
+
+            <!-- CÓDIGO CATASTRAL AJUSTADO A MÁRGENES Y CARACTERES -->
+            <label style="font-size: 11px; font-weight: 700; color: #4a5568; text-transform: uppercase;">Código Catastral</label>
+            <div class="grid-catastral" style="margin-top: 5px;">
+                <div class="form-group">
+                    <label>Edo (2)</label>
+                    <input type="text" class="catastral-input" maxlength="2" placeholder="00">
+                </div>
+                <div class="form-group">
+                    <label>Mun (2)</label>
+                    <input type="text" class="catastral-input" maxlength="2" placeholder="00">
+                </div>
+                <div class="form-group">
+                    <label>Parr (2)</label>
+                    <input type="text" class="catastral-input" maxlength="2" placeholder="00">
+                </div>
+                <div class="form-group">
+                    <label>Amb (3)</label>
+                    <input type="text" class="catastral-input" maxlength="3" placeholder="000">
+                </div>
+                <div class="form-group">
+                    <label>Sect (2)</label>
+                    <input type="text" class="catastral-input" maxlength="2" placeholder="00">
+                </div>
+                <div class="form-group">
+                    <label>Manz (3)</label>
+                    <input type="text" class="catastral-input" maxlength="3" placeholder="000">
+                </div>
+                <div class="form-group">
+                    <label>Parc (3)</label>
+                    <input type="text" class="catastral-input" maxlength="3" placeholder="000">
+                </div>
+                <div class="form-group">
+                    <label>Sbp (2)</label>
+                    <input type="text" class="catastral-input" maxlength="2" placeholder="00">
+                </div>
+                <div class="form-group">
+                    <label>Niv (2)</label>
+                    <input type="text" class="catastral-input" maxlength="2" placeholder="00">
+                </div>
+                <div class="form-group">
+                    <label>Und (2)</label>
+                    <input type="text" class="catastral-input" maxlength="2" placeholder="00">
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <div></div>
+                <button type="button" class="btn btn-primary" onclick="changeTab('tab2')">Siguiente &raquo;</button>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 2: DATOS DE LOS OCUPANTES DEL INMUEBLE -->
+        <div id="tab2" class="tab-content">
+            <div class="section-title">II. Datos de los Ocupantes del Inmueble</div>
+            <p style="font-size: 12px; color: #4a5568;">Registre los integrantes del hogar comenzando por el/la <strong>Jefe(a) de Hogar</strong> en la posición Nº 1.</p>
+
+            <div class="table-responsive">
+                <table id="tablaOcupantes">
+                    <thead>
+                        <tr>
+                            <th style="width: 30px;">Nº</th>
+                            <th style="width: 170px;">Apellidos y Nombres</th>
+                            <th style="width: 90px;">Nº C.I.</th>
+                            <th style="width: 110px;">Parentesco</th>
+                            <th style="width: 70px;">Sexo</th>
+                            <th style="width: 60px;">Año Nac.</th>
+                            <th style="width: 90px;">Nacionalidad</th>
+                            <th style="width: 90px;">Estado Civil</th>
+                            <th style="width: 110px;">Nivel Estudio</th>
+                            <th style="width: 70px;">¿Trabaja?</th>
+                            <th style="width: 40px;">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyOcupantes">
+                        <!-- Fila 1 Predefinida -->
+                        <tr>
+                            <td><strong>1</strong></td>
+                            <td><input type="text" placeholder="Jefe(a) de Hogar"></td>
+                            <td><input type="text" placeholder="C.I."></td>
+                            <td>
+                                <select>
+                                    <option selected>Jefe(a) del hogar</option>
+                                    <option>Cónyuge</option>
+                                    <option>Hijo(a)</option>
+                                    <option>Nieto(a)</option>
+                                    <option>Madre/Padre</option>
+                                    <option>Otro</option>
+                                </select>
+                            </td>
+                            <td><select><option>M</option><option>F</option></select></td>
+                            <td><input type="number" placeholder="AAAA"></td>
+                            <td><select><option>Venezolano</option><option>Extranjero</option></select></td>
+                            <td><select><option>Soltero(a)</option><option>Casado(a)</option><option>Concubino(a)</option><option>Otro</option></select></td>
+                            <td><select><option>Ninguno</option><option>Básico</option><option>Diversificado</option><option>Universitario</option></select></td>
+                            <td><select><option>Sí</option><option>No</option></select></td>
+                            <td>-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- BOTÓN PARA AGREGAR NUEVAS FILAS -->
+            <button type="button" class="btn btn-add" onclick="agregarFilaOcupante()">+ Agregar Integrante</button>
+
+            <div class="nav-buttons">
+                <button type="button" class="btn btn-secondary" onclick="changeTab('tab1')">&laquo; Anterior</button>
+                <button type="button" class="btn btn-primary" onclick="changeTab('tab3')">Siguiente &raquo;</button>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 3: FUERZA DE TRABAJO JEFE(A) DEL HOGAR -->
+        <div id="tab3" class="tab-content">
+            <div class="section-title">III. Fuerza de Trabajo Jefe(a) del Hogar</div>
+            
+            <div class="grid-2">
+                <!-- Pregunta 1 -->
+                <div class="form-group">
+                    <label>1. ¿En cuál de estas situaciones se encuentra actualmente?</label>
+                    <div class="radio-group" style="grid-template-columns: 1fr;">
+                        <label class="radio-item"><input type="radio" name="p1"> a- Trabajando</label>
+                        <label class="radio-item"><input type="radio" name="p1"> b- Sin trabajar</label>
+                        <label class="radio-item"><input type="radio" name="p1"> c- Buscando trabajo por primera vez</label>
+                        <label class="radio-item"><input type="radio" name="p1"> d- En quehaceres del hogar</label>
+                        <label class="radio-item"><input type="radio" name="p1"> e- Estudiando</label>
+                        <label class="radio-item"><input type="radio" name="p1"> f- Como pensionado o jubilado</label>
+                        <label class="radio-item"><input type="radio" name="p1"> g- Otra situación (especifique): <input type="text" style="margin-left: 5px; padding: 2px 5px;"></label>
+                    </div>
+                </div>
+
+                <!-- Pregunta 2 -->
+                <div class="form-group">
+                    <label>2. ¿Cuánto tiempo tiene sin trabajar?</label>
+                    <div class="radio-group" style="grid-template-columns: 1fr;">
+                        <label class="radio-item"><input type="radio" name="p2"> a- Hasta 3 meses</label>
+                        <label class="radio-item"><input type="radio" name="p2"> b- De 4 a 6 meses</label>
+                        <label class="radio-item"><input type="radio" name="p2"> c- De 7 a 12 meses</label>
+                        <label class="radio-item"><input type="radio" name="p2"> d- Más de 1 año</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2" style="margin-top: 15px;">
+                <!-- Pregunta 3 -->
+                <div class="form-group">
+                    <label>3. ¿Cuál es su ocupación en la empresa, organismo o negocio donde trabaja?</label>
+                    <input type="text" placeholder="Ej: Chofer, aprendiz de tornero, oficinista, maestra, etc.">
+                </div>
+
+                <!-- Pregunta 4 -->
+                <div class="form-group">
+                    <label>4. ¿A qué se dedica la empresa, organismo o negocio donde trabaja?</label>
+                    <input type="text" placeholder="Ej: Transporte de pasajeros, fábrica, banco, educación, etc.">
+                </div>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 20px 0;">
+
+            <div class="grid-2">
+                <!-- Pregunta 5 -->
+                <div class="form-group">
+                    <label>5. ¿Cuánto ganó el mes pasado en todos sus trabajos? (Ingreso en Bs.)</label>
+                    <div class="radio-group" style="grid-template-columns: 1fr;">
+                        <label class="radio-item"><input type="radio" name="p5"> a- Ingreso en Bs: <input type="number" style="width: 120px; margin-left: 5px; padding: 2px 5px;" placeholder="Monto Bs."></label>
+                        <label class="radio-item"><input type="radio" name="p5"> b- No tuvo ingresos</label>
+                    </div>
+                </div>
+
+                <!-- Pregunta 6 -->
+                <div class="form-group">
+                    <label>6. ¿Cuántas personas en su hogar tienen trabajo remunerado?</label>
+                    <div class="radio-group" style="grid-template-columns: 1fr;">
+                        <label class="radio-item"><input type="radio" name="p6"> a- Una persona</label>
+                        <label class="radio-item"><input type="radio" name="p6"> b- Dos personas</label>
+                        <label class="radio-item"><input type="radio" name="p6"> c- Tres personas o más</label>
+                        <label class="radio-item"><input type="radio" name="p6"> d- Ninguno</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2" style="margin-top: 15px;">
+                <!-- Pregunta 7 -->
+                <div class="form-group">
+                    <label>7. ¿Cuál fue el monto total del ingreso del hogar el mes pasado?</label>
+                    <div class="radio-group" style="grid-template-columns: 1fr;">
+                        <label class="radio-item"><input type="radio" name="p7"> a- Menos de un salario mínimo</label>
+                        <label class="radio-item"><input type="radio" name="p7"> b- Un salario mínimo</label>
+                        <label class="radio-item"><input type="radio" name="p7"> c- De uno a dos salarios mínimos</label>
+                        <label class="radio-item"><input type="radio" name="p7"> d- De dos a cuatro salarios mínimos</label>
+                        <label class="radio-item"><input type="radio" name="p7"> e- Más de cuatro salarios mínimos</label>
+                        <label class="radio-item"><input type="radio" name="p7"> f- Ninguno</label>
+                    </div>
+                </div>
+
+                <!-- Pregunta 8 -->
+                <div class="form-group">
+                    <label>8. ¿En la vivienda se realiza alguna(s) actividad(es) económica(s)?</label>
+                    <div class="radio-group" style="grid-template-columns: 1fr;">
+                        <label class="radio-item"><input type="radio" name="p8"> a- Sí</label>
+                        <label class="radio-item"><input type="radio" name="p8"> b- No</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button type="button" class="btn btn-secondary" onclick="changeTab('tab2')">&laquo; Anterior</button>
+                <button type="button" class="btn btn-primary" onclick="changeTab('tab4')">Siguiente &raquo;</button>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 4: IV. SITUACIÓN DE RIESGO Y FIRMA -->
+        <div id="tab4" class="tab-content">
+            <div class="section-title">IV. Situación de Riesgo</div>
+            <p style="font-size: 12px; color: #4a5568; margin-bottom: 15px;">Aspectos que pueden incidir en una situación de riesgo:</p>
+
+            <div class="grid-2">
+                <!-- DE LA VIVIENDA -->
+                <div class="form-group">
+                    <div class="sub-section-title">De la Vivienda</div>
+                    <div class="checkbox-group" style="grid-template-columns: 1fr;">
+                        <label class="checkbox-item"><input type="checkbox"> ¿Fisuras o grietas en las paredes?</label>
+                        <label class="checkbox-item"><input type="checkbox"> ¿Columnas fracturadas?</label>
+                        <label class="checkbox-item"><input type="checkbox"> ¿Vigas fracturadas?</label>
+                        <label class="checkbox-item"><input type="checkbox"> Presencia en los alrededores de otras viviendas, calles, escaleras, muros, etc. en situación de riesgo que puedan afectarla</label>
+                        <label class="checkbox-item"><input type="checkbox"> ¿Hundimiento del piso?</label>
+                        <label class="checkbox-item">Otros (especificar): <input type="text" style="margin-left: 5px; width: 100%; border: none; border-bottom: 1px solid #ccc;"></label>
+                    </div>
+                </div>
+
+                <!-- DEL TERRENO -->
+                <div class="form-group">
+                    <div class="sub-section-title">Del Terreno</div>
+                    <div class="checkbox-group" style="grid-template-columns: 1fr;">
+                        <label class="checkbox-item"><input type="checkbox"> ¿Existen o han existido hundimientos del terreno?</label>
+                        <label class="checkbox-item"><input type="checkbox"> ¿Existen o han existido deslizamientos del terreno?</label>
+                        <label class="checkbox-item"><input type="checkbox"> ¿Está al borde, sobre o al pie de un talud?</label>
+                        <div style="background: #fff; border: 1px solid #e2e8f0; padding: 8px; border-radius: 4px;">
+                            <span style="font-size: 11px; font-weight: bold; color: #4a5568;">Drenajes o quebradas en la cercanía:</span>
+                            <div style="display: flex; gap: 10px; margin-top: 5px;">
+                                <label style="font-size: 11px;"><input type="checkbox"> A menos de 10 m.</label>
+                                <label style="font-size: 11px;"><input type="checkbox"> de 10 a 20 m.</label>
+                                <label style="font-size: 11px;"><input type="checkbox"> de 20 a 40 m.</label>
+                            </div>
+                        </div>
+                        <label class="checkbox-item"><input type="checkbox"> ¿Tiene botes de aguas en la cercanía (blancas y/o negras)?</label>
+                        <label class="checkbox-item"><input type="checkbox"> ¿Existen árboles o postes en la cercanía que estén inclinados?</label>
+                    </div>
+                </div>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 20px 0;">
+
+            <!-- NIVEL DE RIESGO EVALUADO -->
+            <div class="form-group">
+                <label style="margin-bottom: 8px;">Dictamen / Nivel de Riesgo Evaluado:</label>
+                <div class="risk-box">
+                    <label class="radio-item" style="color: #e53e3e; font-weight: bold;"><input type="radio" name="nivel_riesgo"> Alto</label>
+                    <label class="radio-item" style="color: #dd6b20; font-weight: bold;"><input type="radio" name="nivel_riesgo"> Mediano</label>
+                    <label class="radio-item" style="color: #38a169; font-weight: bold;"><input type="radio" name="nivel_riesgo"> Bajo</label>
+                    <div style="border-left: 1px solid #cbd5e0; padding-left: 15px;">
+                        <label class="checkbox-item" style="background: #e6fffa; border-color: #b2f5ea; color: #234e52; font-weight: bold;">
+                            <input type="checkbox"> LA INSPECCIÓN VISUAL NO REFLEJA NINGÚN TIPO DE RIESGO
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid-2" style="margin-top: 30px; align-items: flex-end;">
+                <div class="form-group">
+                    <label>Firma del Empadronador</label>
+                    <input type="text" placeholder="Firma o Nombre del Evaluador">
+                </div>
+                <div style="text-align: right;">
+                    <button type="submit" class="btn btn-submit" style="padding: 12px 30px;">Guardar Estudio Socioeconómico</button>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button type="button" class="btn btn-secondary" onclick="changeTab('tab3')">&laquo; Anterior</button>
+                <div></div>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+<!-- LÓGICA DE INTERACTIVIDAD -->
+<script>
+    // Cambio de pestañas
+    function openTab(evt, tabId) {
+        if(evt) evt.preventDefault(); 
+        
+        var tabContents = document.getElementsByClassName("tab-content");
+        for (var i = 0; i < tabContents.length; i++) {
+            tabContents[i].classList.remove("active");
+        }
+
+        var tabButtons = document.getElementsByClassName("tab-button");
+        for (var i = 0; i < tabButtons.length; i++) {
+            tabButtons[i].classList.remove("active");
+        }
+
+        document.getElementById(tabId).classList.add("active");
+        
+        for (var i = 0; i < tabButtons.length; i++) {
+            if(tabButtons[i].getAttribute('onclick').includes(tabId)) {
+                tabButtons[i].classList.add("active");
+            }
+        }
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function changeTab(tabId) {
+        openTab(null, tabId);
+    }
+
+    // Agregar y eliminar integrantes dinámicamente
+    function agregarFilaOcupante() {
+        const tbody = document.getElementById('tbodyOcupantes');
+        const numFilas = tbody.children.length + 1;
+
+        const nuevaFila = document.createElement('tr');
+        nuevaFila.innerHTML = `
+            <td><strong>${numFilas}</strong></td>
+            <td><input type="text" placeholder="Nombre completo"></td>
+            <td><input type="text" placeholder="C.I."></td>
+            <td>
+                <select>
+                    <option value="">-- Seleccionar --</option>
+                    <option>Cónyuge</option>
+                    <option>Hijo(a)</option>
+                    <option>Nieto(a)</option>
+                    <option>Madre/Padre</option>
+                    <option>Suegro(a)</option>
+                    <option>Hermano(a)</option>
+                    <option>Sobrino(a)</option>
+                    <option>Primo(a)</option>
+                    <option>Yerno/Nuera</option>
+                    <option>Otro</option>
+                </select>
+            </td>
+            <td><select><option>M</option><option>F</option></select></td>
+            <td><input type="number" placeholder="AAAA"></td>
+            <td><select><option>Venezolano</option><option>Extranjero</option></select></td>
+            <td><select><option>Soltero(a)</option><option>Casado(a)</option><option>Concubino(a)</option><option>Otro</option></select></td>
+            <td><select><option>Ninguno</option><option>Preescolar</option><option>Básico</option><option>Diversificado</option><option>Técnico Sup.</option><option>Universitario</option></select></td>
+            <td><select><option>Sí</option><option>No</option></select></td>
+            <td><button type="button" class="btn-remove" onclick="eliminarFilaOcupante(this)">X</button></td>
+        `;
+
+        tbody.appendChild(nuevaFila);
+    }
+
+    function eliminarFilaOcupante(btn) {
+        const fila = btn.closest('tr');
+        fila.remove();
+        reordenarNumerosOcupantes();
+    }
+
+    function reordenarNumerosOcupantes() {
+        const filas = document.querySelectorAll('#tbodyOcupantes tr');
+        filas.forEach((fila, index) => {
+            fila.cells[0].innerHTML = `<strong>${index + 1}</strong>`;
+        });
+    }
+</script>
+
+</body>
+</html>

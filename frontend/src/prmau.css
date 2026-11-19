@@ -1,0 +1,179 @@
+/* Estilos de apoyo para los formularios PRMAU.
+   Los tokens de color/fuente usados por las clases Tailwind (vul-*, siroh-*,
+   light-main, tabs, checkboxItem, font-segoe) se definen en src/index.css.
+   No se reimporta Tailwind aqui para evitar conflictos con el setup global. */
+
+html{
+    scroll-padding-top: 100px;
+}
+
+/* HEADER */
+.form-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+}
+
+.header-title {
+    text-align: center;
+    flex-grow: 1;
+}
+
+.header-title h1 {
+    font-size: 20px;
+    color: var(--primary-color);
+    margin: 0 0 5px 0;
+    text-transform: uppercase;
+}
+
+.header-title h2 {
+    font-size: 16px;
+    color: var(--secondary-color);
+    margin: 0 0 5px 0;
+}
+
+.header-title h3 {
+    font-size: 14px;
+    font-weight: normal;
+    margin: 0;
+}
+
+.meta-info {
+    text-align: right;
+    font-size: 13px;
+}
+
+.meta-info div {
+    margin-bottom: 5px;
+}
+
+/* FORM TABS */
+.tabs-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 5px;
+}
+
+.tab-button {
+    background-color: #e2e8f0;
+    color: #4a5568;
+    border: none;
+    padding: 10px 15px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 6px 6px 0 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tab-button:hover {
+    background-color: #cbd5e0;
+}
+
+.tab-button.active {
+    background-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Contenido de las Pestañas */
+.tab-content {
+    display: none; /* Oculto por defecto */
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 25px;
+    background-color: var(--bg-light);
+    animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+    display: block; /* Muestra la pestaña activa */
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+
+
+/* SIROH FORMS*/
+
+
+/* FORM ELEMENTS */
+
+
+.form-group > textarea{
+    min-height: 200px;
+}
+
+
+.checkbox-section-title { 
+    font-size: 12px; 
+    font-weight: bold; 
+    color: var(--primary-blue); 
+    background: var(--light-blue); 
+    padding: 6px 10px; 
+    margin: 15px 0 10px 0; 
+    text-transform: uppercase; 
+    border-left: 3px solid var(--secondary-blue); 
+}
+.section-subTitle{
+    padding: 6px 11px; 
+    font-size: 10px;
+    text-transform: uppercase; 
+    color: var(--primary-orange); 
+    background: var(--light-orange); 
+    border-left: 3px solid var(--secondary-orange); 
+}
+.section-subTitle ~ .section-subTitle {
+    margin-top: 20px;
+}
+.checkbox-grid { 
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 8px;
+    padding: 5px;
+}
+.checkbox-item { 
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #334155;
+}
+
+.checkbox-item > label > img{
+    object-fit: contain;
+    height: 100px;
+    aspect-ratio: 1/1;
+}
+.checkbox-item > input[type="checkbox"]:has(+label>img) {
+    display: none;
+}
+.checkbox-item > input[type="checkbox"] + label>img{
+    cursor: pointer;
+    border: transparent solid 2px;
+
+}
+.checkbox-item > input[type="checkbox"]:checked + label>img{
+    border-color: #28e;
+}
+
+/* COMPONENTES DE CONTROL */

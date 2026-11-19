@@ -68,6 +68,7 @@ export const Siroh = () => {
         onToggleMetMenu={() => setMetMenuOpen((open) => !open)}
         metSub={metSub}
         onMetSub={handleMetSub}
+        onLogout={handleLogout}
       />
 
       <main className={MAIN}>

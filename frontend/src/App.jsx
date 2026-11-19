@@ -3,6 +3,7 @@ import { Home } from "./pages/Home"
 import { Login } from "./pages/Login"
 import { Siroh } from "./pages/Siroh"
 import { SirohRawForm } from "./pages/SirohRawForm"
+import { Prmau } from "./pages/Prmau"
 import { AccessDenied } from "./pages/AccessDenied"
 import { AuthProvider } from "./context/AuthContext"
 import { useAuth } from "./context/auth"
@@ -29,6 +30,10 @@ function AppRoutes() {
 
       <Route element={<ProtectedRoute allowedRoles={ROUTE_ACCESS["/siroh-raw-Form"]}/>}>
         <Route path="/siroh-raw-Form" element={<SirohRawForm/>}></Route>
+      </Route>
+
+      <Route element={<ProtectedRoute allowedRoles={ROUTE_ACCESS["/prmau"]}/>}>
+        <Route path="/prmau" element={<Prmau/>}></Route>
       </Route>
 
       <Route element={<ProtectedRoute/>}>

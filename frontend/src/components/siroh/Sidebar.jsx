@@ -38,7 +38,7 @@ import {
 } from "./styles";
 import { MET_SUB_LINKS } from "./options";
 
-const Sidebar = ({ page, setPage, metMenuOpen, onToggleMetMenu, metSub, onMetSub }) => {
+const Sidebar = ({ page, setPage, metMenuOpen, onToggleMetMenu, metSub, onMetSub, onLogout }) => {
   const { role } = useAuth();
   const linkCls = (key) =>
     `${NAV_LINK_BASE} ${NAV_LINK_HOVER} ${page === key ? NAV_LINK_ACTIVE : ""}`;
@@ -137,6 +137,20 @@ const Sidebar = ({ page, setPage, metMenuOpen, onToggleMetMenu, metSub, onMetSub
               </a>
             </li>
           )}
+          <li>
+            <Link to="/" className={`${NAV_LINK_BASE} ${NAV_LINK_HOVER}`}>
+              ↩️ Volver al inicio
+            </Link>
+          </li>
+          <li>
+            <button
+              type="button"
+              onClick={onLogout}
+              className={`${NAV_LINK_BASE} ${NAV_LINK_HOVER} w-full text-left`}
+            >
+              ⎋ Cerrar sesión
+            </button>
+          </li>
         </ul>
       </div>
 

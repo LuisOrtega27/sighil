@@ -17,6 +17,28 @@
     --color-page: #f8fafc;
     --color-ink: #1e293b;
     --color-line: #cbd5e1;
+
+    /* Paleta/tokens de formularios PRMAU (migrados de prmau.css) */
+    --color-light-main: #edf2f7;
+    --color-vul-primary: #1a365d;
+    --color-vul-secondary: #2b6cb0;
+    --color-vul-accent: #3182ce;
+    --color-vul-label: #475569;
+
+    --color-siroh-primary-blue: #0f2c59;
+    --color-siroh-secondary-blue: #1d70b8;
+    --color-siroh-primary-orange: #e65c00;
+    --color-siroh-secondary-orange: #ff8800;
+    --color-siroh-light-blue: #f0f7ff;
+    --color-siroh-light-orange: #fff8f0;
+    --color-siroh-alert-red: #d9381e;
+    --color-siroh-success-green: #10b981;
+    --color-siroh-border-muted: #cbd5e1;
+
+    --color-tabs: #4a5568;
+    --color-tabs-border: #cbd5e0;
+    --color-checkboxItem: #334155;
+    --font-segoe: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* Sutil animación de gradiente de fondo para la sección corporativa */
