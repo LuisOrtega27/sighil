@@ -27,12 +27,23 @@ Siempre ejecutarse desde el directorio correspondiente:
 
 ## Stack
 
+Versiones según `frontend/package.json` y `backend/package.json` (mayor
+declarada en cada una).
+
 **Frontend:** Vite 8 · React 19 · react-router-dom 7 · Tailwind CSS v4
 (`@import "tailwindcss"` + tokens en `@theme` de `src/index.css`) · ESLint
-(preset de Vite: react-hooks + react-refresh, `allowConstantExport: true`).
+(preset de Vite: react-hooks + react-refresh, `allowConstantExport: true`) ·
+react-hook-form 7 · react-icons 5 · react-toastify 11 · axios 1 (clientes en
+`src/api/`) · Leaflet 1 (`siroh/CoordinateMapModal.jsx`).
 
-**Backend:** Express 5 · MySQL2 · JWT en cookies (`jsonwebtoken` +
-`cookie-parser`) · `bcryptjs` · `dotenv` · `pino` · nodemon.
+- `react-toastify`: el CSS y el `<ToastContainer />` se importan una sola vez
+  en `src/main.jsx`; los mensajes se emiten con `toast.success()` /
+  `toast.error()` desde los componentes.
+- Declaradas pero sin uso en `src/`: `dotenv` 18, `js-cookie` 3.
+
+**Backend:** Express 5 · MySQL2 3 · JWT en cookies (`jsonwebtoken` 9 +
+`cookie-parser` 1) · `bcryptjs` 3 · `dotenv` 18 · `pino` 10 · `cors` 2 ·
+nodemon 1 (desarrollo).
 
 ## Rutas del frontend (`src/App.jsx`)
 

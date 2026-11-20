@@ -41,6 +41,12 @@
     --font-segoe: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+/* Toasts alineados con la paleta del sistema */
+html:root {
+    --toastify-color-error: #d9381e;
+    --toastify-color-success: #10b981;
+}
+
 /* Sutil animación de gradiente de fondo para la sección corporativa */
 @keyframes gradientBg {
     0% { background-position: 0% 50%; }

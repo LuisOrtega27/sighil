@@ -1209,7 +1209,7 @@ const SirohForm = () => {
       {mapOpen && (
         <Suspense
           fallback={
-            <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-slate-950/70 text-sm text-white">
+            <div className="fixed inset-0 z-2000 flex items-center justify-center bg-slate-950/70 text-sm text-white">
               Cargando mapa…
             </div>
           }

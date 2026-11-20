@@ -10,6 +10,7 @@ import {
   FaUserTie,
   FaWater,
 } from "react-icons/fa6"
+import { toast } from "react-toastify"
 
 import {useAuth} from "../context/auth"
 import { INSTITUTION } from "../config/institution"
@@ -17,47 +18,49 @@ import { INSTITUTION } from "../config/institution"
 export const Login = () => {
   
   const navigate = useNavigate();
-  const {register,handleSubmit, getValues, formState:{errors}, reset} = useForm()
+  const {register,handleSubmit, getValues, reset} = useForm()
   const [view, setView] = useState("login")
   const [passMatch, setPassMatch] = useState(false);
-  const [loginError, setLoginError] = useState("")
-  const [registerError, setRegisterError] = useState("")
 
   const {signUp, signIn, isAuthenticated} = useAuth();
+
+  const showValidationErrors = (errors) => {
+    Object.entries(errors).forEach(([field, error]) => {
+      if (error?.message) {
+        toast.error(error.message, { toastId: `validation-${field}` })
+      }
+    })
+  }
 
   useEffect(()=>{
     if(isAuthenticated) navigate("/");
   },[isAuthenticated, navigate])
 
   const onSubmitLogin = handleSubmit(async (values)=>{
-    setLoginError("")
-
     try {
       await signIn(values)
+      toast.info("Bienvenido al sistema SIGHIL", {toastId:"bienvenida"})
       reset();
     } catch (error) {
-      setLoginError(error.response?.data?.message ?? "No se pudo iniciar sesión")
+      toast.error(error.response?.data?.message ?? "No se pudo iniciar sesión")
     }
-
-  })
+  }, showValidationErrors)
 
   const onSubmitRegister = handleSubmit( async (values)=>{
-    setRegisterError("")
     if(!passMatch ) {
-      setRegisterError("Las contraseñas no coinciden")
+      toast.error("Las contraseñas no coinciden", { toastId: "pass-match" })
       return
     }
 
     try {
       await signUp(values)
-      alert("Solicitud de registro enviada. El administrador del sistema validará tus credenciales.");
+      toast.success("Solicitud de registro enviada. El administrador del sistema validará tus credenciales.");
       setView("login")
       reset()
     } catch (error) {
-      setRegisterError(error.response?.data?.message ?? "No se pudo enviar la solicitud")
+      toast.error(error.response?.data?.message ?? "No se pudo enviar la solicitud")
     }
-
-  })
+  }, showValidationErrors)
 
   return (
     <div className="bg-slate-950 text-slate-100 font-sans min-h-screen flex items-center justify-center p-4 md:p-8">
@@ -110,14 +113,17 @@ export const Login = () => {
                 <p className="text-xs text-slate-400">Introduce tus credenciales autorizadas para acceder a los módulos.</p>
               </div>
 
-              <form className="space-y-4" onSubmit={onSubmitLogin}>
+              <form className="space-y-4" onSubmit={onSubmitLogin} noValidate>
                 <div>
                   <label className="block text-[10px] uppercase font-mono tracking-wider text-slate-400 mb-1">Usuario Institucional</label>
                   <div className="relative">
                     <input 
                       type="email" 
                       placeholder="ej. usuario@gmail.com"
-                      {...register("email", {required: true})} 
+                      {...register("email", {
+                        required: {value: true, message: "El correo institucional es obligatorio"},
+                        pattern: {value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "Introduce un correo válido"}
+                      })} 
                       className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 transition-colors font-mono user-valid:border-red-500" />
                     <FaUserTie className="absolute left-3.5 top-3.5 text-slate-500" />
                   </div>
@@ -133,7 +139,7 @@ export const Login = () => {
                       type="password" 
                       placeholder="••••••••••••"
                       required
-                      {...register("password", {required: true})}
+                      {...register("password", {required: {value: true, message: "La contraseña es obligatoria"}})}
                       className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 transition-colors font-mono user-valid:border-red-500" />
                     <FaLock className="absolute left-3.5 top-3.5 text-slate-500" />
                   </div>
@@ -143,8 +149,6 @@ export const Login = () => {
                   <input type="checkbox" id="remember" {...register("remember")} className="accent-blue-600 rounded" />
                   <label htmlFor="remember" className="text-[11px] text-slate-400 cursor-pointer select-none">Mantener sesión iniciada en este terminal</label>
                 </div>
-
-                {loginError && <p role="alert" className="text-[11px] text-alert">{loginError}</p>}
 
                 <button type="submit" className="w-full py-2.5 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-500 transition-all shadow-md shadow-blue-950/50 flex items-center justify-center gap-2">
                   <FaRightToBracket />
@@ -169,7 +173,7 @@ export const Login = () => {
                 <p className="text-xs text-slate-400">Crea una cuenta técnica. La cuenta requerirá aprobación del administrador.</p>
               </div>
 
-              <form className="space-y-3" onSubmit={onSubmitRegister}>
+              <form className="space-y-3" onSubmit={onSubmitRegister} noValidate>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-[10px] uppercase font-mono tracking-wider text-slate-400 mb-1">Nombre</label>
@@ -178,9 +182,11 @@ export const Login = () => {
                       placeholder="Ej. Juan"
                       pattern=".{4,}"
                       required
-                      {...register("fname", {required: {value: true, message:"name is required"}})} 
+                      {...register("fname", {
+                        required: {value: true, message:"name is required"},
+                        pattern: {value: /.{4,}/, message: "El nombre debe tener al menos 4 caracteres"}
+                      })} 
                       className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none transition-colors invalid:border-red-500" />
-                      {errors.fname && <span>{errors.fname.message}</span>}
                   </div>
                   <div>
                     <label className="block text-[10px] uppercase font-mono tracking-wider text-slate-400 mb-1">Apellido</label>
@@ -189,7 +195,10 @@ export const Login = () => {
                       placeholder="Ej. Pérez"
                       pattern=".{4,}"
                       required
-                      {...register("lname", {required: true})} 
+                      {...register("lname", {
+                        required: {value: true, message: "El apellido es obligatorio"},
+                        pattern: {value: /.{4,}/, message: "El apellido debe tener al menos 4 caracteres"}
+                      })} 
                       className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none transition-colors invalid:border-red-500" />
                   </div>
                 </div>
@@ -235,7 +244,10 @@ export const Login = () => {
                     type="email" 
                     placeholder="jperez@alcaldia.gob"
                     required
-                    {...register("email", {required: true, message: "email is required"})} 
+                    {...register("email", {
+                      required: {value: true, message: "email is required"},
+                      pattern: {value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "Introduce un correo válido"}
+                    })} 
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none transition-colors font-mono invalid:border-red-500" />
                 </div>
 
@@ -243,7 +255,7 @@ export const Login = () => {
                   <label className="block text-[10px] uppercase font-mono tracking-wider text-slate-400 mb-1">Área o Departamento</label>
                   <select 
                     required
-                    {...register("direccion_id", {required: true})} 
+                    {...register("direccion_id", {required: {value: true, message: "Selecciona un área o departamento"}})} 
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none transition-colors">
                     <option value={6}>Visitante</option>
                     <option value={1}>Presidencia</option>
@@ -293,8 +305,6 @@ export const Login = () => {
                         onChange={e=> e.target.value === getValues("password") ? setPassMatch(true) : setPassMatch(false)}/>
                   </div>
                 </div>
-
-                {registerError && <p role="alert" className="text-[11px] text-alert">{registerError}</p>}
 
                 <button type="submit" className="w-full mt-2 py-2.5 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-500 transition-all shadow-md shadow-emerald-950/50">
                   Enviar Solicitud de Alta
