@@ -277,7 +277,6 @@ export const Login = () => {
                       {...register("password", {
                         required: {value: true, message: "the pasword is required"},
                         minLength: {value: 6, message: "the password must have alt least 6 characters"},
-                        maxLength: {value: 6, message: "password max length is 20 characters"}
                       })}  
                       className={`
                         w-full bg-slate-950 
