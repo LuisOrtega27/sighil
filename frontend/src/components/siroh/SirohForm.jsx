@@ -436,7 +436,7 @@ const SirohForm = () => {
         ))}
       </div>
 
-      <form ref={formRef} id="form-siroh" className="siroh-form relative" onSubmit={handleSubmit}>
+      <form ref={formRef} id="form-siroh" className="siroh-form relative max-h-4/5 overflow-y-scroll" onSubmit={handleSubmit}>
         {/* ================= 1. CONTROL E INSPECTORES ================= */}
         <div id="view-s-id" ref={setViewRef} className="siroh-view">
           <SectionTitle>Control de la Inspección</SectionTitle>

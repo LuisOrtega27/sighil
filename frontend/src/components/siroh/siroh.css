@@ -41,7 +41,7 @@
     overflow-x: scroll;
     scroll-behavior: smooth;
     scroll-snap-type: x mandatory;
-    max-height: 950px;
+    max-height: 500px;
 }
 .siroh-form::-webkit-scrollbar {
     display: none;

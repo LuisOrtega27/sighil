@@ -33,7 +33,7 @@ export const SIDEBAR_FOOTER =
   "border-t border-[#1e293b] pt-3 text-center text-[10.5px] leading-[1.3] text-[#64748b]";
 
 /* ---------- LAYOUT PRINCIPAL ---------- */
-export const MAIN = "ml-[290px] w-[calc(100%-290px)] p-[35px]";
+export const MAIN = "ml-[290px] w-[calc(100%-290px)] p-4";
 export const TOP_NAVBAR =
   "mb-6 flex items-center justify-between border-b border-line pb-4";
 export const TOP_TITLE = "text-2xl font-bold";

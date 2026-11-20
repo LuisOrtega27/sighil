@@ -190,30 +190,30 @@ export const FormSocio = () => {
 
                     <FormSectionTitle text={"II. Datos de los Ocupantes del Inmueble"} />
                     
-                    <table id="tablaOcupantes" className="table-fixed  w-full text-center text-xs">
+                    <table id="tablaOcupantes" className="table-fixed  w-full text-center text-xs border-2 border-blue-400">
                         
-                        <thead className="divide-y-2 divide-white">
+                        <thead>
                             <tr className="bg-siroh-border-muted text-vul-primary font-bold" >
-                                <td>Nº</td>
-                                <td>Apellidos y Nombres</td>
-                                <td>Nº C.I.</td>
-                                <td>Parentesco</td>
-                                <td>Sexo</td>
-                                <td>Año Nac.</td>
-                                <td>Nacionalidad</td>
-                                <td>Estado Civil</td>
-                                <td>Nivel Estudio</td>
-                                <td>¿Trabaja?</td>
-                                <td>Acción</td>
+                                <td className="border-x border-white">Nº</td>
+                                <td className="border-x border-white">Apellidos y Nombres</td>
+                                <td className="border-x border-white">Nº C.I.</td>
+                                <td className="border-x border-white">Parentesco</td>
+                                <td className="border-x border-white">Sexo</td>
+                                <td className="border-x border-white">Año Nac.</td>
+                                <td className="border-x border-white">Nacionalidad</td>
+                                <td className="border-x border-white">Estado Civil</td>
+                                <td className="border-x border-white">Nivel Estudio</td>
+                                <td className="border-x border-white">¿Trabaja?</td>
+                                <td className="border-x border-white">Acción</td>
                             </tr>
                         </thead>
 
-                        <tbody >
+                        <tbody className=" [&>input]:h-10 [&>input]:bg-black">
                             {ocupantes.map((row, index) => (
-                            <tr key={row.id} className="bg-white divide-x divide-y divide-blue-400">
+                            <tr key={row.id} className="bg-white border-y border-blue-400 hover:bg-blue-100 h-10">
                                 <td>{index + 1}</td>
-                                <td> <input type="text" value={row.apellidos_nombres} onChange={(e) => updateOcupante(row.id, "apellidos_nombres", e.target.value)} placeholder="Jefe(a) de hogar"/> </td>
-                                <td> <input type="number" value={row.ci} onChange={(e) => updateOcupante(row.id, "ci", e.target.value)} placeholder="C.I."/> </td>
+                                <td> <input type="text" className="w-full" value={row.apellidos_nombres} onChange={(e) => updateOcupante(row.id, "apellidos_nombres", e.target.value)} placeholder="Jefe(a) de hogar"/> </td>
+                                <td> <input type="number" className="w-full" value={row.ci} onChange={(e) => updateOcupante(row.id, "ci", e.target.value)} placeholder="C.I."/> </td>
                                 <td> 
                                     <select value={row.parentesco} onChange={(e) => updateOcupante(row.id, "parentesco", e.target.value)}>
                                         <option value="">-- Seleccionar --</option>
@@ -268,7 +268,7 @@ export const FormSocio = () => {
                                 <td>
                                     <button
                                         type="button"
-                                        className="bg-siroh-alert-red cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                                        className="bg-siroh-alert-red cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 p-1"
                                         onClick={() => eliminarIntegrante(row.id)}
                                         disabled={ocupantes.length <= 1}
                                         aria-label="Eliminar integrante"
