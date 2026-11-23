@@ -4,6 +4,7 @@ import pool from "../database.js";
    parametrizadas y los endpoints estan protegidos por authRequired. */
 
 const getCuencas = async (req, res) => {
+    console.log(req)
     try {
         const [rows] = await pool.query(
             "SELECT id, nombre FROM cuencas ORDER BY id"

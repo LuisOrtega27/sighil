@@ -17,8 +17,9 @@ export const AuthProvider = ({children})=>{
             try {
                 const {data} = await meRequest()
                 if(active){
+                    /* /me devuelve null cuando no hay sesion (no lanza 401). */
                     setUser(data)
-                    setIsAuthenticated(true)
+                    setIsAuthenticated(Boolean(data))
                 }
             } catch {
                 // Sin cookie valida (o expirada): sesion limpia, sin ruido.

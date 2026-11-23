@@ -1,13 +1,13 @@
 import { Router } from "express"
 
 import { register, login, me, logout } from "../controllers/auth.controller.js"
-import authRequired from "../middlewares/authRequired.js"
+import { optionalAuth } from "../middlewares/authRequired.js"
 
 const router = Router()
 
 router.post("/register", register);
 router.post("/login", login);
 router.post("/logout", logout);
-router.get("/me", authRequired, me);
+router.get("/me", optionalAuth, me);
 
 export default router

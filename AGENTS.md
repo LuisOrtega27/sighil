@@ -36,6 +36,14 @@ declarada en cada una).
 react-hook-form 7 · react-icons 5 · react-toastify 11 · axios 1 (clientes en
 `src/api/`) · Leaflet 1 (`siroh/CoordinateMapModal.jsx`).
 
+- **Sesión:** en desarrollo los clientes de `src/api/` usan `/api` (ruta
+  relativa) y `vite.config.js` lo proxya al backend indicado por `VITE_API_URL`.
+  Así la cookie `HttpOnly` queda ligada al mismo host que la SPA y no se pierde
+  al recargar. En producción se usa `VITE_API_URL` directamente.
+- `GET /api/auth/me` es una consulta de sesión: devuelve `200` con `null` cuando
+  no hay cookie válida (no un 401); `authRequired` sigue protegiendo el resto de
+  endpoints.
+
 - `react-toastify`: el CSS y el `<ToastContainer />` se importan una sola vez
   en `src/main.jsx`; los mensajes se emiten con `toast.success()` /
   `toast.error()` desde los componentes.

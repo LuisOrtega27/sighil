@@ -17,6 +17,8 @@ const cookieOptions = (remember = false) => ({
 const register = async (req,res)=>{
     const {fname, lname, direccion_id, ci, phone, email, password} = req.body
 
+    console.log(req.body)
+
     try {
         // La consulta devuelve [rows]; una cuenta pendiente NO debe autenticarse.
         const [found] = await pool.query("SELECT id FROM users WHERE ci = ?", [ci]);
@@ -28,6 +30,8 @@ const register = async (req,res)=>{
              VALUES (?, ?, ?, ?, ?, ?, ?, "pendiente")`,
             [fname, lname, direccion_id, ci, phone, email, passwordHash]
         );
+        console.log("req.body")
+
 
         res.status(200).json({message: "register successfull"})
 
@@ -72,8 +76,12 @@ const login = async (req,res)=>{
     }
 }
 
-/* Restaura la sesion al recargar: authRequired ya valido la cookie y cargo req.user. */
+/* Restaura la sesion al recargar: optionalAuth carga req.user si hay una
+   cookie valida. Sin sesion devuelve null (200) para no generar un 401 en
+   console al abrir la aplicacion. */
 const me = (req,res)=>{
+    if(!req.user) return res.status(200).json(null)
+
     const {id, rol_id, fname, lname, ci, email} = req.user
     res.status(200).json({id, rol_id, fname, lname, ci, email})
 }
