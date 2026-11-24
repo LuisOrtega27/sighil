@@ -15,13 +15,12 @@
      marcados con TODO(backend) en los componentes de formulario.
    - socio economico2.html se conserva en components/prmau como referencia. */
 
-import { FaArrowLeft } from "react-icons/fa6";
-import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/auth";
 import "../prmau.css";
 import "../components/siroh/siroh.css";
 import Sidebar from "../components/Sidebar";
-import TopNavbar from "../components/prmau/TopNavbar";
+import TopNavbar from "../components/TopNavbar";
 import { FormVulne } from "../components/prmau/FormVulne";
 import { FormSocio } from "../components/prmau/FormSocio";
 
@@ -84,18 +83,8 @@ export const Prmau = () => {
       />
 
       <main className="ml-[290px] w-[calc(100%-290px)] p-4">
-        <div className="flex justify-start px-5 pt-3">
-          <Link
-            to="/"
-            id="prmau-back-home"
-            className="inline-flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
-          >
-            <FaArrowLeft className="h-4 w-4" />
-            Volver al inicio
-          </Link>
-        </div>
 
-        <TopNavbar form={activeKey} onLogout={handleLogout} />
+        <TopNavbar section={activeKey} fallback="vulnerabilidad" onLogout={handleLogout} />
 
         <Outlet />
       </main>

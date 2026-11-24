@@ -16,6 +16,12 @@ const menu = [
     descripcion: "Programa de Microzonificación y Asentamientos Urbanos.",
     icono: "🏘️",
   },
+  {
+    to: "/perfil",
+    titulo: "Mi Perfil",
+    descripcion: "Consulta y actualiza tus datos personales e institucionales.",
+    icono: "👤",
+  },
 ]
 
 export const Home = () => {

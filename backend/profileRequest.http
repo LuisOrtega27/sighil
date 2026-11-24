@@ -1,0 +1,15 @@
+### getProfile (requiere cookie de sesion)
+GET http://localhost:4001/api/profile
+
+### updateProfile (requiere cookie de sesion)
+PUT http://localhost:4001/api/profile
+Content-Type: application/json
+
+{
+    "fname": "Juan",
+    "lname": "Pérez",
+    "ci": "12.345.678",
+    "phone": "0412-1234567",
+    "email": "jperez@alcaldia.gob",
+    "direccion_id": 1
+}

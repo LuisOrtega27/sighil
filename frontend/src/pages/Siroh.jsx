@@ -14,14 +14,13 @@
      re-implementadas o marcadas con TODO en cada componente.
    - siroh.html se conserva en esta carpeta como referencia. */
 
-import { FaArrowLeft } from "react-icons/fa6";
-import { Link, Navigate, Outlet, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { Navigate, Outlet, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/auth";
 import { canAccess, SIROH_SECTION_ACCESS } from "../auth/permissions";
 import { INSTITUTION } from "../config/institution";
 import "../components/siroh/siroh.css";
 import Sidebar from "../components/Sidebar";
-import TopNavbar from "../components/siroh/TopNavbar";
+import TopNavbar from "../components/TopNavbar";
 import Territorial from "../components/siroh/Territorial";
 import Geoportal from "../components/siroh/Geoportal";
 import SirohForm from "../components/siroh/SirohForm";
@@ -207,18 +206,8 @@ export const Siroh = () => {
       />
 
       <main className="ml-[290px] w-[calc(100%-290px)] p-4">
-        <div className="flex justify-start px-5 pt-3">
-          <Link
-            to="/"
-            id="siroh-back-home"
-            className="inline-flex items-center gap-2 rounded-lg bg-secondary px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
-          >
-            <FaArrowLeft className="h-4 w-4" />
-            Volver al inicio
-          </Link>
-        </div>
 
-        <TopNavbar page={activeKey} onLogout={handleLogout} />
+        <TopNavbar section={activeKey} onLogout={handleLogout} />
 
         <Outlet />
       </main>

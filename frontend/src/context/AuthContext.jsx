@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { loginRequest, logoutRequest, meRequest, registerRequest } from '../api/auth';
+import { getProfile } from '../api/profile';
 import { canAccess } from '../auth/permissions';
 import { AuthContext } from './auth';
 
@@ -73,6 +74,20 @@ export const AuthProvider = ({children})=>{
         setIsAuthenticated(false)
     }
 
+    /* Sincroniza el usuario en memoria con los datos ya guardados en la DB.
+       Se usa despues de editar el perfil para que Home/TopNavbar no queden
+       con los valores anteriores. */
+    const refreshUser = async ()=>{
+        try {
+            const data = await getProfile()
+            setUser(data)
+            return data
+        } catch (error) {
+            console.log(error.response?.data ?? error)
+            throw error
+        }
+    }
+
     const hasRole = (allowedRoles)=> canAccess(allowedRoles, user?.rol_id)
 
     return(
@@ -80,6 +95,7 @@ export const AuthProvider = ({children})=>{
             signUp,
             signIn,
             signOut,
+            refreshUser,
             isAuthenticated,
             user,
             role: user?.rol_id ?? null,

@@ -5,6 +5,7 @@ import { Siroh, SIROH_ITEMS, SIROH_SECTION_ROUTES } from "./pages/Siroh"
 import { SirohRawForm } from "./pages/SirohRawForm"
 import { Prmau, PRMAU_ITEMS, PRMAU_SECTION_ROUTES } from "./pages/Prmau"
 import { AccessDenied } from "./pages/AccessDenied"
+import { Profile } from "./pages/Profile"
 import { AuthProvider } from "./context/AuthContext"
 import { useAuth } from "./context/auth"
 import { ROUTE_ACCESS } from "./auth/permissions"
@@ -22,6 +23,10 @@ function AppRoutes() {
       {/* Protected routes */}
       <Route element={<ProtectedRoute/>}>
         <Route path="/" element={<Home/>}></Route>
+      </Route>
+
+      <Route element={<ProtectedRoute allowedRoles={ROUTE_ACCESS["/perfil"]}/>}>
+        <Route path="/perfil" element={<Profile/>}></Route>
       </Route>
 
       <Route element={<ProtectedRoute allowedRoles={ROUTE_ACCESS["/siroh"]}/>}>

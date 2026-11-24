@@ -14,6 +14,7 @@ import { toast } from "react-toastify"
 
 import {useAuth} from "../context/auth"
 import { INSTITUTION } from "../config/institution"
+import { PROFILE_AREAS } from "../config/profile"
 
 export const Login = () => {
   
@@ -257,13 +258,9 @@ export const Login = () => {
                     required
                     {...register("direccion_id", {required: {value: true, message: "Selecciona un área o departamento"}})} 
                     className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300 focus:outline-none transition-colors">
-                    <option value={6}>Visitante</option>
-                    <option value={1}>Presidencia</option>
-                    <option value={2}>Coordinación de Quebradas</option>
-                    <option value={3}>Direción de Riesgos</option>
-                    <option value={4}>Protección Civil</option>
-                    <option value={5}>Sala de Riesgo</option>
-                    <option value={7}>Informatica</option>
+                    {PROFILE_AREAS.map(({ id, label }) => (
+                      <option key={id} value={id}>{label}</option>
+                    ))}
                   </select>
                 </div>
 
