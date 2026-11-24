@@ -304,8 +304,8 @@ const SirohForm = () => {
   };
 
   return (
-    <div className="mb-6 rounded-lg border-t-4 border-secondary bg-white p-[30px] shadow-[0_4px_6px_rgba(0,0,0,0.05)]">
-      <div className="mb-5 rounded-md border border-line bg-[#f1f5f9] px-3 py-3 text-center text-[11px] font-bold leading-[1.4] text-[#334155]">
+    <div className="mb-6 rounded-lg border-t-4 border-secondary bg-white p-7 shadow-[0_4px_6px_rgba(0,0,0,0.05)]">
+      <div className="mb-5 rounded-md border border-line bg-[#f1f5f9] px-3 py-3 text-center text-[11px] font-bold leading-[1.4] text-checkboxItem">
         MINISTERIO DEL PODER POPULAR DE LAS AGUAS • VICEMINISTERIO DE
         ADMINISTRACIÓN DE CUENCAS HIDROGRÁFICAS
         <br />
@@ -318,7 +318,7 @@ const SirohForm = () => {
         Formulario Técnico de Evaluación de Infraestructura Fluvial
       </div>
 
-      <div className="mb-5 flex gap-[5px] overflow-x-auto rounded-t-md border-b-2 border-line bg-[#e2e8f0] px-[5px] pt-[5px]">
+      <div className="mb-5 flex gap-1 overflow-x-auto rounded-t-md border-b-2 border-line bg-[#e2e8f0] px-1 pt-1">
         {TABS.map((tab) => (
           <TabBtn
             key={tab.key}
@@ -342,7 +342,7 @@ const SirohForm = () => {
                 name="header_fecha__fecha"
                 id="header_fecha__fecha"
                 required
-                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
+                className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"
               />
             </Field>
 
@@ -356,7 +356,7 @@ const SirohForm = () => {
                 title="el patron es: 'Horas:Minutos'"
                 maxLength={6}
                 required
-                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
+                className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"
               />
             </Field>
 
@@ -369,7 +369,7 @@ const SirohForm = () => {
                 pattern="\d{6}"
                 required
                 readOnly
-                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
+                className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"
               />
               <button
                 type="button"
@@ -393,7 +393,7 @@ const SirohForm = () => {
               <div className="flex">
                 <select
                   id="filter-cuenca"
-                  className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
+                  className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"
                   value={cuencaId}
                   onChange={handleCuencaChange}
                 >
@@ -407,7 +407,7 @@ const SirohForm = () => {
 
                 <select
                   id="filter-sub-cuenca"
-                  className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
+                  className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"
                   value={subcuencaId}
                   onChange={handleSubcuencaChange}
                   disabled={!cuencaId}
@@ -422,7 +422,7 @@ const SirohForm = () => {
 
                 <select
                   id="filter-parroquia"
-                  className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
+                  className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"
                   value={parroquiaId}
                   onChange={handleParroquiaChange}
                   disabled={!subcuencaId}
@@ -459,7 +459,7 @@ const SirohForm = () => {
                 list=""
                 autoFocus
                 required
-                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
+                className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"
               />
 
               {fichaEditable && (
@@ -482,7 +482,7 @@ const SirohForm = () => {
                 title="Patron esperado: 123456.12"
                 maxLength={9}
                 required
-                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
+                className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"
               />
             </Field>
 
@@ -497,7 +497,7 @@ const SirohForm = () => {
                 title="Patron esperado: 1234567.12"
                 maxLength={10}
                 required
-                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
+                className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"
               />
             </Field>
 
@@ -534,7 +534,7 @@ const SirohForm = () => {
                 tabIndex={-1}
                 required
                 readOnly
-                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
+                className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"
               />
             </Field>
 
@@ -546,7 +546,7 @@ const SirohForm = () => {
                 pattern="\d{1,4}(,\d{2})?"
                 maxLength={7}
                 required
-                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
+                className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"
               />
             </Field>
           </FormRow>
@@ -559,7 +559,7 @@ const SirohForm = () => {
                 name="id_tec__nom_ape_1"
                 id="id_tec__nom_ape_1"
                 required
-                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
+                className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"
               />
             </Field>
 
@@ -572,7 +572,7 @@ const SirohForm = () => {
                 pattern="^\d{4}-\d{7}$"
                 maxLength={12}
                 required
-                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
+                className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"
               />
             </Field>
 
@@ -581,7 +581,7 @@ const SirohForm = () => {
                 type="text"
                 name="id_tec__nom_ape_2"
                 id="id_tec__nom_ape_2"
-                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
+                className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"
               />
             </Field>
 
@@ -593,7 +593,7 @@ const SirohForm = () => {
                 placeholder="0000-0000000"
                 pattern="^\d{4}-\d{7}$"
                 maxLength={12}
-                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
+                className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"
               />
             </Field>
           </FormRow>
@@ -606,7 +606,7 @@ const SirohForm = () => {
                 name="datos_cuenta__nombre"
                 id="datos_cuenta__nombre"
                 required
-                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
+                className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"
               />
             </Field>
 
@@ -618,7 +618,7 @@ const SirohForm = () => {
                 defaultValue="Distrito Capital"
                 required
                 readOnly
-                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
+                className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"
               />
             </Field>
 
@@ -630,7 +630,7 @@ const SirohForm = () => {
                 defaultValue={INSTITUTION.municipio}
                 required
                 readOnly
-                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
+                className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"
               />
             </Field>
           </FormRow>
@@ -643,7 +643,7 @@ const SirohForm = () => {
                 id="datos_cuenta__parroquia"
                 list="parroquias"
                 required
-                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
+                className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"
               />
               <datalist id="parroquias">
                 {PARROQUIAS.map((p) => (
@@ -658,7 +658,7 @@ const SirohForm = () => {
                 name="datos_cuenta__cent_pobl"
                 id="datos_cuenta__cent_pobl"
                 required
-                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
+                className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"
               />
             </Field>
           </FormRow>
@@ -681,7 +681,7 @@ const SirohForm = () => {
                 maxLength={2}
                 pattern="[0-9]{1,2}"
                 inputMode="numeric"
-                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
+                className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"
               />
             </Field>
           </CbGrid>
@@ -732,7 +732,7 @@ const SirohForm = () => {
           <FormRow>
             <Field>
               <textarea
-                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none min-h-[200px] resize-y"
+                className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none min-h-50 resize-y"
                 name="ent_fisi__obsevaciones"
                 id="ent_fisi__obsevaciones"
                 wrap="soft"
@@ -752,7 +752,7 @@ const SirohForm = () => {
                 type="text"
                 name="tipo_obra__nombre"
                 id="tipo_obra__nombre"
-                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
+                className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"
               />
             </Field>
 
@@ -762,7 +762,7 @@ const SirohForm = () => {
                 name="tipo_obra__tiempo"
                 id="tipo_obra__tiempo"
                 maxLength={2}
-                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
+                className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"
               />
             </Field>
 
@@ -771,7 +771,7 @@ const SirohForm = () => {
                 name="tipo_obra__tiempo_formato"
                 id="tipo_obra__tiempo_formato"
                 defaultValue="NULL"
-                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
+                className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"
               >
                 <option value="NULL"></option>
                 <option value="Años">Años</option>
@@ -816,7 +816,7 @@ const SirohForm = () => {
               id="tipo_obra__drp"
               maxLength={5}
               placeholder="00,00"
-              className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
+              className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"
             />
           </Field>
 
@@ -826,14 +826,14 @@ const SirohForm = () => {
               type="text"
               name="tipo_obra__omc"
               id="tipo_obra__omc"
-              className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
+              className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"
             />
           </Field>
 
           <SubTitle>Observaciones</SubTitle>
           <Field>
             <textarea
-              className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none min-h-[200px] resize-y"
+              className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none min-h-50 resize-y"
               name="tipo_obra__observaciones"
               id="tipo_obra__observaciones"
               wrap="soft"
@@ -869,7 +869,7 @@ const SirohForm = () => {
           <SubTitle>Observaciones</SubTitle>
           <Field>
             <textarea
-              className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none min-h-[200px] resize-y"
+              className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none min-h-50 resize-y"
               name="carac_obra__observaciones"
               id="carac_obra__observaciones"
               wrap="soft"
@@ -901,7 +901,7 @@ const SirohForm = () => {
                   maxLength={2}
                   pattern="[0-9]*"
                   inputMode="numeric"
-                  className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
+                  className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"
                 />
               </Field>
             ))}
@@ -921,7 +921,7 @@ const SirohForm = () => {
                 type="text"
                 name="carac_obra__otros_canales"
                 id="carac_obra__otros_canales"
-                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
+                className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"
               />
             </Field>
           </FormRow>
@@ -952,7 +952,7 @@ const SirohForm = () => {
                   pattern={o.pattern}
                   maxLength={o.maxLength}
                   placeholder={o.placeholder}
-                  className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
+                  className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"
                 />
               </Field>
             ))}
@@ -1020,7 +1020,7 @@ const SirohForm = () => {
           <SubTitle>Observaciones</SubTitle>
           <Field>
             <textarea
-              className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none min-h-[200px] resize-y"
+              className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none min-h-50 resize-y"
               name="meto_apli__observaciones"
               id="meto_apli__observaciones"
               wrap="soft"
@@ -1040,7 +1040,7 @@ const SirohForm = () => {
                   name={`org_parti__nom_ape_${n}`}
                   id={`org_parti__nom_ape_${n}`}
                   required={required}
-                  className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
+                  className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"
                 />
               </Field>
 
@@ -1050,7 +1050,7 @@ const SirohForm = () => {
                   name={`org_parti__insti_${n}`}
                   id={`org_parti__insti_${n}`}
                   required={required}
-                  className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
+                  className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"
                 />
               </Field>
 
@@ -1062,7 +1062,7 @@ const SirohForm = () => {
                   placeholder="0000-0000000"
                   maxLength={12}
                   required={required}
-                  className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
+                  className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"
                 />
               </Field>
             </FormRow>

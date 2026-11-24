@@ -205,7 +205,7 @@ export const Siroh = () => {
         onLogout={handleLogout}
       />
 
-      <main className="ml-[290px] w-[calc(100%-290px)] p-4">
+      <main className="ml-72 w-[calc(100%-290px)] p-4">
 
         <TopNavbar section={activeKey} onLogout={handleLogout} />
 
