@@ -16,3 +16,23 @@ export const ProtectedRoute = ({ allowedRoles }) => {
         <Outlet/>
     )
 }
+
+/* Guarda por seccion: la ruta raiz ya valido la sesion, aqui solo se
+   comprueba el permiso del item del sidebar que declara cada pagina. */
+export const SectionGuard = ({ access, children }) => {
+
+    const {role} = useAuth()
+
+    if(!canAccess(access, role)) return <Navigate to={"/acceso-denegado"} replace/>
+
+    return children
+}
+
+/* Redireccion inicial de cada modulo a la primera seccion permitida. */
+export const ModuleIndex = ({ items, fallback }) => {
+
+    const {role} = useAuth()
+    const first = items.find((item) => canAccess(item.access, role))
+
+    return <Navigate to={first?.to ?? fallback} replace/>
+}

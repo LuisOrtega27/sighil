@@ -16,17 +16,12 @@
 
 import { useState } from "react";
 import {
-  ALERT_ERROR,
-  BTN,
-  CARD,
-  CARD_SUB,
-  CARD_TITLE,
-  FORM_ROW,
-  INPUT,
-  SELECT,
-  TEXTAREA,
-} from "./styles";
-import { CbGrid, Field, FormRow, RadioItem, SectionTitle } from "./helpers";
+  CbGrid,
+  Field,
+  FormRow,
+  RadioItem,
+  SectionTitle,
+} from "../formPrimitives";
 
 const Territorial = () => {
   const [cotaError, setCotaError] = useState(false);
@@ -49,9 +44,9 @@ const Territorial = () => {
   };
 
   return (
-    <div className={CARD}>
-      <h2 className={CARD_TITLE}>Gestion de Inventario de Cuerpos de Agua</h2>
-      <div className={CARD_SUB}>
+    <div className="mb-6 rounded-lg border-t-4 border-secondary bg-white p-[30px] shadow-[0_4px_6px_rgba(0,0,0,0.05)]">
+      <h2 className="mb-1 text-xl font-bold uppercase text-primary">Gestion de Inventario de Cuerpos de Agua</h2>
+      <div className="mb-6 text-[12.5px] font-semibold uppercase tracking-[0.5px] text-[#64748b]">
         Formulario Tecnico de Gestion de Cuerpos de Agua
       </div>
 
@@ -70,7 +65,7 @@ const Territorial = () => {
                 id="hidro__tipo_cuerpo_agua"
                 required
                 defaultValue=""
-                className={SELECT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               >
                 <option value="" disabled>
                   Seleccione una opción...
@@ -91,7 +86,7 @@ const Territorial = () => {
                 id="hidro__nombre"
                 placeholder="Ej. Catuche"
                 required
-                className={INPUT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               />
             </Field>
           </FormRow>
@@ -128,7 +123,7 @@ const Territorial = () => {
                 required
                 defaultValue=""
                 onChange={(e) => setCuenca(e.target.value)}
-                className={SELECT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               >
                 <option value="" disabled>
                   Seleccione...
@@ -147,7 +142,7 @@ const Territorial = () => {
                 id="sub_cuenca"
                 name="sub_cuenca"
                 disabled={!cuenca}
-                className={SELECT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               >
                 <option value="">
                   {cuenca
@@ -162,7 +157,7 @@ const Territorial = () => {
                 type="text"
                 name="micro_cuenca"
                 placeholder="Ej. Tramo Alto"
-                className={INPUT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               />
             </Field>
           </FormRow>
@@ -173,7 +168,7 @@ const Territorial = () => {
           <SectionTitle>3 Parámetros Técnicos y Georreferenciación</SectionTitle>
 
           {cotaError && (
-            <div id="alerta-cotas" className={ALERT_ERROR}>
+            <div id="alerta-cotas" className="mb-3 border-l-4 border-alert bg-[#fde8e6] px-3 py-2.5 text-xs font-semibold text-alert">
               Inconsistencia Hidráulica: La cota mínima de desembocadura no
               puede ser mayor o igual a la cota de nacimiento.
             </div>
@@ -190,7 +185,7 @@ const Territorial = () => {
                 name="cota_maxima"
                 placeholder="Naciente"
                 required
-                className={INPUT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               />
             </Field>
 
@@ -204,7 +199,7 @@ const Territorial = () => {
                 name="cota_minima"
                 placeholder="Desembocadura"
                 required
-                className={INPUT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               />
             </Field>
 
@@ -217,7 +212,7 @@ const Territorial = () => {
                 name="hidro__utm_este"
                 placeholder="Ej. 727639"
                 required
-                className={INPUT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               />
             </Field>
 
@@ -230,14 +225,14 @@ const Territorial = () => {
                 name="hidro__utm_norte"
                 placeholder="Ej. 1164731"
                 required
-                className={INPUT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               />
             </Field>
           </FormRow>
 
           <FormRow>
             <Field label="Tipo de Lecho / Cauce" htmlFor="hidro__tipo_lecho">
-              <select name="hidro__tipo_lecho" id="hidro__tipo_lecho" className={SELECT}>
+              <select name="hidro__tipo_lecho" id="hidro__tipo_lecho" className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none">
                 <option value="Rocoso">Rocoso (Natural)</option>
                 <option value="Sedimentario">Sedimentario / Tierra</option>
                 <option value="Canalizado">Canalizado en Concreto</option>
@@ -250,7 +245,7 @@ const Territorial = () => {
                 name="hidro__nivel_riesgo"
                 id="hidro__nivel_riesgo"
                 defaultValue="Moderado"
-                className={SELECT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               >
                 <option value="Bajo">Bajo</option>
                 <option value="Moderado">Moderado</option>
@@ -264,21 +259,21 @@ const Territorial = () => {
               name="hidro__observaciones"
               rows="3"
               placeholder="Indicar presencia de obras..."
-              className={TEXTAREA}
+              className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none min-h-[200px] resize-y"
             />
           </Field>
         </div>
 
-        <div className={FORM_ROW}>
+        <div className="mb-3 grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-3">
           <button
             type="reset"
             id="hidro__btn-limpiar"
-            className={BTN}
+            className="cursor-pointer rounded border-none text-xs font-bold uppercase text-white transition-colors bg-secondary px-5 py-2.5 hover:bg-primary"
             onClick={() => setCotaError(false)}
           >
             Limpiar
           </button>
-          <button type="submit" id="hidro__btn-guardar" className={BTN}>
+          <button type="submit" id="hidro__btn-guardar" className="cursor-pointer rounded border-none text-xs font-bold uppercase text-white transition-colors bg-secondary px-5 py-2.5 hover:bg-primary">
             Guardar en Inventario Central
           </button>
         </div>

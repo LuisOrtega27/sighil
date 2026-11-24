@@ -18,15 +18,6 @@
 
 import { useEffect } from "react";
 import { INSTITUTION } from "../../config/institution";
-import {
-  BTN_SMALL,
-  CARD,
-  CARD_SUB,
-  CARD_TITLE,
-  MAP_LAYER_BOX,
-  MAP_LAYER_LABEL,
-  MOCK_MAP,
-} from "./styles";
 
 // TODO: mover a variables de entorno (VITE_GMAPS_KEY) cuando exista .env.
 const GMAPS_KEY =
@@ -44,13 +35,13 @@ const Geoportal = () => {
   }, []);
 
   return (
-    <div className={CARD}>
-      <h2 className={CARD_TITLE}>Consulta y Cruce de Datos Territoriales</h2>
-      <div className={CARD_SUB}>
+    <div className="mb-6 rounded-lg border-t-4 border-secondary bg-white p-[30px] shadow-[0_4px_6px_rgba(0,0,0,0.05)]">
+      <h2 className="mb-1 text-xl font-bold uppercase text-primary">Consulta y Cruce de Datos Territoriales</h2>
+      <div className="mb-6 text-[12.5px] font-semibold uppercase tracking-[0.5px] text-[#64748b]">
         Análisis espacial en tiempo real de la poligonal del Municipio {INSTITUTION.municipio}
       </div>
 
-      <div className={MOCK_MAP}>
+      <div className="relative flex h-[500px] w-full flex-col items-center justify-center overflow-hidden rounded-md border-2 border-dashed border-line bg-[#e2e8f0]">
         <div className="relative z-[5] text-center text-[#475569]">
           <span className="text-[40px]">🗺️</span>
           <h3 className="mt-2.5 text-lg font-bold">
@@ -62,24 +53,24 @@ const Geoportal = () => {
           </p>
           <button
             type="button"
-            className={`${BTN_SMALL} mt-[15px]`}
+            className={`cursor-pointer rounded border-none text-xs font-bold uppercase text-white transition-colors mr-0.5 bg-secondary px-2 py-1 text-[11px] hover:bg-primary mt-[15px]`}
             onClick={() => alert("Cargando API de Mapas...")}
           >
             Centrar en Poligonal Metropolitana
           </button>
         </div>
 
-        <div className={MAP_LAYER_BOX}>
+        <div className="absolute right-[15px] top-[15px] w-[180px] rounded-md bg-white p-3 text-[11px] shadow-[0_2px_8px_rgba(0,0,0,0.15)]">
           <b className="mb-1.5 block text-[10px] uppercase text-primary">
             Control de Capas SIG
           </b>
-          <label className={MAP_LAYER_LABEL}>
+          <label className="mb-1 block">
             <input type="checkbox" defaultChecked /> Red de Drenaje e Hilos
           </label>
-          <label className={MAP_LAYER_LABEL}>
+          <label className="mb-1 block">
             <input type="checkbox" defaultChecked /> Inventario de Obras SIROH
           </label>
-          <label className={MAP_LAYER_LABEL}>
+          <label className="mb-1 block">
             <input type="checkbox" /> Áreas de Inundación (Crecidas)
           </label>
           <label className="block">

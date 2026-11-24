@@ -8,9 +8,9 @@ import {
 import { FaArrowLeft, FaDrawPolygon, FaMapLocationDot } from "react-icons/fa6";
 import { Link } from "react-router-dom";
 
-import { createInspeccion, updateInspeccion } from "../api/siroh";
-
 import { INSTITUTION } from "../config/institution";
+import { SaveMessage } from "../components/siroh/SaveMessage";
+import { useSirohForm } from "../components/siroh/useSirohForm";
 import canalRectangular from "../assets/imgs/canales/canales-rectangular.png";
 import canalTrapezoidal from "../assets/imgs/canales/canales-trapezoidal.png";
 import canalTriangular from "../assets/imgs/canales/canales-triangular.png";
@@ -78,18 +78,8 @@ const RadioOption = ({ id, name, value, label, first = false, required = false }
 const NAV_BUTTON = "rounded bg-[#2288ee] px-4 py-2 font-bold text-white transition hover:bg-[#1a6cb8] active:scale-95";
 
 export const SirohRawForm = () => {
-  const [mapOpen, setMapOpen] = useState(false);
-  const [mapInitial, setMapInitial] = useState({ e: "", n: "" });
-
   const [demarcacionOpen, setDemarcacionOpen] = useState(false);
   const [fichaSnapshot, setFichaSnapshot] = useState("");
-  const [fichaPrefix, setFichaPrefix] = useState("");
-
-  /* Guardado en dos pasos, igual que SirohForm.jsx. */
-  const [inspeccionId, setInspeccionId] = useState(null);
-  const [creating, setCreating] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [saveMessage, setSaveMessage] = useState(null);
 
   const formRef = useRef(null);
   const codRef = useRef(null);
@@ -98,21 +88,37 @@ export const SirohRawForm = () => {
   const fichaLabelRef = useRef(null);
   const fichaRef = useRef(null);
 
-  /* Los inputs se dejan no controlados para conservar pattern/required;
-     el mapa solo escribe directamente sus values. */
-  const handleMapSelect = useCallback(({ e, n }) => {
-    if (eastRef.current) eastRef.current.value = e;
-    if (northRef.current) northRef.current.value = n;
-  }, []);
-  const handleMapClose = useCallback(() => setMapOpen(false), []);
-  const handleMapOpen = useCallback(() => {
-    /* Si la ficha ya tiene E/N, el modal marca el punto al abrirse. */
-    setMapInitial({
-      e: eastRef.current?.value ?? "",
-      n: northRef.current?.value ?? "",
-    });
-    setMapOpen(true);
-  }, []);
+  /* Guardado en dos pasos, coordenadas y patron de ficha: logica compartida
+     con SirohForm.jsx. */
+  const {
+    mapOpen,
+    mapInitial,
+    fichaPrefix,
+    setFichaPrefix,
+    inspeccionId,
+    creating,
+    submitting,
+    saveMessage,
+    handleFichaChange,
+    handleMapOpen,
+    handleMapClose,
+    handleMapSelect,
+    handleCrearRegistro,
+    handleSubmit,
+    handleReset,
+  } = useSirohForm({
+    refs: {
+      form: formRef,
+      cod: codRef,
+      east: eastRef,
+      north: northRef,
+      ficha: fichaRef,
+    },
+    resetExtras: () => {
+      setDemarcacionOpen(false);
+      setFichaSnapshot("");
+    },
+  });
 
   const handleDemarcacionClose = useCallback(() => setDemarcacionOpen(false), []);
   const handleDemarcacionOpen = useCallback(() => {
@@ -133,108 +139,7 @@ export const SirohRawForm = () => {
     setFichaPrefix(prefix);
     setDemarcacionOpen(false);
     if (prefix) fichaRef.current?.focus();
-  }, []);
-
-  /* El prefijo generado no se puede borrar: solo se aceptan 2 digitos finales. */
-  const handleFichaChange = useCallback(
-    (event) => {
-      if (!fichaPrefix) return;
-
-      const raw = event.target.value;
-      const suffix = raw.startsWith(fichaPrefix)
-        ? raw.slice(fichaPrefix.length)
-        : "";
-      const digits = suffix.replace(/\D/g, "").slice(0, 2);
-      const next = `${fichaPrefix}${digits}`;
-
-      if (fichaRef.current) fichaRef.current.value = next;
-    },
-    [fichaPrefix]
-  );
-
-  const construirPayload = () => {
-    const formData = new FormData(formRef.current);
-    const payload = {};
-
-    for (const [name, valor] of formData.entries()) {
-      /* cod_n lo asigna el backend; los selects de catalogo no tienen name
-         y por eso FormData ya los ignora. */
-      if (name === "cod_n") continue;
-      const value =
-        typeof valor === "string" && valor.trim() === "" ? null : valor;
-      payload[name] = Array.isArray(value) ? value.join(",") : value;
-    }
-
-    return payload;
-  };
-
-  const resetEstado = () => {
-    setFichaPrefix("");
-    setMapInitial({ e: "", n: "" });
-    setInspeccionId(null);
-
-    if (fichaRef.current) fichaRef.current.value = "";
-    if (codRef.current) codRef.current.value = "";
-  };
-
-  const limpiarFormulario = () => {
-    formRef.current?.reset();
-    resetEstado();
-  };
-
-  const handleReset = () => {
-    /* El navegador ya limpia los values; aqui solo se reinicia el estado. */
-    resetEstado();
-    setSaveMessage(null);
-  };
-
-  const handleCrearRegistro = async () => {
-    if (creating || inspeccionId) return;
-
-    setCreating(true);
-    setSaveMessage(null);
-
-    try {
-      const registro = await createInspeccion();
-      if (codRef.current) codRef.current.value = registro.cod_n;
-      setInspeccionId(registro.id);
-      setSaveMessage({
-        tipo: "ok",
-        texto: `Registro creado con código ${registro.cod_n}.`,
-      });
-    } catch {
-      setSaveMessage({
-        tipo: "error",
-        texto: "No se pudo crear el registro. Intente nuevamente.",
-      });
-    } finally {
-      setCreating(false);
-    }
-  };
-
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (!inspeccionId || submitting) return;
-
-    setSubmitting(true);
-    setSaveMessage(null);
-
-    try {
-      await updateInspeccion(inspeccionId, construirPayload());
-      limpiarFormulario();
-      setSaveMessage({
-        tipo: "ok",
-        texto: "Inspección registrada correctamente.",
-      });
-    } catch {
-      setSaveMessage({
-        tipo: "error",
-        texto: "No se pudo guardar la inspección. Intente nuevamente.",
-      });
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  }, [setFichaPrefix]);
 
   return (
     <>
@@ -266,11 +171,10 @@ export const SirohRawForm = () => {
                   >
                     {creating ? "Creando…" : inspeccionId ? "Registro creado" : "Nuevo"}
                   </button>
-                  {saveMessage && (
-                    <p className={`absolute left-1/2 top-full z-50 mt-1 w-56 -translate-x-1/2 rounded bg-white px-2 py-1 text-center text-[10px] shadow ${saveMessage.tipo === "error" ? "text-red-600" : "text-green-700"}`}>
-                      {saveMessage.texto}
-                    </p>
-                  )}
+                  <SaveMessage
+                    message={saveMessage}
+                    className="absolute left-1/2 top-full z-50 mt-1 w-56 -translate-x-1/2 rounded bg-white px-2 py-1 text-center text-[10px] shadow"
+                  />
                 </li>
                 <li> <button type="button" id="main_menu__updateRegistry" className={NAV_BUTTON}>Actualizacion</button> </li>
                 <li> <button type="button" id="main_menu__showHistory" className={NAV_BUTTON}>Historico</button> </li>
@@ -1146,11 +1050,7 @@ export const SirohRawForm = () => {
                     </button>
                     <button type="reset" className="btn_reset rounded bg-[#e2e8f0] px-6 py-2 font-bold text-[#1e293b] transition hover:bg-[#cbd5e1] active:scale-95">REINICIAR</button>
                 </div>
-                {saveMessage && (
-                  <p className={`text-xs ${saveMessage.tipo === "error" ? "text-red-600" : "text-green-700"}`}>
-                    {saveMessage.texto}
-                  </p>
-                )}
+                <SaveMessage message={saveMessage} className="text-xs" />
             </div>
 
         </form>

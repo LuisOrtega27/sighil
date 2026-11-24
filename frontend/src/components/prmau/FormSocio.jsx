@@ -1,17 +1,22 @@
 import { useRef, useState } from "react"
 
-import { CheckboxItem } from "./CheckboxItem"
+import {
+  CheckboxItem,
+  FormCheckboxGrid,
+  FormGroup,
+  FormSectionMiniSubTitle,
+  FormSectionSubTitle,
+  FormSectionTitle,
+  PrmauFormRow,
+} from "../formPrimitives"
 import { FormActions } from "./FormActions"
 import { FormBody } from "./FormBody"
-import { FormCheckboxGrid } from "./FormCheckboxGrid"
 import { FormContainer } from "./FormContainer"
-import { FormGroup } from "./FormGroup"
-import { FormRow } from "./FormRow"
 import { FormSection } from "./FormSection"
-import { FormSectionMiniSubTitle } from "./FormSectionMiniSubTitle"
-import { FormSectionSubTitle } from "./FormSectionSubTitle"
-import { FormSectionTitle } from "./FormSectionTitle"
 import { FormTabs } from "./FormTabs"
+import { FormHeader } from "./FormHeader"
+import { SubmitStatus } from "./SubmitStatus"
+import { useFormSubmit } from "./useFormSubmit"
 
 import { FaXmark } from "react-icons/fa6" 
 import { submitSocioeconomico } from "../../api/prmau"
@@ -50,23 +55,22 @@ const createOcupante = (id) => ({
   trabaja: "si",
 })
 
-const formToPayload = (form) => {
-  const fd = new FormData(form)
-  const out = {}
-  for (const [key, value] of fd.entries()) {
-    if (!key) continue
-    if (out[key] === undefined) out[key] = value
-    else if (Array.isArray(out[key])) out[key].push(value)
-    else out[key] = [out[key], value]
-  }
-  return out
-}
-
 export const FormSocio = () => {
   const nextId = useRef(2)
   const [ocupantes, setOcupantes] = useState([createOcupante(1)])
-  const [submitStatus, setSubmitStatus] = useState({ type: "", message: "" })
-  const [submitting, setSubmitting] = useState(false)
+  const { submitStatus, submitting, handleSubmit } = useFormSubmit({
+    submit: submitSocioeconomico,
+    buildPayload: (payload) => {
+      payload.ocupantes = ocupantes.map(({ id, ...rest }) => {
+        void id
+        return rest
+      })
+      payload.n_ocupantes = ocupantes.length
+      return payload
+    },
+    successMessage: (res) => `Formulario socioeconómico enviado correctamente${res?.id ? ` (ID: ${res.id})` : ""}.`,
+    errorMessage: "No se pudo enviar el formulario socioeconómico.",
+  })
 
   const agregarIntegrante = () => {
     setOcupantes((prev) => {
@@ -100,60 +104,22 @@ export const FormSocio = () => {
     )
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setSubmitStatus({ type: "", message: "" })
-    setSubmitting(true)
-    try {
-      const payload = formToPayload(e.currentTarget)
-      payload.ocupantes = ocupantes.map(({ id, ...rest }) => {
-        void id
-        return rest
-      })
-      payload.n_ocupantes = ocupantes.length
-      // TODO(backend): confirmar mapeo definitivo de campos y tabla destino.
-      const res = await submitSocioeconomico(payload)
-      setSubmitStatus({
-        type: "success",
-        message: `Formulario socioeconómico enviado correctamente${res?.id ? ` (ID: ${res.id})` : ""}.`,
-      })
-    } catch (error) {
-      setSubmitStatus({
-        type: "error",
-        message: error?.response?.data?.message || "No se pudo enviar el formulario socioeconómico.",
-      })
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
   return (
     <FormContainer>
         <form onSubmit={handleSubmit}>
 
-            <header className="flex border-b-3 border-b-vul-primary mb-5">
-
-                <div className="text-center flex-1 pb-4 font-segoe">
-                    <h1 className="text-vul-primary text-2xl font-bold">Alcaldía de Caracas</h1>
-                    <h2 className="text-vul-secondary font-bold">Instituto Municipal de Gestión de Riesgos y Administración de Desastres</h2>
-                    <h3>REGISTRO DE VULNERABILIDAD FÍSICA (IMGRAD)</h3>
+            <FormHeader title="REGISTRO DE VULNERABILIDAD FÍSICA (IMGRAD)">
+                <div>
+                    <strong>Nº CONTROL:</strong> 
+                    <input name={"n_control"} className="text-siroh-alert-red font-bold w-16 text-center" defaultValue={"94000"} />
                 </div>
-
-                <div className="meta-info">
-                    <div>
-                        <strong>Nº CONTROL:</strong> 
-                        <input name={"n_control"} className="text-siroh-alert-red font-bold w-16 text-center" defaultValue={"94000"} />
-                    </div>
-                    <div className="flex gap-2">
-                        <strong>Nº de Hogar:</strong>
-                        <input name="n_hogar" className="w-16 text-center border-2" type="text" placeholder="---"/>
-                        <span>de</span>
-                        <input name="total_hogares" className="w-16 text-center border-2" type="text" placeholder="---"/>
-                    </div>
-                    
+                <div className="flex gap-2">
+                    <strong>Nº de Hogar:</strong>
+                    <input name="n_hogar" className="w-16 text-center border-2" type="text" placeholder="---"/>
+                    <span>de</span>
+                    <input name="total_hogares" className="w-16 text-center border-2" type="text" placeholder="---"/>
                 </div>
-
-            </header>
+            </FormHeader>
 
             <FormTabs tabList={tabList}/>
 
@@ -164,24 +130,24 @@ export const FormSocio = () => {
                     <FormSectionTitle text={"I. Datos Generales y Ubicación del Inmueble"}/>
 
                     <FormSectionSubTitle text={"Datos de la persona"} />
-                    <FormRow>
+                    <PrmauFormRow>
                         <FormGroup inputName={"empadronador_nombre"} label={"Nombre y Apellido del Empadronador"}/>
                         <FormGroup inputName={"empadronador_ci"} label={"Cédula de Identidad (C.I.)"}/>
-                    </FormRow>
+                    </PrmauFormRow>
 
                     <FormSectionSubTitle text={"Datos del inmueble"} />
-                    <FormRow>
+                    <PrmauFormRow>
                         <FormGroup inputName={"estado"} label={"Estado (Edo.)"}/>
                         <FormGroup inputName={"municipio"} label={"Municipio (Mun.)"}/>
                         <FormGroup inputName={"parroquia"} label={"Parroquia (Prr.)"}/>
                         <FormGroup inputName={"sector"} label={"Sector / Ámbitos (Amb. / Sect.)"}/>
                         <FormGroup inputName={"manzana"} label={"Manzana / Comunidad (Manz.)"}/>
-                    </FormRow>
+                    </PrmauFormRow>
 
                     <FormSectionSubTitle text={"Codigo catastral"} />
-                    <FormRow>
+                    <PrmauFormRow>
                         <FormGroup inputName={"cod_catastral"} label={"Código Catastral"}/>
-                    </FormRow>
+                    </PrmauFormRow>
 
                 </FormSection>
                 
@@ -310,7 +276,7 @@ export const FormSocio = () => {
                     <FormSectionTitle text={"III. Fuerza de Trabajo Jefe(a) del Hogar"} />
 
                     <FormSectionSubTitle text={"1. ¿En cuál de estas situaciones se encuentra actualmente?"} />
-                    <FormRow>
+                    <PrmauFormRow>
                         <CheckboxItem inputType="radio" inputName={"ft_situacion_actual"} label={"a- Trabajando"}/>
                         <CheckboxItem inputType="radio" inputName={"ft_situacion_actual"} label={"b- Sin trabajar"}/>
                         <CheckboxItem inputType="radio" inputName={"ft_situacion_actual"} label={"c- Buscando trabajo por primera vez"}/>
@@ -318,25 +284,25 @@ export const FormSocio = () => {
                         <CheckboxItem inputType="radio" inputName={"ft_situacion_actual"} label={"e- Estudiando"}/>
                         <CheckboxItem inputType="radio" inputName={"ft_situacion_actual"} label={"f- Como pensionado o jubilado"}/>
                         <CheckboxItem inputType="radio" inputName={"ft_situacion_actual"} label={"g- Otra situación (especifique):"}/>
-                    </FormRow>
+                    </PrmauFormRow>
 
                     <FormSectionSubTitle text={"2. ¿Cuánto tiempo tiene sin trabajar?"} />
-                    <FormRow>
+                    <PrmauFormRow>
                         <CheckboxItem inputType="radio" inputName={"ft_tiempo_sin_trabajar"} label={"a- Hasta 3 meses"}/>
                         <CheckboxItem inputType="radio" inputName={"ft_tiempo_sin_trabajar"} label={"b- De 4 a 6 meses"}/>
                         <CheckboxItem inputType="radio" inputName={"ft_tiempo_sin_trabajar"} label={"c- De 7 a 12 meses"}/>
                         <CheckboxItem inputType="radio" inputName={"ft_tiempo_sin_trabajar"} label={"d- Más de 1 año"}/>
-                    </FormRow>
+                    </PrmauFormRow>
 
                     <FormSectionSubTitle text={"3. ¿Cuál es su ocupación en la empresa, organismo o negocio donde trabaja?"} />
-                    <FormRow>
+                    <PrmauFormRow>
                         <FormGroup inputName={"ft_ocupacion"} label={""} inputPlaceholder={"Ej: Chofer, aprendiz de tornero, oficinista, maestra, etc."}/>
-                    </FormRow>
+                    </PrmauFormRow>
 
                     <FormSectionSubTitle text={"4. ¿A qué se dedica la empresa, organismo o negocio donde trabaja?"} />
-                    <FormRow>
+                    <PrmauFormRow>
                         <FormGroup inputName={"ft_actividad_empresa"} label={""} inputPlaceholder={"Ej: Transporte de pasajeros, fábrica, banco, educación, etc."}/>
-                    </FormRow>
+                    </PrmauFormRow>
 
                     <FormSectionSubTitle text={"4. ¿A qué se dedica la empresa, organismo o negocio donde trabaja?"} />
                     <FormCheckboxGrid>
@@ -414,17 +380,11 @@ export const FormSocio = () => {
                     </FormCheckboxGrid>
 
                     <FormSectionTitle text={"Firma del Empadronador"} />
-                    <FormRow>
+                    <PrmauFormRow>
                         <FormGroup inputName={"firma_empadronador"} inputPlaceholder={"Firma o Nombre del Evaluador"} />
-                    </FormRow>
+                    </PrmauFormRow>
 
-                    {submitStatus.message && (
-                        <div
-                            className={`mt-4 rounded-md px-4 py-3 text-sm font-semibold ${submitStatus.type === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}
-                        >
-                            {submitStatus.message}
-                        </div>
-                    )}
+                    <SubmitStatus status={submitStatus} />
 
                     <FormActions disabled={submitting}/> {/* Submit BTN */} 
                     

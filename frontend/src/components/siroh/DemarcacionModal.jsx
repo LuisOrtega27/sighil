@@ -8,7 +8,6 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { getCuencas, getParroquias, getSubcuencas } from "../../api/catalogos";
-import { BTN, BTN_PRIMARY, INPUT, LABEL, SELECT } from "./styles";
 
 /* id cuenca - codigo subcuenca - id parroquia - abreviatura - */
 const buildFichaPrefix = (cuencas, subcuencas, parroquias, cId, sId, pId) => {
@@ -154,12 +153,12 @@ const DemarcacionModal = ({ onClose, onApply, currentFicha = "" }) => {
 
         <div className="space-y-4 p-5">
           <div>
-            <label htmlFor="filter-cuenca" className={LABEL}>
+            <label htmlFor="filter-cuenca" className="mb-1 text-[10.5px] font-bold uppercase text-[#475569]">
               ----Cuenca----
             </label>
             <select
               id="filter-cuenca"
-              className={SELECT}
+              className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               value={cuencaId}
               onChange={handleCuencaChange}
             >
@@ -173,12 +172,12 @@ const DemarcacionModal = ({ onClose, onApply, currentFicha = "" }) => {
           </div>
 
           <div>
-            <label htmlFor="filter-sub-cuenca" className={LABEL}>
+            <label htmlFor="filter-sub-cuenca" className="mb-1 text-[10.5px] font-bold uppercase text-[#475569]">
               ----Sub Cuenca----
             </label>
             <select
               id="filter-sub-cuenca"
-              className={SELECT}
+              className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               value={subcuencaId}
               onChange={handleSubcuencaChange}
               disabled={!cuencaId}
@@ -193,12 +192,12 @@ const DemarcacionModal = ({ onClose, onApply, currentFicha = "" }) => {
           </div>
 
           <div>
-            <label htmlFor="filter-parroquia" className={LABEL}>
+            <label htmlFor="filter-parroquia" className="mb-1 text-[10.5px] font-bold uppercase text-[#475569]">
               ----Parroquia----
             </label>
             <select
               id="filter-parroquia"
-              className={SELECT}
+              className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               value={parroquiaId}
               onChange={handleParroquiaChange}
               disabled={!subcuencaId}
@@ -221,13 +220,13 @@ const DemarcacionModal = ({ onClose, onApply, currentFicha = "" }) => {
           )}
 
           <div>
-            <label htmlFor="demarcacion-ficha-preview" className={LABEL}>
+            <label htmlFor="demarcacion-ficha-preview" className="mb-1 text-[10.5px] font-bold uppercase text-[#475569]">
               FICHA Nº
             </label>
             <input
               type="text"
               id="demarcacion-ficha-preview"
-              className={INPUT}
+              className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               readOnly
               value={fichaPrefix || currentFicha}
             />
@@ -240,14 +239,14 @@ const DemarcacionModal = ({ onClose, onApply, currentFicha = "" }) => {
         </div>
 
         <div className="flex justify-end gap-2 border-t border-line px-5 py-4">
-          <button type="button" onClick={onClose} className={BTN}>
+          <button type="button" onClick={onClose} className="cursor-pointer rounded border-none text-xs font-bold uppercase text-white transition-colors bg-secondary px-5 py-2.5 hover:bg-primary">
             Cancelar
           </button>
           <button
             type="button"
             onClick={() => onApply(fichaPrefix)}
             disabled={!fichaPrefix}
-            className={`${BTN_PRIMARY} disabled:opacity-50`}
+            className={`cursor-pointer rounded border-none text-xs font-bold uppercase text-white transition-colors bg-primary px-5 py-2.5 disabled:opacity-50`}
           >
             Aplicar
           </button>

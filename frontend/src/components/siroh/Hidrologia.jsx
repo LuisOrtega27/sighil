@@ -14,20 +14,6 @@
 
 import { useState } from "react";
 import { INSTITUTION } from "../../config/institution";
-import {
-  CARD,
-  CARD_SUB,
-  CARD_TITLE,
-  CUENCA_BTN,
-  CUENCA_BTN_ACTIVE,
-  CUENCA_BTN_IDLE,
-  CUENCA_DETAIL,
-  CUENCA_DETAIL_BODY,
-  CUENCA_DETAIL_TITLE,
-  CUENCAS_GRID,
-  CUENCAS_LIST,
-  CUENCAS_TITLE,
-} from "./styles";
 import { CUENCAS } from "./options";
 
 const Hidrologia = () => {
@@ -35,22 +21,22 @@ const Hidrologia = () => {
   const cuenca = CUENCAS.find((c) => c.id === selected);
 
   return (
-    <div className={CARD}>
-      <h2 className={CARD_TITLE}>Inventario y Caracterización Macro de Cuencas</h2>
-      <div className={CARD_SUB}>
+    <div className="mb-6 rounded-lg border-t-4 border-secondary bg-white p-[30px] shadow-[0_4px_6px_rgba(0,0,0,0.05)]">
+      <h2 className="mb-1 text-xl font-bold uppercase text-primary">Inventario y Caracterización Macro de Cuencas</h2>
+      <div className="mb-6 text-[12.5px] font-semibold uppercase tracking-[0.5px] text-[#64748b]">
         Repositorio de expedientes digitales de las subcuencas del municipio
       </div>
 
-      <div className={CUENCAS_GRID}>
-        <div className={CUENCAS_LIST}>
-          <h3 className={CUENCAS_TITLE}>Subcuencas Disponibles</h3>
+      <div className="grid grid-cols-[1fr_2fr] gap-5">
+        <div className="border-r border-line pr-[15px]">
+          <h3 className="mb-2.5 text-xs font-bold uppercase text-primary">Subcuencas Disponibles</h3>
           {CUENCAS.map((c) => (
             <button
               key={c.id}
               type="button"
               onClick={() => setSelected(c.id)}
-              className={`${CUENCA_BTN} ${
-                selected === c.id ? CUENCA_BTN_ACTIVE : CUENCA_BTN_IDLE
+              className={`mb-1.5 w-full cursor-pointer rounded px-2.5 py-2.5 text-left text-[13px] font-bold transition-colors ${
+                selected === c.id ? "bg-lightblue" : "bg-[#f1f5f9] hover:bg-lightblue"
               }`}
             >
               {c.nombre}
@@ -58,11 +44,11 @@ const Hidrologia = () => {
           ))}
         </div>
 
-        <div className={CUENCA_DETAIL}>
-          <h3 className={CUENCA_DETAIL_TITLE}>
+        <div className="rounded-md border border-line bg-[#fafafa] p-5">
+          <h3 className="text-base font-bold text-primary">
             {cuenca ? cuenca.nombre : "Selecciona una subcuenca para abrir el expediente"}
           </h3>
-          <div className={CUENCA_DETAIL_BODY}>
+          <div className="mt-3.5 text-[13px] leading-[1.5] text-[#475569]">
             {cuenca ? (
               /* TODO(backend): expediente completo de la subcuenca
                  (lo cargaba el JS original, inexistente en el repo). */

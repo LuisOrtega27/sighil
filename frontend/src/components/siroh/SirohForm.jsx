@@ -27,7 +27,6 @@
 import {
   lazy,
   Suspense,
-  useCallback,
   useEffect,
   useRef,
   useState,
@@ -35,41 +34,24 @@ import {
 
 /* Leaflet se carga solo cuando se abre el modal (mantiene ligero el bundle inicial). */
 const CoordinateMapModal = lazy(() => import("./CoordinateMapModal"));
-import {
-  BTN_SMALL,
-  BTN_SUCCESS_BLOCK,
-  CARD,
-  CARD_SUB,
-  CARD_TITLE,
-  FICHA_HEADER,
-  FORM_GROUP,
-  INPUT,
-  SELECT,
-  TAB_CONTAINER,
-  TEXTAREA,
-} from "./styles";
+import { ImgCheckItem, ImgRadioItem, TabBtn } from "./helpers";
 import {
   CbGrid,
   CheckItem,
   Field,
   FormRow,
-  ImgCheckItem,
-  ImgRadioItem,
   RadioItem,
   SectionTitle,
   SubTitle,
-  TabBtn,
-} from "./helpers";
+} from "../formPrimitives";
+import { SaveMessage } from "./SaveMessage";
+import { useSirohForm } from "./useSirohForm";
 import { INSTITUTION } from "../../config/institution";
 import {
   getCuencas,
   getParroquias,
   getSubcuencas,
 } from "../../api/catalogos";
-import {
-  createInspeccion,
-  updateInspeccion,
-} from "../../api/siroh";
 import {
   ALTERACIONES_CAUSE,
   CANALES,
@@ -157,8 +139,6 @@ const ORGANIZACIONES = [
 
 const SirohForm = () => {
   const [activeTab, setActiveTab] = useState("s-id");
-  const [mapOpen, setMapOpen] = useState(false);
-  const [mapInitial, setMapInitial] = useState({ e: "", n: "" });
 
   /* Catalogos de la ficha: cuencas + parroquias se piden al montar;
      subcuencas depende de la cuenca elegida. */
@@ -170,15 +150,6 @@ const SirohForm = () => {
   const [parroquiaId, setParroquiaId] = useState("");
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [catalogError, setCatalogError] = useState(false);
-  const [fichaPrefix, setFichaPrefix] = useState("");
-  const [fichaEditable, setFichaEditable] = useState(false);
-
-  /* Guardado en dos pasos: primero se crea la fila (cod_n) y luego se
-     actualizan las columnas con los name del formulario. */
-  const [inspeccionId, setInspeccionId] = useState(null);
-  const [creating, setCreating] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [saveMessage, setSaveMessage] = useState(null);
 
   const formRef = useRef(null);
   const viewRefs = useRef({});
@@ -186,6 +157,41 @@ const SirohForm = () => {
   const northRef = useRef(null);
   const fichaRef = useRef(null);
   const codRef = useRef(null);
+
+  /* Guardado en dos pasos, coordenadas y patron de ficha: logica compartida
+     con SirohRawForm.jsx. */
+  const {
+    mapOpen,
+    mapInitial,
+    fichaPrefix,
+    setFichaPrefix,
+    inspeccionId,
+    creating,
+    submitting,
+    saveMessage,
+    handleFichaChange,
+    handleMapOpen,
+    handleMapClose,
+    handleMapSelect,
+    handleCrearRegistro,
+    handleSubmit,
+  } = useSirohForm({
+    refs: {
+      form: formRef,
+      cod: codRef,
+      east: eastRef,
+      north: northRef,
+      ficha: fichaRef,
+    },
+    resetExtras: () => {
+      setCuencaId("");
+      setSubcuencaId("");
+      setParroquiaId("");
+      setSubcuencas([]);
+    },
+  });
+
+  const fichaEditable = Boolean(fichaPrefix);
 
   /* 2 peticiones iniciales: cuencas y parroquias (catalogo independiente). */
   useEffect(() => {
@@ -239,7 +245,6 @@ const SirohForm = () => {
 
   const setFichaValue = (prefix) => {
     setFichaPrefix(prefix);
-    setFichaEditable(Boolean(prefix));
     if (fichaRef.current) fichaRef.current.value = prefix;
   };
 
@@ -284,92 +289,6 @@ const SirohForm = () => {
     if (prefix && fichaRef.current) fichaRef.current.focus();
   };
 
-  /* El prefijo generado no se puede borrar: solo se aceptan 2 digitos finales. */
-  const handleFichaChange = (event) => {
-    if (!fichaPrefix) return;
-
-    const raw = event.target.value;
-    const suffix = raw.startsWith(fichaPrefix)
-      ? raw.slice(fichaPrefix.length)
-      : "";
-    const digits = suffix.replace(/\D/g, "").slice(0, 2);
-    const next = `${fichaPrefix}${digits}`;
-
-    if (fichaRef.current) fichaRef.current.value = next;
-  };
-
-  const construirPayload = () => {
-    const formData = new FormData(formRef.current);
-    const payload = {};
-
-    for (const [name, valor] of formData.entries()) {
-      /* cod_n lo asigna el backend; los selects de catalogo no tienen name
-         y por eso FormData ya los ignora. */
-      if (name === "cod_n") continue;
-      const value =
-        typeof valor === "string" && valor.trim() === "" ? null : valor;
-      payload[name] = Array.isArray(value) ? value.join(",") : value;
-    }
-
-    return payload;
-  };
-
-  const limpiarFormulario = () => {
-    formRef.current?.reset();
-    setCuencaId("");
-    setSubcuencaId("");
-    setParroquiaId("");
-    setSubcuencas([]);
-    setFichaPrefix("");
-    setFichaEditable(false);
-    setMapInitial({ e: "", n: "" });
-    setInspeccionId(null);
-
-    if (fichaRef.current) fichaRef.current.value = "";
-    if (codRef.current) codRef.current.value = "";
-  };
-
-  const handleCrearRegistro = async () => {
-    if (creating || inspeccionId) return;
-
-    setCreating(true);
-    setSaveMessage(null);
-
-    try {
-      const registro = await createInspeccion();
-      if (codRef.current) codRef.current.value = registro.cod_n;
-      setInspeccionId(registro.id);
-      setSaveMessage({
-        tipo: "ok",
-        texto: `Registro creado con código ${registro.cod_n}.`,
-      });
-    } catch {
-      setSaveMessage({
-        tipo: "error",
-        texto: "No se pudo crear el registro. Intente nuevamente.",
-      });
-    } finally {
-      setCreating(false);
-    }
-  };
-
-  /* Los inputs se dejan no controlados para conservar pattern/required y la
-     validacion nativa del formulario original; el mapa solo escribe sus values. */
-  const handleMapSelect = useCallback(({ e, n }) => {
-    if (eastRef.current) eastRef.current.value = e;
-    if (northRef.current) northRef.current.value = n;
-  }, []);
-  const handleMapClose = useCallback(() => setMapOpen(false), []);
-  const handleMapOpen = useCallback(() => {
-    /* Se capturan los values actuales para que el modal marque el punto
-       ya registrado en la ficha (si ambos campos son validos). */
-    setMapInitial({
-      e: eastRef.current?.value ?? "",
-      n: northRef.current?.value ?? "",
-    });
-    setMapOpen(true);
-  }, []);
-
   const goToTab = (key) => {
     setActiveTab(key);
     const view = viewRefs.current[key];
@@ -384,46 +303,22 @@ const SirohForm = () => {
     if (el) viewRefs.current[el.id.replace("view-", "")] = el;
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    if (!inspeccionId || submitting) return;
-
-    setSubmitting(true);
-    setSaveMessage(null);
-
-    try {
-      await updateInspeccion(inspeccionId, construirPayload());
-      limpiarFormulario();
-      setSaveMessage({
-        tipo: "ok",
-        texto: "Inspección registrada correctamente.",
-      });
-    } catch {
-      setSaveMessage({
-        tipo: "error",
-        texto: "No se pudo guardar la inspección. Intente nuevamente.",
-      });
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
   return (
-    <div className={CARD}>
-      <div className={FICHA_HEADER}>
+    <div className="mb-6 rounded-lg border-t-4 border-secondary bg-white p-[30px] shadow-[0_4px_6px_rgba(0,0,0,0.05)]">
+      <div className="mb-5 rounded-md border border-line bg-[#f1f5f9] px-3 py-3 text-center text-[11px] font-bold leading-[1.4] text-[#334155]">
         MINISTERIO DEL PODER POPULAR DE LAS AGUAS • VICEMINISTERIO DE
         ADMINISTRACIÓN DE CUENCAS HIDROGRÁFICAS
         <br />
         DIRECCIÓN GENERAL DE MITIGACIÓN Y CONTROL DE INUNDACIONES • {`ALCALDÍA DE ${INSTITUTION.municipio.toUpperCase()} (${INSTITUTION.organismoSigla})`}
       </div>
-      <h2 className={CARD_TITLE}>
+      <h2 className="mb-1 text-xl font-bold uppercase text-primary">
         Sistema de Inspección y Registro de Obras Hidráulicas (SIROH)
       </h2>
-      <div className={CARD_SUB}>
+      <div className="mb-6 text-[12.5px] font-semibold uppercase tracking-[0.5px] text-[#64748b]">
         Formulario Técnico de Evaluación de Infraestructura Fluvial
       </div>
 
-      <div className={TAB_CONTAINER}>
+      <div className="mb-5 flex gap-[5px] overflow-x-auto rounded-t-md border-b-2 border-line bg-[#e2e8f0] px-[5px] pt-[5px]">
         {TABS.map((tab) => (
           <TabBtn
             key={tab.key}
@@ -447,7 +342,7 @@ const SirohForm = () => {
                 name="header_fecha__fecha"
                 id="header_fecha__fecha"
                 required
-                className={INPUT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               />
             </Field>
 
@@ -461,7 +356,7 @@ const SirohForm = () => {
                 title="el patron es: 'Horas:Minutos'"
                 maxLength={6}
                 required
-                className={INPUT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               />
             </Field>
 
@@ -474,13 +369,13 @@ const SirohForm = () => {
                 pattern="\d{6}"
                 required
                 readOnly
-                className={INPUT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               />
               <button
                 type="button"
                 onClick={handleCrearRegistro}
                 disabled={creating || Boolean(inspeccionId)}
-                className={`${BTN_SMALL} mt-1 disabled:opacity-50`}
+                className={`cursor-pointer rounded border-none text-xs font-bold uppercase text-white transition-colors mr-0.5 bg-secondary px-2 py-1 text-[11px] hover:bg-primary mt-1 disabled:opacity-50`}
               >
                 {creating
                   ? "Creando…"
@@ -488,17 +383,7 @@ const SirohForm = () => {
                     ? "Registro creado"
                     : "Nuevo registro"}
               </button>
-              {saveMessage && (
-                <p
-                  className={`mt-1 text-[10px] ${
-                    saveMessage.tipo === "error"
-                      ? "text-red-600"
-                      : "text-green-700"
-                  }`}
-                >
-                  {saveMessage.texto}
-                </p>
-              )}
+              <SaveMessage message={saveMessage} className="mt-1 text-[10px]" />
             </Field>
           </FormRow>
 
@@ -508,7 +393,7 @@ const SirohForm = () => {
               <div className="flex">
                 <select
                   id="filter-cuenca"
-                  className={SELECT}
+                  className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
                   value={cuencaId}
                   onChange={handleCuencaChange}
                 >
@@ -522,7 +407,7 @@ const SirohForm = () => {
 
                 <select
                   id="filter-sub-cuenca"
-                  className={SELECT}
+                  className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
                   value={subcuencaId}
                   onChange={handleSubcuencaChange}
                   disabled={!cuencaId}
@@ -537,7 +422,7 @@ const SirohForm = () => {
 
                 <select
                   id="filter-parroquia"
-                  className={SELECT}
+                  className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
                   value={parroquiaId}
                   onChange={handleParroquiaChange}
                   disabled={!subcuencaId}
@@ -574,7 +459,7 @@ const SirohForm = () => {
                 list=""
                 autoFocus
                 required
-                className={INPUT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               />
 
               {fichaEditable && (
@@ -597,7 +482,7 @@ const SirohForm = () => {
                 title="Patron esperado: 123456.12"
                 maxLength={9}
                 required
-                className={INPUT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               />
             </Field>
 
@@ -612,11 +497,11 @@ const SirohForm = () => {
                 title="Patron esperado: 1234567.12"
                 maxLength={10}
                 required
-                className={INPUT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               />
             </Field>
 
-            <div className={FORM_GROUP}>
+            <div className="flex flex-col">
               <label
                 htmlFor="map-btn"
                 id="label-map-btn"
@@ -649,7 +534,7 @@ const SirohForm = () => {
                 tabIndex={-1}
                 required
                 readOnly
-                className={INPUT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               />
             </Field>
 
@@ -661,7 +546,7 @@ const SirohForm = () => {
                 pattern="\d{1,4}(,\d{2})?"
                 maxLength={7}
                 required
-                className={INPUT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               />
             </Field>
           </FormRow>
@@ -674,7 +559,7 @@ const SirohForm = () => {
                 name="id_tec__nom_ape_1"
                 id="id_tec__nom_ape_1"
                 required
-                className={INPUT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               />
             </Field>
 
@@ -687,7 +572,7 @@ const SirohForm = () => {
                 pattern="^\d{4}-\d{7}$"
                 maxLength={12}
                 required
-                className={INPUT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               />
             </Field>
 
@@ -696,7 +581,7 @@ const SirohForm = () => {
                 type="text"
                 name="id_tec__nom_ape_2"
                 id="id_tec__nom_ape_2"
-                className={INPUT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               />
             </Field>
 
@@ -708,7 +593,7 @@ const SirohForm = () => {
                 placeholder="0000-0000000"
                 pattern="^\d{4}-\d{7}$"
                 maxLength={12}
-                className={INPUT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               />
             </Field>
           </FormRow>
@@ -721,7 +606,7 @@ const SirohForm = () => {
                 name="datos_cuenta__nombre"
                 id="datos_cuenta__nombre"
                 required
-                className={INPUT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               />
             </Field>
 
@@ -733,7 +618,7 @@ const SirohForm = () => {
                 defaultValue="Distrito Capital"
                 required
                 readOnly
-                className={INPUT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               />
             </Field>
 
@@ -745,7 +630,7 @@ const SirohForm = () => {
                 defaultValue={INSTITUTION.municipio}
                 required
                 readOnly
-                className={INPUT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               />
             </Field>
           </FormRow>
@@ -758,7 +643,7 @@ const SirohForm = () => {
                 id="datos_cuenta__parroquia"
                 list="parroquias"
                 required
-                className={INPUT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               />
               <datalist id="parroquias">
                 {PARROQUIAS.map((p) => (
@@ -773,7 +658,7 @@ const SirohForm = () => {
                 name="datos_cuenta__cent_pobl"
                 id="datos_cuenta__cent_pobl"
                 required
-                className={INPUT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               />
             </Field>
           </FormRow>
@@ -796,7 +681,7 @@ const SirohForm = () => {
                 maxLength={2}
                 pattern="[0-9]{1,2}"
                 inputMode="numeric"
-                className={INPUT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               />
             </Field>
           </CbGrid>
@@ -847,7 +732,7 @@ const SirohForm = () => {
           <FormRow>
             <Field>
               <textarea
-                className={TEXTAREA}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none min-h-[200px] resize-y"
                 name="ent_fisi__obsevaciones"
                 id="ent_fisi__obsevaciones"
                 wrap="soft"
@@ -867,7 +752,7 @@ const SirohForm = () => {
                 type="text"
                 name="tipo_obra__nombre"
                 id="tipo_obra__nombre"
-                className={INPUT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               />
             </Field>
 
@@ -877,7 +762,7 @@ const SirohForm = () => {
                 name="tipo_obra__tiempo"
                 id="tipo_obra__tiempo"
                 maxLength={2}
-                className={INPUT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               />
             </Field>
 
@@ -886,7 +771,7 @@ const SirohForm = () => {
                 name="tipo_obra__tiempo_formato"
                 id="tipo_obra__tiempo_formato"
                 defaultValue="NULL"
-                className={SELECT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               >
                 <option value="NULL"></option>
                 <option value="Años">Años</option>
@@ -931,7 +816,7 @@ const SirohForm = () => {
               id="tipo_obra__drp"
               maxLength={5}
               placeholder="00,00"
-              className={INPUT}
+              className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
             />
           </Field>
 
@@ -941,14 +826,14 @@ const SirohForm = () => {
               type="text"
               name="tipo_obra__omc"
               id="tipo_obra__omc"
-              className={INPUT}
+              className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
             />
           </Field>
 
           <SubTitle>Observaciones</SubTitle>
           <Field>
             <textarea
-              className={TEXTAREA}
+              className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none min-h-[200px] resize-y"
               name="tipo_obra__observaciones"
               id="tipo_obra__observaciones"
               wrap="soft"
@@ -984,7 +869,7 @@ const SirohForm = () => {
           <SubTitle>Observaciones</SubTitle>
           <Field>
             <textarea
-              className={TEXTAREA}
+              className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none min-h-[200px] resize-y"
               name="carac_obra__observaciones"
               id="carac_obra__observaciones"
               wrap="soft"
@@ -1016,7 +901,7 @@ const SirohForm = () => {
                   maxLength={2}
                   pattern="[0-9]*"
                   inputMode="numeric"
-                  className={INPUT}
+                  className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
                 />
               </Field>
             ))}
@@ -1036,7 +921,7 @@ const SirohForm = () => {
                 type="text"
                 name="carac_obra__otros_canales"
                 id="carac_obra__otros_canales"
-                className={INPUT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               />
             </Field>
           </FormRow>
@@ -1067,7 +952,7 @@ const SirohForm = () => {
                   pattern={o.pattern}
                   maxLength={o.maxLength}
                   placeholder={o.placeholder}
-                  className={INPUT}
+                  className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
                 />
               </Field>
             ))}
@@ -1135,7 +1020,7 @@ const SirohForm = () => {
           <SubTitle>Observaciones</SubTitle>
           <Field>
             <textarea
-              className={TEXTAREA}
+              className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none min-h-[200px] resize-y"
               name="meto_apli__observaciones"
               id="meto_apli__observaciones"
               wrap="soft"
@@ -1155,7 +1040,7 @@ const SirohForm = () => {
                   name={`org_parti__nom_ape_${n}`}
                   id={`org_parti__nom_ape_${n}`}
                   required={required}
-                  className={INPUT}
+                  className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
                 />
               </Field>
 
@@ -1165,7 +1050,7 @@ const SirohForm = () => {
                   name={`org_parti__insti_${n}`}
                   id={`org_parti__insti_${n}`}
                   required={required}
-                  className={INPUT}
+                  className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
                 />
               </Field>
 
@@ -1177,7 +1062,7 @@ const SirohForm = () => {
                   placeholder="0000-0000000"
                   maxLength={12}
                   required={required}
-                  className={INPUT}
+                  className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
                 />
               </Field>
             </FormRow>
@@ -1185,24 +1070,14 @@ const SirohForm = () => {
 
           <button
             type="submit"
-            className={`${BTN_SUCCESS_BLOCK} disabled:opacity-60`}
+            className={`cursor-pointer rounded border-none text-xs font-bold uppercase text-white transition-colors w-full bg-success px-5 py-2.5 text-[13px] hover:bg-[#047857] disabled:opacity-60`}
             disabled={submitting || !inspeccionId}
           >
             {submitting
               ? "Guardando…"
               : "💾 Registrar Inspección Completa en Base de Datos SIROH"}
           </button>
-          {saveMessage && (
-            <p
-              className={`mt-2 text-center text-xs ${
-                saveMessage.tipo === "error"
-                  ? "text-red-600"
-                  : "text-green-700"
-              }`}
-            >
-              {saveMessage.texto}
-            </p>
-          )}
+          <SaveMessage message={saveMessage} className="mt-2 text-center text-xs" />
         </div>
       </form>
 

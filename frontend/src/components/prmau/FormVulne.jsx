@@ -1,15 +1,20 @@
 import { FormTabs } from "./FormTabs"
 import { FormContainer } from "./FormContainer"
 import { FormSection } from "./FormSection"
-import { FormSectionTitle } from "./FormSectionTitle"
-import { FormSectionSubTitle } from "./FormSectionSubTitle"
-import { FormCheckboxGrid } from "./FormCheckboxGrid"
-import { CheckboxItem } from "./CheckboxItem"
-import { FormRow } from "./FormRow"
-import { FormGroup } from "./FormGroup"
+import {
+    CheckboxItem,
+    FormCheckboxGrid,
+    FormGroup,
+    FormSectionSubTitle,
+    FormSectionTitle,
+    PrmauFormRow,
+} from "../formPrimitives"
 import { FormBody } from "./FormBody"
 import { FormActions } from "./FormActions"
 import { FormSelect } from "./FormSelect"
+import { FormHeader } from "./FormHeader"
+import { SubmitStatus } from "./SubmitStatus"
+import { useFormSubmit } from "./useFormSubmit"
 
 import { useEffect, useState } from "react"
 import {
@@ -48,18 +53,6 @@ const tabList = [
     },
 ]
 
-const formToPayload = (form) => {
-    const fd = new FormData(form)
-    const out = {}
-    for (const [key, value] of fd.entries()) {
-        if (!key) continue
-        if (out[key] === undefined) out[key] = value
-        else if (Array.isArray(out[key])) out[key].push(value)
-        else out[key] = [out[key], value]
-    }
-    return out
-}
-
 export const FormVulne = () => {
     
     /*  como funciona el codigo catastral?
@@ -89,9 +82,16 @@ export const FormVulne = () => {
     const [sector, setSector] = useState(null)
     const [manzana, setManzana] = useState(null)
 
-    const [submitStatus, setSubmitStatus] = useState({ type: "", message: "" })
-    const [submitting, setSubmitting] = useState(false)
-     
+    const { submitStatus, submitting, handleSubmit } = useFormSubmit({
+        submit: submitVulnerabilidad,
+        buildPayload: (payload) => {
+            payload.cod_catastral = codCatastro.join("-")
+            return payload
+        },
+        successMessage: (res) => `Formulario de vulnerabilidad enviado correctamente${res?.id ? ` (ID: ${res.id})` : ""}.`,
+        errorMessage: "No se pudo enviar el formulario de vulnerabilidad.",
+    })
+
     // CONECCION CON LA BASE DE DATOS
 
     // buscar parroquias
@@ -218,52 +218,19 @@ export const FormVulne = () => {
 
     const handleChange = ()=>{} // todabia no hecho
 
-    const handleSubmit = async (e) => {
-        e.preventDefault()
-        setSubmitStatus({ type: "", message: "" })
-        setSubmitting(true)
-        try {
-            const payload = formToPayload(e.currentTarget)
-            payload.cod_catastral = codCatastro.join("-")
-            // TODO(backend): confirmar mapeo definitivo de campos y tabla destino.
-            const res = await submitVulnerabilidad(payload)
-            setSubmitStatus({
-                type: "success",
-                message: `Formulario de vulnerabilidad enviado correctamente${res?.id ? ` (ID: ${res.id})` : ""}.`,
-            })
-        } catch (error) {
-            setSubmitStatus({
-                type: "error",
-                message: error?.response?.data?.message || "No se pudo enviar el formulario de vulnerabilidad.",
-            })
-        } finally {
-            setSubmitting(false)
-        }
-    }
-    
   return (
     <FormContainer>
         
         <form onSubmit={handleSubmit} onChange={handleChange}>
 
-            <header className="flex border-b-3 border-b-vul-primary mb-5">
-
-                <div className="text-center flex-1 pb-4 font-segoe">
-                    <h1 className="text-vul-primary text-2xl font-bold">Alcaldía de Caracas</h1>
-                    <h2 className="text-vul-secondary font-bold">Instituto Municipal de Gestión de Riesgos y Administración de Desastres</h2>
-                    <h3>REGISTRO DE VULNERABILIDAD FÍSICA (IMGRAD)</h3>
+            <FormHeader title="REGISTRO DE VULNERABILIDAD FÍSICA (IMGRAD)">
+                <div>
+                    <strong>Nº CONTROL:</strong> 
+                    <input name={"n_ficha"} className="text-siroh-alert-red font-bold w-16 text-center" readOnly/>
                 </div>
-
-                <div className="meta-info">
-                    <div>
-                        <strong>Nº CONTROL:</strong> 
-                        <input name={"n_ficha"} className="text-siroh-alert-red font-bold w-16 text-center" readOnly/>
-                    </div>
-                    <div> <strong>Fecha:</strong> <input type="date" name="fch_transcrip" readOnly/> </div>
-                    <div> <strong>Fecha Levantamiento:</strong> <input type="date" name="fch_levan" readOnly/> </div>
-                </div>
-
-            </header>
+                <div> <strong>Fecha:</strong> <input type="date" name="fch_transcrip" readOnly/> </div>
+                <div> <strong>Fecha Levantamiento:</strong> <input type="date" name="fch_levan" readOnly/> </div>
+            </FormHeader>
 
             <FormTabs tabList={tabList}/> {/* Navegacion del formulario */}
             
@@ -274,12 +241,12 @@ export const FormVulne = () => {
                     <FormSectionTitle text="1. Datos Geográficos, Sociales y del Ocupante"/>
                     
                     <FormSectionSubTitle text={"Informacion del catastro"}/>
-                    <FormRow>
+                    <PrmauFormRow>
                         <FormSelect inputName="parroquia" label="Parroquia" optionList={listParroquias} actionHandler={handleParroquia}/>
                         <FormSelect inputName="sector" label="Sector" optionList={listSectores} filter={parroquiaFilter} actionHandler={handleSector}/>
                         <FormSelect inputName="manzana" label="Manzana" optionList={listManzanas} filter={parroquiaFilter} actionHandler={handleManzana}/>
-                    </FormRow>
-                    <FormRow>
+                    </PrmauFormRow>
+                    <PrmauFormRow>
                         <FormSelect inputName="organizacion" label="Organizacion" optionList={listOrganizaciones} filter={parroquiaFilter}/>
                         {/* CODIGO CATASTRAL Debo ver si pongo esto en un componente */}
                         <div className="flex flex-col">
@@ -305,17 +272,17 @@ export const FormVulne = () => {
                                 onChange={handleCodCatastral}
                             />
                         </div>
-                    </FormRow>
+                    </PrmauFormRow>
 
                     <FormSectionSubTitle text={"Informacion de la persona"}/>
-                    <FormRow>
+                    <PrmauFormRow>
                         <FormGroup inputName="apellidos_nombres" label={"Apellidos y Nombres del Ocupante"}/>
                         <FormGroup inputName="cedula" label={"Cédula de Identidad"}/>
-                    </FormRow>
-                    <FormRow>
+                    </PrmauFormRow>
+                    <PrmauFormRow>
                         <FormGroup inputName="tlf_celular" label={"Teléfono Celular"}/>
                         <FormGroup inputName="tlf_local" label={"Teléfono Local"}/>
-                    </FormRow>
+                    </PrmauFormRow>
 
                     <FormSectionSubTitle text={"Condicion"}/>
 
@@ -353,9 +320,9 @@ export const FormVulne = () => {
                     </FormCheckboxGrid>
 
                     <FormSectionSubTitle text={"Observaciones:"}/>
-                    <FormRow>
+                    <PrmauFormRow>
                         <FormGroup inputType={"textarea"} inputName={"obs_parcela"} />
-                    </FormRow>
+                    </PrmauFormRow>
                 </FormSection>
 
                 {/* 3. */}
@@ -365,30 +332,30 @@ export const FormVulne = () => {
 
                     <FormSectionSubTitle text={"Tipo de vivienda"}/>
 
-                    <FormRow>
-                        <FormRow>
+                    <PrmauFormRow>
+                        <PrmauFormRow>
                             <CheckboxItem inputType="radio" inputName={"tipo_vivienda"} label={"Unifamiliar"}/>
                             <CheckboxItem inputType="radio" inputName={"tipo_vivienda"} label={"Multifamiliar"}/>
-                        </FormRow>
+                        </PrmauFormRow>
                         <FormGroup inputType="number" inputName={"n_pisos"} label={"N° de Pisos"}/>
                         <FormGroup inputType="number" inputName={"n_entradas_indep"} label={"N° de Entradas Indep."}/>
                         <FormGroup inputType="number" inputName={"n_familias"} label={"N° de Familias"}/>
-                    </FormRow>
+                    </PrmauFormRow>
 
                     <FormSectionSubTitle text={"Desglose Demográfico (N° Personas en la Vivienda: 3)"}/>
-                    <FormRow>
+                    <PrmauFormRow>
                             <FormGroup inputType="number" inputName={"n_lactantes"} label={"Lactantes"}/>
                             <FormGroup inputType="number" inputName={"n_ninos"} label={"Niños"}/>
                             <FormGroup inputType="number" inputName={"n_adultos"} label={"Adultos"}/>
                             <FormGroup inputType="number" inputName={"n_adultos_mayores"} label={"Adultos Mayores"}/>
                             <FormGroup inputType="number" inputName={"n_discapacitados"} label={"Discapacitados"}/>
                             <FormGroup inputType="number" inputName={"n_personas"} label={"N° de personas"}/>
-                    </FormRow>
+                    </PrmauFormRow>
 
                     <FormSectionSubTitle text={"Observaciones"}/>
-                    <FormRow>
+                    <PrmauFormRow>
                         <FormGroup inputType="textarea" inputName={"obs_vivienda"} />
-                    </FormRow>
+                    </PrmauFormRow>
                     
                     
                 </FormSection>
@@ -439,13 +406,13 @@ export const FormVulne = () => {
                     </FormCheckboxGrid>
                     
                     <FormSectionSubTitle text={"Observaciones:"}/>
-                    <FormRow>
+                    <PrmauFormRow>
                         <FormGroup inputType={"textarea"} inputName={"obs_materiales"} />
-                    </FormRow>
+                    </PrmauFormRow>
                     {/* <FormSectionSubTitle text={"Pisos / Acabados"}/>
-                    <FormRow>
+                    <PrmauFormRow>
                         <FormGroup inputName={""} label={"Especificar tipología o estado físico de los pisos..."} />
-                    </FormRow> */}
+                    </PrmauFormRow> */}
                     
                 </FormSection>
                 
@@ -486,17 +453,11 @@ export const FormVulne = () => {
                     </FormCheckboxGrid>
 
                     <FormSectionSubTitle text={"Observaciones"} />
-                    <FormRow>
+                    <PrmauFormRow>
                         <FormGroup inputType={"textarea"} inputName={"obs_equipamientos"} />
-                    </FormRow>
+                    </PrmauFormRow>
 
-                    {submitStatus.message && (
-                        <div
-                            className={`mt-4 rounded-md px-4 py-3 text-sm font-semibold ${submitStatus.type === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}
-                        >
-                            {submitStatus.message}
-                        </div>
-                    )}
+                    <SubmitStatus status={submitStatus} />
 
                     <FormActions disabled={submitting}/> {/* Submit BTN */} 
 

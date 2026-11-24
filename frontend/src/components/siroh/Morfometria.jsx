@@ -12,17 +12,8 @@
      se deja con fila "sin datos". */
 
 import { useState } from "react";
-import {
-  BTN_PRIMARY,
-  CARD,
-  CARD_SUB,
-  CARD_TITLE,
-  INPUT,
-  PRINT_PREVIEW,
-  TABLE,
-  TH,
-} from "./styles";
-import { EmptyRow, Field, FormRow, SectionTitle, TabBtn } from "./helpers";
+import { EmptyRow, TabBtn } from "./helpers";
+import { Field, FormRow, SectionTitle } from "../formPrimitives";
 
 const Morfometria = () => {
   const [tab, setTab] = useState("mo-carga");
@@ -34,9 +25,9 @@ const Morfometria = () => {
   };
 
   return (
-    <div className={CARD}>
-      <h2 className={CARD_TITLE}>Estudios de Parámetros de Forma y Relieve</h2>
-      <div className={CARD_SUB}>
+    <div className="mb-6 rounded-lg border-t-4 border-secondary bg-white p-[30px] shadow-[0_4px_6px_rgba(0,0,0,0.05)]">
+      <h2 className="mb-1 text-xl font-bold uppercase text-primary">Estudios de Parámetros de Forma y Relieve</h2>
+      <div className="mb-6 text-[12.5px] font-semibold uppercase tracking-[0.5px] text-[#64748b]">
         Cálculo de Variables Geométricas en Cuerpos de Agua
       </div>
 
@@ -61,31 +52,31 @@ const Morfometria = () => {
                 id="mo-nombre"
                 placeholder="Ej. Quebrada Pomosa"
                 required
-                className={INPUT}
+                className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none"
               />
             </Field>
             <Field label="Área de la Cuenca (A) [km²]">
-              <input type="number" step="0.01" id="mo-area" required className={INPUT} />
+              <input type="number" step="0.01" id="mo-area" required className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none" />
             </Field>
             <Field label="Perímetro de Cuenca (P) [km]">
-              <input type="number" step="0.01" id="mo-perimetro" required className={INPUT} />
+              <input type="number" step="0.01" id="mo-perimetro" required className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none" />
             </Field>
           </FormRow>
 
           <FormRow>
             <Field label="Longitud Cauce Principal (L) [km]">
-              <input type="number" step="0.01" id="mo-long" required className={INPUT} />
+              <input type="number" step="0.01" id="mo-long" required className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none" />
             </Field>
             <Field label="Cota Máxima (Hmax) [msnm]">
-              <input type="number" id="mo-cmax" required className={INPUT} />
+              <input type="number" id="mo-cmax" required className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none" />
             </Field>
             <Field label="Cota Mínima (Hmin) [msnm]">
-              <input type="number" id="mo-cmin" required className={INPUT} />
+              <input type="number" id="mo-cmin" required className="rounded border border-line bg-white px-2.5 py-[7px] text-[12.5px] outline-none" />
             </Field>
           </FormRow>
 
           <div className="mt-[15px] text-right">
-            <button type="submit" className={BTN_PRIMARY}>
+            <button type="submit" className="cursor-pointer rounded border-none text-xs font-bold uppercase text-white transition-colors bg-primary px-5 py-2.5">
               ⚡ Procesar Parámetros y Almacenar
             </button>
           </div>
@@ -96,14 +87,14 @@ const Morfometria = () => {
         <h3 className="mb-2.5 text-[13px] font-bold uppercase text-primary">
           Catálogo de Estudios Guardados
         </h3>
-        <table className={TABLE}>
+        <table className="mb-[15px] mt-2.5 w-full border-collapse">
           <thead>
             <tr>
-              <th className={TH}>Cuerpo de Agua</th>
-              <th className={TH}>Área (km²)</th>
-              <th className={TH}>Gravelius (Kc)</th>
-              <th className={TH}>Pendiente (λ)</th>
-              <th className={TH}>Acciones Técnicas</th>
+              <th className="border-b border-[#e2e8f0] bg-lightblue px-3 py-2.5 text-left text-[10.5px] font-bold uppercase text-primary">Cuerpo de Agua</th>
+              <th className="border-b border-[#e2e8f0] bg-lightblue px-3 py-2.5 text-left text-[10.5px] font-bold uppercase text-primary">Área (km²)</th>
+              <th className="border-b border-[#e2e8f0] bg-lightblue px-3 py-2.5 text-left text-[10.5px] font-bold uppercase text-primary">Gravelius (Kc)</th>
+              <th className="border-b border-[#e2e8f0] bg-lightblue px-3 py-2.5 text-left text-[10.5px] font-bold uppercase text-primary">Pendiente (λ)</th>
+              <th className="border-b border-[#e2e8f0] bg-lightblue px-3 py-2.5 text-left text-[10.5px] font-bold uppercase text-primary">Acciones Técnicas</th>
             </tr>
           </thead>
           <tbody id="tabla-morfometria-cuerpo">
@@ -113,7 +104,7 @@ const Morfometria = () => {
             </EmptyRow>
           </tbody>
         </table>
-        <div id="print-area" className={PRINT_PREVIEW} />
+        <div id="print-area" className="hidden border-2 border-black bg-white p-[30px] mt-5 font-['Courier_New',monospace]" />
       </div>
     </div>
   );
