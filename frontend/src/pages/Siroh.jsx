@@ -14,6 +14,7 @@
      re-implementadas o marcadas con TODO en cada componente.
    - siroh.html se conserva en esta carpeta como referencia. */
 
+import { lazy, Suspense, useCallback, useState } from "react";
 import { Navigate, Outlet, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../context/auth";
 import { canAccess, SIROH_SECTION_ACCESS } from "../auth/permissions";
@@ -28,6 +29,8 @@ import Meteorologia from "../components/siroh/Meteorologia";
 import Hidrologia from "../components/siroh/Hidrologia";
 import Morfometria from "../components/siroh/Morfometria";
 import { MET_SUB_LINKS } from "../components/siroh/options";
+
+const EditFichaModal = lazy(() => import("../components/siroh/EditFichaModal"));
 
 const MET_CHILDREN = MET_SUB_LINKS.map(({ key, label }) => ({
   key,
@@ -183,6 +186,34 @@ export const Siroh = () => {
   const { signOut, role } = useAuth();
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const [editFichaOpen, setEditFichaOpen] = useState(false);
+
+  const handleEditFichaClose = useCallback(() => setEditFichaOpen(false), []);
+  const handleEditFichaLoaded = useCallback((ficha) => {
+    setEditFichaOpen(false);
+    navigate(`/siroh/siroh?edit=${ficha.cod_n}`, { state: { ficha } });
+  }, [navigate]);
+
+  /* El submenu "Editar ficha" solo existe para quien puede escribir en SIROH.
+     Se deriva del array exportado sin mutarlo. */
+  const puedeEditarFicha = canAccess(SIROH_SECTION_ACCESS.siroh, role);
+  const sidebarItems = SIROH_ITEMS.map((item) =>
+    item.key !== "siroh"
+      ? item
+      : {
+          ...item,
+          children: item.children
+            .filter(
+              (child) =>
+                child.id !== "sub-link-editar-ficha" || puedeEditarFicha
+            )
+            .map((child) =>
+              child.id === "sub-link-editar-ficha"
+                ? { ...child, onClick: () => setEditFichaOpen(true) }
+                : child
+            ),
+        }
+  );
 
   /* Mientras el index redirige, el titulo usa la primera seccion permitida. */
   const activeKey =
@@ -201,7 +232,7 @@ export const Siroh = () => {
         title={INSTITUTION.sigla}
         subtitle={INSTITUTION.tagline}
         menuId="main-menu"
-        items={SIROH_ITEMS}
+        items={sidebarItems}
         onLogout={handleLogout}
       />
 
@@ -211,6 +242,21 @@ export const Siroh = () => {
 
         <Outlet />
       </main>
+
+      {editFichaOpen && (
+        <Suspense
+          fallback={
+            <div className="fixed inset-0 z-2000 flex items-center justify-center bg-slate-950/70 text-sm text-white">
+              Cargando modal…
+            </div>
+          }
+        >
+          <EditFichaModal
+            onClose={handleEditFichaClose}
+            onLoaded={handleEditFichaLoaded}
+          />
+        </Suspense>
+      )}
     </div>
   );
 };

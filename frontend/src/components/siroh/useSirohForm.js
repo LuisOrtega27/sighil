@@ -2,14 +2,77 @@
    useSirohForm.js
    Logica compartida por los dos formularios SIROH (SirohForm.jsx y
    SirohRawForm.jsx): guardado en dos pasos, patron de ficha, coordenadas
-   del mapa y reinicio. Solo difieren en los catalogos/estados propios de
-   cada vista, que se entregan mediante resetExtras().
+   del mapa, carga de una ficha existente y reinicio. Solo difieren en los
+   catalogos/estados propios de cada vista, entregados mediante
+   resetExtras() / onCargar().
    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 
 import { useCallback, useState } from "react";
 import { createInspeccion, updateInspeccion } from "../../api/siroh";
 
-export const useSirohForm = ({ refs, resetExtras }) => {
+/* La BD guarda estos campos, pero no son editables desde los controles del form. */
+const CAMPOS_INTERNOS = new Set([
+    "id",
+    "user_id",
+    "cod_n",
+    "ficha_n",
+    "modification",
+    "created_at",
+    "updated_at",
+]);
+
+const texto = (valor) => (valor === null || valor === undefined ? "" : String(valor));
+
+/* La BD tiene fechas en formatos mezclados; input[type=date] solo acepta ISO. */
+const normalizarFecha = (valor) => {
+    const contenido = texto(valor);
+    if (!contenido) return "";
+    if (/^\d{4}-\d{2}-\d{2}/.test(contenido)) return contenido.slice(0, 10);
+
+    const partes = contenido.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
+    if (!partes) return "";
+    const [, dia, mes, anio] = partes;
+    return `${anio}-${mes.padStart(2, "0")}-${dia.padStart(2, "0")}`;
+};
+
+/* Los inputs son no controlados: se escribe directo en el DOM para conservar
+   pattern/required y groups de radio/checkbox. */
+const aplicarValor = (control, valor, grupal) => {
+    if (control.type === "hidden") return;
+
+    const contenido = texto(valor);
+
+    if (control.type === "radio") {
+        if (grupal) control.checked = control.value === contenido;
+        return;
+    }
+
+    if (control.type === "checkbox") {
+        const valores = contenido.split(",").map((item) => item.trim()).filter(Boolean);
+        control.checked =
+            contenido === "1" ||
+            contenido.toLowerCase() === "true" ||
+            valores.includes(control.value);
+        return;
+    }
+
+    control.value =
+      control.type === "date" ? normalizarFecha(contenido) : contenido;
+};
+
+const escribirCampo = (campo, valor) => {
+    if (!campo) return;
+
+    /* RadioNodeList / HTMLCollection: varios controles comparten el name. */
+    if (typeof campo.length === "number" && !campo.nodeType) {
+        Array.from(campo).forEach((control) => aplicarValor(control, valor, true));
+        return;
+    }
+
+    aplicarValor(campo, valor, false);
+};
+
+export const useSirohForm = ({ refs, resetExtras, onCargar }) => {
   const { form: formRef, cod: codRef, east: eastRef, north: northRef, ficha: fichaRef } = refs;
 
   const [mapOpen, setMapOpen] = useState(false);
@@ -115,6 +178,37 @@ export const useSirohForm = ({ refs, resetExtras }) => {
     }
   };
 
+  /* Carga una fila existente devuelta por GET /inspecciones/:id. El payload
+     se escribe por name; los catalogos dependientes los resuelve la vista
+     mediante onCargar (SirohForm necesita sincronizar cuenca/subcuenca). */
+  const cargarInspeccion = useCallback(async (ficha) => {
+    if (!ficha) return;
+
+    const form = formRef.current;
+    if (form) {
+      Object.entries(ficha).forEach(([name, value]) => {
+        if (CAMPOS_INTERNOS.has(name)) return;
+        escribirCampo(form.elements.namedItem(name), value);
+      });
+    }
+
+    const codigo = Number(ficha.cod_n);
+    if (codRef.current) codRef.current.value = String(codigo).padStart(6, "0");
+    setInspeccionId(codigo);
+
+    const fichaValor = texto(ficha.ficha_n);
+    if (fichaRef.current) fichaRef.current.value = fichaValor;
+    setFichaPrefix(fichaValor.replace(/\d{2}$/, ""));
+
+    setMapInitial({ e: texto(ficha.coor_utm__e), n: texto(ficha.coor_utm__n) });
+    setSaveMessage({
+      tipo: "ok",
+      texto: `Ficha ${String(codigo).padStart(6, "0")} cargada correctamente.`,
+    });
+
+    await onCargar?.(ficha);
+  }, [formRef, codRef, fichaRef, onCargar]);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (!inspeccionId || submitting) return;
@@ -158,6 +252,7 @@ export const useSirohForm = ({ refs, resetExtras }) => {
     handleMapClose,
     handleMapOpen,
     handleCrearRegistro,
+    cargarInspeccion,
     handleSubmit,
     handleReset,
     limpiarFormulario,

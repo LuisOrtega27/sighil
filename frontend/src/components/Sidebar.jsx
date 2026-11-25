@@ -41,9 +41,9 @@ const Sidebar = ({ title, subtitle, menuId, items, onLogout }) => {
   return (
     <aside className="fixed left-0 top-0 z-100 flex h-screen w-72 flex-col justify-between bg-primary px-5 py-6 text-white shadow-[4px_0_10px_rgba(0,0,0,0.1)]">
       <div className="text-center">
-        <div className="mb-3 flex max-h-22 w-full items-center justify-center rounded-lg bg-white/5 p-2.5">
+        <Link to={"/"} className="mb-3 flex max-h-22 w-full items-center justify-center rounded-lg bg-white/5 p-2.5">
           <img src={INSTITUTION.logo} alt={`Logo ${INSTITUTION.alcaldia}`} className="max-h-16 max-w-full object-contain" />
-        </div>
+        </Link>
         <h2 className="mb-3 border-b-2 border-secondary pb-2 text-[22px] font-extrabold tracking-[1px]">{title}</h2>
         <p className="text-[10px] font-bold uppercase leading-[1.3] text-[#94a3b8]">{subtitle}</p>
 
@@ -63,6 +63,7 @@ const Sidebar = ({ title, subtitle, menuId, items, onLogout }) => {
                           <button
                             type="button"
                             id={child.id}
+                            onClick={child.onClick}
                             className={`mb-0.5 block cursor-pointer rounded-r border-l-2 border-white/20 py-1.5 pl-2.5 pr-2.5 text-[11.5px] text-white transition-colors hover:border-l-white w-full bg-transparent text-left`}
                           >
                             {child.label}

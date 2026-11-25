@@ -26,6 +26,31 @@ const obtenerColumnasPermitidas = async () => {
     );
 };
 
+/* Consulta para el modal "Editar ficha": acepta cod_n con o sin ceros. */
+const getInspeccion = async (req, res) => {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({ message: "invalid inspeccion id" });
+    }
+
+    try {
+        const [rows] = await pool.query(
+            "SELECT * FROM ficha_eoh WHERE cod_n = ?",
+            [id]
+        );
+
+        if (!rows.length) {
+            return res.status(404).json({ message: "inspeccion not found" });
+        }
+
+        res.status(200).json(rows[0]);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "internal server error" });
+    }
+};
+
 /* Paso 1: crear la fila vacia y devolver el codigo de 6 digitos. */
 const createInspeccion = async (req, res) => {
     try {
@@ -93,6 +118,7 @@ const updateInspeccion = async (req, res) => {
 };
 
 export {
+    getInspeccion,
     createInspeccion,
     updateInspeccion,
 };

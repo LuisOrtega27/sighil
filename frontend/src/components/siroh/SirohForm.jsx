@@ -27,6 +27,7 @@
 import {
   lazy,
   Suspense,
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -46,6 +47,7 @@ import {
 } from "../formPrimitives";
 import { SaveMessage } from "./SaveMessage";
 import { useSirohForm } from "./useSirohForm";
+import { useSirohEdit } from "./useSirohEdit";
 import { INSTITUTION } from "../../config/institution";
 import {
   getCuencas,
@@ -158,6 +160,69 @@ const SirohForm = () => {
   const fichaRef = useRef(null);
   const codRef = useRef(null);
 
+  /* Al cargar una ficha existente se reconstruyen los selects dependientes
+     desde el prefijo guardado en ficha_n: CC-SSS-PPP-ABB-NN. */
+  const handleFichaCargada = useCallback(async (ficha) => {
+    const fichaValor = String(ficha?.ficha_n ?? "");
+    const [cuencaCod = "", subCod = "", parroquiaCod = ""] = fichaValor.split("-");
+
+    let listaCuencas = cuencas;
+    if (!listaCuencas.length) {
+      try {
+        listaCuencas = await getCuencas();
+        setCuencas(listaCuencas);
+      } catch {
+        setCatalogError(true);
+      }
+    }
+
+    let listaParroquias = parroquias;
+    if (!listaParroquias.length) {
+      try {
+        listaParroquias = await getParroquias();
+        setParroquias(listaParroquias);
+      } catch {
+        setCatalogError(true);
+      }
+    }
+
+    const cuenca = listaCuencas.find(
+      (item) =>
+        String(item.id).padStart(2, "0") === cuencaCod ||
+        String(item.id) === String(Number(cuencaCod))
+    );
+    const parroquia = listaParroquias.find(
+      (item) =>
+        String(item.id).padStart(2, "0") === parroquiaCod ||
+        String(item.id) === String(Number(parroquiaCod))
+    );
+
+    const cuencaSel = cuenca ? String(cuenca.id) : "";
+    setCuencaId(cuencaSel);
+    setParroquiaId(
+      parroquia ? String(parroquia.id) : parroquiaCod ? String(Number(parroquiaCod)) : ""
+    );
+    setSubcuencas([]);
+    setSubcuencaId("");
+
+    if (!cuencaSel) return;
+
+    let listaSubcuencas = [];
+    try {
+      listaSubcuencas = await getSubcuencas(cuencaSel);
+    } catch {
+      setCatalogError(true);
+    }
+    setSubcuencas(listaSubcuencas);
+
+    const subcuenca = listaSubcuencas.find(
+      (item) =>
+        String(item.codigo).padStart(2, "0") === subCod ||
+        String(item.id) === String(Number(subCod))
+    );
+    if (subcuenca) setSubcuencaId(String(subcuenca.id));
+  }, [cuencas, parroquias]);
+
   /* Guardado en dos pasos, coordenadas y patron de ficha: logica compartida
      con SirohRawForm.jsx. */
   const {
@@ -169,6 +234,8 @@ const SirohForm = () => {
     creating,
     submitting,
     saveMessage,
+    setSaveMessage,
+    cargarInspeccion,
     handleFichaChange,
     handleMapOpen,
     handleMapClose,
@@ -189,7 +256,10 @@ const SirohForm = () => {
       setParroquiaId("");
       setSubcuencas([]);
     },
+    onCargar: handleFichaCargada,
   });
+
+  useSirohEdit({ cargarInspeccion, setSaveMessage });
 
   const fichaEditable = Boolean(fichaPrefix);
 
@@ -543,7 +613,7 @@ const SirohForm = () => {
                 type="text"
                 name="header_codigo__altura"
                 id="header_codigo__altura"
-                pattern="\d{1,4}(,\d{2})?"
+                pattern="\d{1,4}(.\d{2})?"
                 maxLength={7}
                 required
                 className="rounded border border-line bg-white px-2.5 py-2 text-[12.5px] outline-none"

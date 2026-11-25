@@ -6,11 +6,12 @@ import {
   useState,
 } from "react";
 import { FaArrowLeft, FaDrawPolygon, FaMapLocationDot } from "react-icons/fa6";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { INSTITUTION } from "../config/institution";
 import { SaveMessage } from "../components/siroh/SaveMessage";
 import { useSirohForm } from "../components/siroh/useSirohForm";
+import { useSirohEdit } from "../components/siroh/useSirohEdit";
 import canalRectangular from "../assets/imgs/canales/canales-rectangular.png";
 import canalTrapezoidal from "../assets/imgs/canales/canales-trapezoidal.png";
 import canalTriangular from "../assets/imgs/canales/canales-triangular.png";
@@ -28,6 +29,7 @@ import morteroPolvo from "../assets/imgs/morteros/mortero-polvo.png";
 /* El modal se carga solo cuando se pulsa #modal-map-btn. */
 const CoordinateMapModal = lazy(() => import("../components/siroh/CoordinateMapModal"));
 const DemarcacionModal = lazy(() => import("../components/siroh/DemarcacionModal"));
+const EditFichaModal = lazy(() => import("../components/siroh/EditFichaModal"));
 
 /* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    Constantes de estilo (migracion de SirohRawForm.css a Tailwind v4)
@@ -79,7 +81,15 @@ const NAV_BUTTON = "rounded bg-[#2288ee] px-4 py-2 font-bold text-white transiti
 
 export const SirohRawForm = () => {
   const [demarcacionOpen, setDemarcacionOpen] = useState(false);
+  const [editFichaOpen, setEditFichaOpen] = useState(false);
   const [fichaSnapshot, setFichaSnapshot] = useState("");
+  const navigate = useNavigate();
+
+  const handleEditFichaClose = useCallback(() => setEditFichaOpen(false), []);
+  const handleEditFichaLoaded = useCallback((ficha) => {
+    setEditFichaOpen(false);
+    navigate(`/siroh-raw-Form?edit=${ficha.cod_n}`, { state: { ficha } });
+  }, [navigate]);
 
   const formRef = useRef(null);
   const codRef = useRef(null);
@@ -99,6 +109,8 @@ export const SirohRawForm = () => {
     creating,
     submitting,
     saveMessage,
+    setSaveMessage,
+    cargarInspeccion,
     handleFichaChange,
     handleMapOpen,
     handleMapClose,
@@ -119,6 +131,8 @@ export const SirohRawForm = () => {
       setFichaSnapshot("");
     },
   });
+
+  useSirohEdit({ cargarInspeccion, setSaveMessage });
 
   const handleDemarcacionClose = useCallback(() => setDemarcacionOpen(false), []);
   const handleDemarcacionOpen = useCallback(() => {
@@ -144,11 +158,13 @@ export const SirohRawForm = () => {
   return (
     <>
         <nav className="main_nav sticky top-0 z-50 flex items-center justify-between gap-4 bg-[#0f2c59] px-6 py-3 shadow-md">
-            <img src={INSTITUTION.logo} alt={`${INSTITUTION.alcaldia} - ${INSTITUTION.organismo}`} title={`${INSTITUTION.alcaldia} - ${INSTITUTION.organismo}`} className="h-14 w-auto"/>
-            <div className="hidden text-white md:block">
-              <p className="text-sm font-bold">{INSTITUTION.sigla}</p>
-              <p className="text-[11px]">{INSTITUTION.nombre}</p>
-            </div>
+            <Link to={"/"} className="flex items-center gap-2">
+                <img src={INSTITUTION.logo} alt={`${INSTITUTION.alcaldia} - ${INSTITUTION.organismo}`} title={`${INSTITUTION.alcaldia} - ${INSTITUTION.organismo}`} className="h-14 w-auto"/>
+                <div className="hidden text-white md:block">
+                <p className="text-sm font-bold">{INSTITUTION.sigla}</p>
+                <p className="text-[11px]">{INSTITUTION.nombre}</p>
+                </div>
+            </Link>
 
             <ul className="main_menu flex items-center gap-2">
                 <li>
@@ -160,6 +176,16 @@ export const SirohRawForm = () => {
                     <FaArrowLeft className="h-4 w-4" />
                     Volver a SIROH
                   </Link>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    id="main_menu__editFicha"
+                    onClick={() => setEditFichaOpen(true)}
+                    className={NAV_BUTTON}
+                  >
+                    Editar ficha
+                  </button>
                 </li>
                 <li className="relative">
                   <button
@@ -289,7 +315,7 @@ export const SirohRawForm = () => {
                             <span>N</span>
 
                             <label htmlFor="header_codigo__altura">ALTURA:</label>
-                            <input type="text" name="header_codigo__altura" id="header_codigo__altura" pattern="\d{1,4}(,\d{2})?" maxLength="7" required className={`${INPUT_BASE} w-[30%]`}/>
+                            <input type="text" name="header_codigo__altura" id="header_codigo__altura" pattern="\d{1,4}(.\d{2})?" maxLength="7" required className={`${INPUT_BASE} w-[30%]`}/>
                             <span>M.S.N.M</span>
                         </div>
                     </div>
@@ -1086,6 +1112,21 @@ export const SirohRawForm = () => {
               onClose={handleDemarcacionClose}
               onApply={handleDemarcacionApply}
               currentFicha={fichaSnapshot}
+            />
+          </Suspense>
+        )}
+
+        {editFichaOpen && (
+          <Suspense
+            fallback={
+              <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-slate-950/70 text-sm text-white">
+                Cargando modal…
+              </div>
+            }
+          >
+            <EditFichaModal
+              onClose={handleEditFichaClose}
+              onLoaded={handleEditFichaLoaded}
             />
           </Suspense>
         )}

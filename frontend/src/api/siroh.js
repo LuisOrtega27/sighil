@@ -1,5 +1,10 @@
 import client from "./client";
 
+export const getInspeccion = async (id) => {
+    const { data } = await client.get(`/siroh/inspecciones/${id}`);
+    return data;
+};
+
 export const createInspeccion = async () => {
     const { data } = await client.post("/siroh/inspecciones");
     return data;
