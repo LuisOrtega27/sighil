@@ -32,22 +32,18 @@ const updateProfile = async (req, res) => {
     const values = {
         fname: typeof fname === "string" ? fname.trim() : "",
         lname: typeof lname === "string" ? lname.trim() : "",
-        ci: typeof ci === "string" ? ci.trim() : "",
+        // ci: typeof ci === "string" ? ci.trim() : "",
         phone: typeof phone === "string" ? phone.trim() : "",
         email: typeof email === "string" ? email.trim().toLowerCase() : "",
         direccion_id,
     };
 
     if (
-        !values.fname || !values.lname || !values.ci || !values.phone || !values.email ||
-        values.direccion_id === undefined || values.direccion_id === null || values.direccion_id === ""
+        !values.fname || !values.lname || !values.phone || values.direccion_id === undefined || values.direccion_id === null || values.direccion_id === ""
     ) {
         return res.status(400).json({ message: "Todos los campos del perfil son obligatorios" });
     }
 
-    if (!CI_PATTERN.test(values.ci)) {
-        return res.status(400).json({ message: "La cédula debe tener el formato 00.000.000" });
-    }
     if (!PHONE_PATTERN.test(values.phone)) {
         return res.status(400).json({ message: "El teléfono debe tener el formato 0000-0000000" });
     }
@@ -59,22 +55,22 @@ const updateProfile = async (req, res) => {
     }
 
     try {
-        const [duplicates] = await pool.query(
-            "SELECT id FROM users WHERE (email = ? OR ci = ?) AND id <> ?",
-            [values.email, values.ci, userId]
-        );
-        if (duplicates.length) {
-            return res.status(409).json({ message: "El correo o la cédula ya están registrados" });
-        }
+        // const [duplicates] = await pool.query(
+        //     "SELECT id FROM users WHERE (email = ? OR ci = ?) AND id <> ?",
+        //     [values.email, values.ci, userId]
+        // );
+        // if (duplicates.length) {
+        //     return res.status(409).json({ message: "El correo o la cédula ya están registrados" });
+        // }
 
         await pool.query(
             `UPDATE users
-                SET fname = ?, lname = ?, ci = ?, phone = ?, email = ?, direccion_id = ?
+                SET fname = ?, lname = ?, phone = ?, email = ?, direccion_id = ?
               WHERE id = ?`,
             [
                 values.fname,
                 values.lname,
-                values.ci,
+                // values.ci,
                 values.phone,
                 values.email,
                 Number(values.direccion_id),

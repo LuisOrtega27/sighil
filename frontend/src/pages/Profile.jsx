@@ -90,6 +90,7 @@ export const Profile = () => {
           </div>
         ) : profile ? (
           <div className="grid gap-6 md:grid-cols-[1fr_280px]">
+
             <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
               <h2 className="text-lg font-bold text-slate-900">Datos personales</h2>
               <p className="mt-1 text-xs text-slate-500">
@@ -133,6 +134,7 @@ export const Profile = () => {
                         maxLength: { value: 10, message: "10 caracteres máximo" },
                         pattern: { value: /^\d{1,2}\.\d{3}\.\d{3}$/, message: "Formato: 00.000.000" },
                       })}
+                      readOnly
                     />
                   </ProfileField>
 
@@ -199,6 +201,12 @@ export const Profile = () => {
               <h2 className="text-base font-bold text-slate-900">Información de la cuenta</h2>
 
               <dl className="mt-5 space-y-4 text-sm">
+
+                <div>
+                  <dt className="text-[10px] font-bold uppercase tracking-wide text-slate-400">ID de usuario</dt>
+                  <dd className="mt-0.5 font-mono font-extrabold text-slate-600">#{profile.id}</dd>
+                </div>
+
                 <div>
                   <dt className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Usuario</dt>
                   <dd className="mt-0.5 font-semibold text-slate-800">
@@ -223,16 +231,14 @@ export const Profile = () => {
                     </span>
                   </dd>
                 </div>
-                <div>
-                  <dt className="text-[10px] font-bold uppercase tracking-wide text-slate-400">ID de usuario</dt>
-                  <dd className="mt-0.5 font-mono text-xs text-slate-600">#{profile.id}</dd>
-                </div>
+
               </dl>
 
               <p className="mt-6 border-t border-slate-100 pt-4 text-[11px] leading-relaxed text-slate-400">
                 El rol y el estatus son asignados por el administrador del sistema y no se pueden modificar desde aquí.
               </p>
             </aside>
+
           </div>
         ) : null}
       </div>

@@ -63,7 +63,7 @@ const TopNavbar = ({ section, fallback = "territorial" }) => {
   const meta = SECTION_META[section] ?? SECTION_META[fallback] ?? SECTION_META.territorial;
 
   return (
-    <div className="mb-6 flex items-center justify-between border-b border-line pb-4">
+    <div className="mb-6 flex items-center  border-b border-line pb-4">
 
       <div>
         <Link
@@ -76,7 +76,7 @@ const TopNavbar = ({ section, fallback = "territorial" }) => {
         </Link>
       </div>
       
-      <div>
+      <div className="grow text-center">
         <h1 className="text-2xl font-bold">{meta.title}</h1>
         <p className="mt-0.5 text-[12.5px] text-[#64748b]">{meta.desc}</p>
       </div>
