@@ -9,8 +9,10 @@ import profileRoutes from "./routes/profile.route.js"
 import catalogosRoutes from "./routes/catalogos.route.js";
 import sirohRoutes from "./routes/siroh.route.js";
 import prmauRoutes from "./routes/prmau.route.js";
+import adminRoutes from "./routes/admin.route.js";
 
 import authRequired from './middlewares/authRequired.js';
+import roleRequired from './middlewares/roleRequired.js';
 
 
 dotenv.config();
@@ -49,7 +51,9 @@ app.use(cookieParser());
 
 // Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/users", userRoutes);
+/* Legacy: se mantiene, pero solo administradores. El modulo nuevo usa /api/admin. */
+app.use("/api/users", authRequired, roleRequired(1), userRoutes);
+app.use("/api/admin", adminRoutes);
 app.use("/api/profile", authRequired, profileRoutes);
 app.use("/api/catalogos", catalogosRoutes);
 app.use("/api/siroh", sirohRoutes);

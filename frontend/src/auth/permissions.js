@@ -18,6 +18,7 @@ export const ROLE_LABELS = Object.freeze({
 const TODOS = [ROLES.ADMIN, ROLES.EDITOR, ROLES.LECTOR, ROLES.VISITANTE]
 const GESTION = [ROLES.ADMIN, ROLES.EDITOR]
 const CONSULTA = [ROLES.ADMIN, ROLES.EDITOR, ROLES.LECTOR]
+const SOLO_ADMIN = [ROLES.ADMIN]
 
 /* Rutas de React Router. /siroh se permite a todos porque adentro se filtran
    los modulos: el visitante solo ve el Geoportal. */
@@ -28,6 +29,7 @@ export const ROUTE_ACCESS = Object.freeze({
   "/siroh-raw-Form": GESTION,
   "/prmau": GESTION,
   "/perfil": TODOS,
+  "/administracion": SOLO_ADMIN,
   "/acceso-denegado": TODOS,
 })
 

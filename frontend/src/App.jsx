@@ -6,6 +6,7 @@ import { SirohRawForm } from "./pages/SirohRawForm"
 import { Prmau, PRMAU_ITEMS, PRMAU_SECTION_ROUTES } from "./pages/Prmau"
 import { AccessDenied } from "./pages/AccessDenied"
 import { Profile } from "./pages/Profile"
+import { Admin } from "./pages/Admin"
 import { AuthProvider } from "./context/AuthContext"
 import { useAuth } from "./context/auth"
 import { ROUTE_ACCESS } from "./auth/permissions"
@@ -27,6 +28,10 @@ function AppRoutes() {
 
       <Route element={<ProtectedRoute allowedRoles={ROUTE_ACCESS["/perfil"]}/>}>
         <Route path="/perfil" element={<Profile/>}></Route>
+      </Route>
+
+      <Route element={<ProtectedRoute allowedRoles={ROUTE_ACCESS["/administracion"]}/>}>
+        <Route path="/administracion" element={<Admin/>}></Route>
       </Route>
 
       <Route element={<ProtectedRoute allowedRoles={ROUTE_ACCESS["/siroh"]}/>}>

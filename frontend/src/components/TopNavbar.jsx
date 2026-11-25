@@ -11,9 +11,11 @@
    (SIROH -> territorial, PRMAU -> vulnerabilidad).
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ */
 
-import { FaArrowLeft, FaUser } from "react-icons/fa6";
+import { FaArrowLeft, FaShieldHalved, FaUser } from "react-icons/fa6";
 
 import { Link } from "react-router-dom";
+import { ROLES } from "../auth/permissions";
+import { useAuth } from "../context/auth";
 // import { INSTITUTION } from "../config/institution";
 
 
@@ -57,9 +59,15 @@ const SECTION_META = {
     title: "Mi Perfil",
     desc: "Consulta y actualiza tus datos personales e institucionales.",
   },
+  // Administracion (solo visible para administradores)
+  administracion: {
+    title: "Administración",
+    desc: "Gestión de usuarios, roles y estadísticas de formularios.",
+  },
 };
 
 const TopNavbar = ({ section, fallback = "territorial" }) => {
+  const { role } = useAuth()
   const meta = SECTION_META[section] ?? SECTION_META[fallback] ?? SECTION_META.territorial;
 
   return (
@@ -83,6 +91,16 @@ const TopNavbar = ({ section, fallback = "territorial" }) => {
 
       <div className="flex items-center gap-3">
         {/* <div className="rounded bg-[#e2e8f0] px-3 py-1.5 text-[11px] font-bold text-primary">{INSTITUTION.sala}</div> */}
+        {Number(role) === ROLES.ADMIN && (
+          <Link
+            to="/administracion"
+            id="topnav-admin"
+            title="Administración"
+            className="rounded-full border border-primary bg-primary px-4 py-4 text-xs text-white transition-opacity hover:opacity-90"
+          >
+            <FaShieldHalved className="text-sm" />
+          </Link>
+        )}
         <Link
           to="/perfil"
           id="topnav-profile"

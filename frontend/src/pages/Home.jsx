@@ -22,6 +22,12 @@ const menu = [
     descripcion: "Consulta y actualiza tus datos personales e institucionales.",
     icono: "👤",
   },
+  {
+    to: "/administracion",
+    titulo: "Administración",
+    descripcion: "Gestiona usuarios, roles y estadísticas de formularios.",
+    icono: "🛡️",
+  },
 ]
 
 export const Home = () => {
