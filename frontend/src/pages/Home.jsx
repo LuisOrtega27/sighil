@@ -43,7 +43,7 @@ export const Home = () => {
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800">
       {/* ============ BANNER ============ */}
-      <header className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white shadow-lg">
+      <header className="bg-linear-to-r from-slate-700 via-slate-900 to-slate-700 text-white shadow-lg">
         <div className="mx-auto max-w-6xl px-6 py-10 flex flex-col md:flex-row items-center gap-8">
           <div className="shrink-0 rounded-2xl bg-white/10 p-4">
             <img
