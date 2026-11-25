@@ -208,7 +208,7 @@ export const SirohRawForm = () => {
 
             <nav className="nav_history hidden max-h-48 overflow-y-auto rounded bg-white p-2 shadow-lg md:block">
                 <ul className="menu_history flex flex-col gap-1">
-                    <li className="flex items-center gap-2 rounded bg-[#f0f7ff] px-2 py-1 text-[#1e293b]">
+                    <li className="flex items-center gap-2 rounded bg-[#f0f7ff] px-2 py-1 text-ink">
                         <button type="button" className="text-[#2288ee] underline">ver</button>
                         <span className="menu_history__code font-bold">000007</span>
                         <span className="menu_history__coords flex gap-1 text-xs text-[#64748b]">
@@ -227,7 +227,7 @@ export const SirohRawForm = () => {
 
             {/* <!--  ++++++++++++++++++++++++++++++++++++++++ PAGINA 1 ++++++++++++++++++++++++++++++++++++++++  --> */}
 
-            <section className="letter mx-auto min-h-[1300px] w-[1200px] p-5 shadow-[0_0_10px_#000] pg1">
+            <section className="letter mx-auto min-h-325 w-300 p-5 shadow-[0_0_10px_#000] pg1">
 
                 {/* <!--  ========================================== HEADER ==================================  --> */}
 
@@ -599,7 +599,7 @@ export const SirohRawForm = () => {
 
             {/* <!--  ++++++++++++++++++++++++++++++++++++++++ PAGINA 2 ++++++++++++++++++++++++++++++++++++++++  --> */}
 
-            <section className="letter mx-auto min-h-[1300px] w-[1200px] p-5 shadow-[0_0_10px_#000] pg2">
+            <section className="letter mx-auto min-h-325 w-300 p-5 shadow-[0_0_10px_#000] pg2">
 
                 {/* <!--  ========================================== CARAC_OBRA ==================================  --> */}
 
@@ -1074,7 +1074,7 @@ export const SirohRawForm = () => {
                     >
                       {submitting ? "Guardando…" : "ENVIAR"}
                     </button>
-                    <button type="reset" className="btn_reset rounded bg-[#e2e8f0] px-6 py-2 font-bold text-[#1e293b] transition hover:bg-[#cbd5e1] active:scale-95">REINICIAR</button>
+                    <button type="reset" className="btn_reset rounded bg-[#e2e8f0] px-6 py-2 font-bold text-ink transition hover:bg-[#cbd5e1] active:scale-95">REINICIAR</button>
                 </div>
                 <SaveMessage message={saveMessage} className="text-xs" />
             </div>
@@ -1103,7 +1103,7 @@ export const SirohRawForm = () => {
         {demarcacionOpen && (
           <Suspense
             fallback={
-              <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-slate-950/70 text-sm text-white">
+              <div className="fixed inset-0 z-2000 flex items-center justify-center bg-slate-950/70 text-sm text-white">
                 Cargando demarcación…
               </div>
             }
@@ -1119,7 +1119,7 @@ export const SirohRawForm = () => {
         {editFichaOpen && (
           <Suspense
             fallback={
-              <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-slate-950/70 text-sm text-white">
+              <div className="fixed inset-0 z-2000 flex items-center justify-center bg-slate-950/70 text-sm text-white">
                 Cargando modal…
               </div>
             }

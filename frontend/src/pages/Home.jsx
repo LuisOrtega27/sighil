@@ -7,7 +7,7 @@ const menu = [
   {
     to: "/siroh",
     titulo: "SIROH",
-    descripcion: "Módulo principal del SIROH.",
+    descripcion: "Sistema de Inspección y Registro de Obras Hidraulicas.",
     icono: "📋",
   },
   {
