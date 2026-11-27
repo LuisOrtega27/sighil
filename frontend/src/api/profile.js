@@ -10,3 +10,8 @@ export const updateProfile = async (profile) => {
     const { data } = await client.put("/profile", profile);
     return data;
 };
+
+export const changePassword = async (passwords) => {
+    const { data } = await client.put("/profile/password", passwords);
+    return data;
+};

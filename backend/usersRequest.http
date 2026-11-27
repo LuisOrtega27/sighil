@@ -44,3 +44,25 @@ GET http://localhost:4000/api/auth/me
 
 ### logout (borra la cookie)
 POST http://localhost:4000/api/auth/logout
+
+### getProfile (requiere la cookie del login)
+GET http://localhost:4001/api/profile
+
+### updateProfile (solo se actualiza el correo; los demas campos se ignoran)
+PUT http://localhost:4001/api/profile
+Content-Type: application/json
+
+{
+    "email": "usuario@ejemplo.com",
+    "fname": "CAMBIO IGNORADO"
+}
+
+### changePassword (requiere la clave actual)
+PUT http://localhost:4001/api/profile/password
+Content-Type: application/json
+
+{
+    "currentPassword": "123456",
+    "newPassword": "nuevaClave123",
+    "confirmPassword": "nuevaClave123"
+}
