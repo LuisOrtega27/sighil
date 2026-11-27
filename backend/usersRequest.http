@@ -57,6 +57,15 @@ Content-Type: application/json
     "fname": "CAMBIO IGNORADO"
 }
 
+### changeUserPassword (solo admin; el id debe ser de OTRO usuario)
+PATCH http://localhost:4001/api/admin/users/2/password
+Content-Type: application/json
+
+{
+    "newPassword": "nuevaClave123",
+    "confirmPassword": "nuevaClave123"
+}
+
 ### changePassword (requiere la clave actual)
 PUT http://localhost:4001/api/profile/password
 Content-Type: application/json

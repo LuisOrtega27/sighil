@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form"
 import { toast } from "react-toastify"
 
 import {
+    changeAdminUserPassword,
     changeAdminUserRole,
     deleteAdminUser,
     getAdminStats,
@@ -54,8 +55,16 @@ export const Admin = () => {
     const [loadingUsers, setLoadingUsers] = useState(true)
     const [loadingStats, setLoadingStats] = useState(true)
     const [editingId, setEditingId] = useState(null)
+    const [passwordId, setPasswordId] = useState(null)
     const [busyId, setBusyId] = useState(null)
     const { register, handleSubmit, reset, formState: { errors } } = useForm()
+    const {
+        register: registerPassword,
+        handleSubmit: handlePasswordSubmit,
+        getValues: getPasswordValues,
+        reset: resetPasswordForm,
+        formState: { errors: passwordErrors },
+    } = useForm()
 
     useEffect(() => {
         let active = true
@@ -90,6 +99,7 @@ export const Admin = () => {
     }, [days])
 
     const startEdit = (target) => {
+        setPasswordId(null)
         setEditingId(target.id)
         reset({
             fname: target.fname ?? "",
@@ -107,6 +117,17 @@ export const Admin = () => {
         reset({})
     }
 
+    const startPassword = (target) => {
+        setEditingId(null)
+        setPasswordId(target.id)
+        resetPasswordForm()
+    }
+
+    const cancelPassword = () => {
+        setPasswordId(null)
+        resetPasswordForm()
+    }
+
     const onUpdate = handleSubmit(async (values) => {
         if (!editingId) return
         setBusyId(editingId)
@@ -117,6 +138,24 @@ export const Admin = () => {
             toast.success("Usuario actualizado correctamente")
         } catch (error) {
             toast.error(error.response?.data?.message ?? "No se pudo actualizar el usuario")
+        } finally {
+            setBusyId(null)
+        }
+    })
+
+    const onPasswordSubmit = handlePasswordSubmit(async (values) => {
+        if (!passwordId) return
+        setBusyId(passwordId)
+        try {
+            await changeAdminUserPassword(passwordId, {
+                newPassword: values.newPassword,
+                confirmPassword: values.confirmPassword,
+            })
+            setPasswordId(null)
+            resetPasswordForm()
+            toast.success("Clave del usuario actualizada correctamente")
+        } catch (error) {
+            toast.error(error.response?.data?.message ?? "No se pudo actualizar la clave")
         } finally {
             setBusyId(null)
         }
@@ -173,7 +212,7 @@ export const Admin = () => {
                         <div>
                             <h2 className="text-lg font-bold text-slate-900">Usuarios registrados</h2>
                             <p className="mt-1 text-xs text-slate-500">
-                                Edita datos, cambia roles o elimina cuentas. El rol y el estatus también se validan en el servidor.
+                                Edita datos, cambia roles, asigna claves o elimina cuentas. El rol y el estatus también se validan en el servidor.
                             </p>
                         </div>
                         <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-bold text-slate-600">
@@ -254,6 +293,33 @@ export const Admin = () => {
                                                         </div>
                                                     </form>
                                                 </td>
+                                            ) : passwordId === row.id ? (
+                                                <td colSpan={7} className="bg-slate-50 px-3 py-4">
+                                                    <form onSubmit={onPasswordSubmit} noValidate className="grid gap-3 sm:grid-cols-2">
+                                                        <AdminField label="Nueva clave" error={passwordErrors.newPassword?.message}>
+                                                            <input type="password" autoComplete="new-password" className={inputCls} {...registerPassword("newPassword", { required: "Obligatoria", minLength: { value: 6, message: "Mínimo 6 caracteres" } })} />
+                                                        </AdminField>
+                                                        <AdminField label="Confirmar clave" error={passwordErrors.confirmPassword?.message}>
+                                                            <input type="password" autoComplete="new-password" className={inputCls} {...registerPassword("confirmPassword", { required: "Obligatoria", validate: (value) => value === getPasswordValues("newPassword") || "Las claves no coinciden" })} />
+                                                        </AdminField>
+                                                        <div className="flex items-end gap-2 sm:col-span-2">
+                                                            <button
+                                                                type="submit"
+                                                                disabled={busyId === row.id}
+                                                                className="rounded-lg bg-primary px-4 py-2 text-xs font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
+                                                            >
+                                                                {busyId === row.id ? "Guardando…" : "Guardar"}
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={cancelPassword}
+                                                                className="rounded-lg border border-slate-300 px-4 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-100"
+                                                            >
+                                                                Cancelar
+                                                            </button>
+                                                        </div>
+                                                    </form>
+                                                </td>
                                             ) : (
                                                 <>
                                                     <td className={`${tdCls} font-semibold text-slate-900`}>
@@ -288,6 +354,15 @@ export const Admin = () => {
                                                                 className="rounded-lg border border-slate-300 px-3 py-1.5 text-[11px] font-semibold text-slate-700 transition hover:bg-slate-100"
                                                             >
                                                                 Editar
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => startPassword(row)}
+                                                                disabled={busyId === row.id || Number(row.id) === Number(user?.id)}
+                                                                title={Number(row.id) === Number(user?.id) ? "Cambia tu clave en Mi perfil" : undefined}
+                                                                className="rounded-lg border border-slate-300 px-3 py-1.5 text-[11px] font-semibold text-slate-700 transition hover:bg-slate-100 disabled:opacity-60"
+                                                            >
+                                                                Clave
                                                             </button>
                                                             <button
                                                                 type="button"

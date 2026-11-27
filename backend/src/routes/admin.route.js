@@ -8,6 +8,7 @@ import {
     createUser,
     updateUser,
     changeRole,
+    changeUserPassword,
     deleteUser,
     getStats,
 } from "../controllers/admin.controller.js";
@@ -22,6 +23,7 @@ router.get("/users/:id", getUser);
 router.post("/users", createUser);
 router.put("/users/:id", updateUser);
 router.patch("/users/:id/role", changeRole);
+router.patch("/users/:id/password", changeUserPassword);
 router.delete("/users/:id", deleteUser);
 router.get("/stats", getStats);
 

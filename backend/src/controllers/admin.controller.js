@@ -10,6 +10,7 @@ const STATUSES = new Set(["pendiente", "activado", "desactivado"]);
 const CI_PATTERN = /^\d{1,2}\.\d{3}\.\d{3}$/;
 const PHONE_PATTERN = /^\d{4}-\d{7}$/;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MIN_PASSWORD_LENGTH = 6;
 
 const USER_SELECT = `
     SELECT u.id, u.fname, u.lname, u.ci, u.phone, u.email,
@@ -213,6 +214,41 @@ const changeRole = async (req, res) => {
     }
 };
 
+/* El administrador puede fijar la clave de otro usuario sin conocer la actual.
+   Su propia clave se cambia en /api/profile, donde sí se exige la vigente. */
+const changeUserPassword = async (req, res) => {
+    if (!isValidId(req.params.id)) {
+        return res.status(400).json({ message: "invalid user id" });
+    }
+    if (Number(req.params.id) === Number(req.user.id)) {
+        return res.status(403).json({ message: "Usa Mi perfil para cambiar tu propia clave" });
+    }
+
+    const { newPassword, confirmPassword } = req.body ?? {};
+    if (typeof newPassword !== "string" || newPassword.length < MIN_PASSWORD_LENGTH) {
+        return res.status(400).json({ message: `La contraseña debe tener al menos ${MIN_PASSWORD_LENGTH} caracteres` });
+    }
+    if (newPassword !== confirmPassword) {
+        return res.status(400).json({ message: "Las contraseñas no coinciden" });
+    }
+
+    try {
+        const existing = await findUser(req.params.id);
+        if (!existing) return res.status(404).json({ message: "user not found" });
+
+        const passwordHash = await bcrypt.hash(newPassword, 10);
+        await pool.query(
+            "UPDATE users SET password = ? WHERE id = ?",
+            [passwordHash, req.params.id]
+        );
+
+        res.status(200).json({ message: "Clave actualizada correctamente" });
+    } catch (error) {
+        console.log(error.message);
+        res.status(500).json({ message: "internal server error" });
+    }
+};
+
 const deleteUser = async (req, res) => {
     if (!isValidId(req.params.id)) {
         return res.status(400).json({ message: "invalid user id" });
@@ -353,6 +389,7 @@ export {
     createUser,
     updateUser,
     changeRole,
+    changeUserPassword,
     deleteUser,
     getStats,
 };

@@ -16,6 +16,11 @@ export const changeAdminUserRole = async (id, rol_id) => {
     return data;
 };
 
+export const changeAdminUserPassword = async (id, passwords) => {
+    const { data } = await client.patch(`/admin/users/${id}/password`, passwords);
+    return data;
+};
+
 export const deleteAdminUser = async (id) => {
     const { data } = await client.delete(`/admin/users/${id}`);
     return data;
