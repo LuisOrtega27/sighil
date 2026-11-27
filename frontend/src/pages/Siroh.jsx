@@ -31,6 +31,7 @@ import Morfometria from "../components/siroh/Morfometria";
 import { MET_SUB_LINKS } from "../components/siroh/options";
 
 const EditFichaModal = lazy(() => import("../components/siroh/EditFichaModal"));
+const ViewFichasModal = lazy(() => import("../components/siroh/ViewFichasModal"));
 
 const MET_CHILDREN = MET_SUB_LINKS.map(({ key, label }) => ({
   key,
@@ -67,6 +68,7 @@ export const SIROH_ITEMS = [
     submenu: "ficha",
     submenuId: "sub-for-list",
     children: [
+      { id: "sub-link-ver-fichas", label: "Ver fichas", type: "button" },
       { id: "sub-link-editar-ficha", label: "Editar ficha", type: "button" },
       { id: "sub-link-ficha-original", label: "Ficha original", to: "/siroh-raw-Form" },
     ],
@@ -187,10 +189,14 @@ export const Siroh = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const [editFichaOpen, setEditFichaOpen] = useState(false);
+  const [viewFichasOpen, setViewFichasOpen] = useState(false);
 
   const handleEditFichaClose = useCallback(() => setEditFichaOpen(false), []);
-  const handleEditFichaLoaded = useCallback((ficha) => {
+  const handleViewFichasClose = useCallback(() => setViewFichasOpen(false), []);
+  /* "Editar ficha" y "Abrir" de "Ver fichas" comparten el flujo de carga. */
+  const handleOpenFicha = useCallback((ficha) => {
     setEditFichaOpen(false);
+    setViewFichasOpen(false);
     navigate(`/siroh/siroh?edit=${ficha.cod_n}`, { state: { ficha } });
   }, [navigate]);
 
@@ -207,11 +213,15 @@ export const Siroh = () => {
               (child) =>
                 child.id !== "sub-link-editar-ficha" || puedeEditarFicha
             )
-            .map((child) =>
-              child.id === "sub-link-editar-ficha"
-                ? { ...child, onClick: () => setEditFichaOpen(true) }
-                : child
-            ),
+            .map((child) => {
+              if (child.id === "sub-link-editar-ficha") {
+                return { ...child, onClick: () => setEditFichaOpen(true) };
+              }
+              if (child.id === "sub-link-ver-fichas") {
+                return { ...child, onClick: () => setViewFichasOpen(true) };
+              }
+              return child;
+            }),
         }
   );
 
@@ -253,7 +263,22 @@ export const Siroh = () => {
         >
           <EditFichaModal
             onClose={handleEditFichaClose}
-            onLoaded={handleEditFichaLoaded}
+            onLoaded={handleOpenFicha}
+          />
+        </Suspense>
+      )}
+
+      {viewFichasOpen && (
+        <Suspense
+          fallback={
+            <div className="fixed inset-0 z-2000 flex items-center justify-center bg-slate-950/70 text-sm text-white">
+              Cargando modal…
+            </div>
+          }
+        >
+          <ViewFichasModal
+            onClose={handleViewFichasClose}
+            onOpen={handleOpenFicha}
           />
         </Suspense>
       )}

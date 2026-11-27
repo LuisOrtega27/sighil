@@ -75,3 +75,9 @@ Content-Type: application/json
     "newPassword": "nuevaClave123",
     "confirmPassword": "nuevaClave123"
 }
+
+### searchInspecciones (filtros combinados con OR; requiere cookie)
+GET http://localhost:4001/api/siroh/inspecciones?cod_n=9&ficha_n=01-02&fecha=2026-11-26
+
+### searchInspecciones (sin filtros = todas las fichas)
+GET http://localhost:4001/api/siroh/inspecciones

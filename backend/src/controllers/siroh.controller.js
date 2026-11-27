@@ -51,6 +51,53 @@ const getInspeccion = async (req, res) => {
     }
 };
 
+/* Modal "Ver fichas": busqueda por cod_n, ficha_n o fecha de transcripcion.
+   Los filtros que llegan se combinan con OR; sin filtros devuelve todas las
+   filas. Se usa SELECT * porque el modal muestra todos los campos de la ficha. */
+const searchInspecciones = async (req, res) => {
+    const { cod_n: codN, ficha_n: fichaN, fecha } = req.query ?? {};
+
+    const conditions = [];
+    const values = [];
+
+    if (codN !== undefined && String(codN).trim() !== "") {
+        const raw = String(codN).trim();
+        if (!/^\d+$/.test(raw)) {
+            return res.status(400).json({ message: "cod_n debe ser numérico" });
+        }
+        conditions.push("cod_n = ?");
+        values.push(Number(raw));
+    }
+
+    if (fichaN !== undefined && String(fichaN).trim() !== "") {
+        conditions.push("ficha_n LIKE ?");
+        values.push(`%${String(fichaN).trim()}%`);
+    }
+
+    if (fecha !== undefined && String(fecha).trim() !== "") {
+        const rawFecha = String(fecha).trim();
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(rawFecha)) {
+            return res.status(400).json({ message: "fecha debe tener el formato YYYY-MM-DD" });
+        }
+        conditions.push("DATE(fecha_transcripcion) = ?");
+        values.push(rawFecha);
+    }
+
+    const where = conditions.length ? ` WHERE ${conditions.join(" OR ")}` : "";
+
+    try {
+        const [rows] = await pool.query(
+            `SELECT * FROM ficha_eoh${where} ORDER BY fecha_transcripcion DESC, cod_n DESC`,
+            values
+        );
+
+        res.status(200).json(rows);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "internal server error" });
+    }
+};
+
 /* Paso 1: crear la fila vacia y devolver el codigo de 6 digitos. */
 const createInspeccion = async (req, res) => {
     try {
@@ -119,6 +166,7 @@ const updateInspeccion = async (req, res) => {
 
 export {
     getInspeccion,
+    searchInspecciones,
     createInspeccion,
     updateInspeccion,
 };

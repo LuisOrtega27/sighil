@@ -5,6 +5,12 @@ export const getInspeccion = async (id) => {
     return data;
 };
 
+/* Filtros: { cod_n, ficha_n, fecha }. El backend los combina con OR. */
+export const searchInspecciones = async (filters) => {
+    const { data } = await client.get("/siroh/inspecciones", { params: filters });
+    return data;
+};
+
 export const createInspeccion = async () => {
     const { data } = await client.post("/siroh/inspecciones");
     return data;
