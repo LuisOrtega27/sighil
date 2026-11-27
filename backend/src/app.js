@@ -13,6 +13,7 @@ import adminRoutes from "./routes/admin.route.js";
 
 import authRequired from './middlewares/authRequired.js';
 import roleRequired from './middlewares/roleRequired.js';
+import { trimRequest, trimResponse } from './middlewares/trim.js';
 
 
 dotenv.config();
@@ -45,6 +46,9 @@ app.use(
     })
 );
 app.use(express.json());
+/* Recorte central: entra limpio y sale limpio (incluye filas de la BD). */
+app.use(trimRequest);
+app.use(trimResponse);
 app.use(cookieParser());
 // app.use(express.urlencoded({ extended: true }));
 

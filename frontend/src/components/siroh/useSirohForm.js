@@ -23,7 +23,8 @@ const CAMPOS_INTERNOS = new Set([
 
 const texto = (valor) => (valor === null || valor === undefined ? "" : String(valor));
 
-/* La BD tiene fechas en formatos mezclados; input[type=date] solo acepta ISO. */
+/* La BD tiene fechas ISO y legacy en M/D/YYYY (mes/dia/anio, p. ej.
+   3/25/2025 = 25 de marzo de 2025); input[type=date] solo acepta ISO. */
 const normalizarFecha = (valor) => {
     const contenido = texto(valor);
     if (!contenido) return "";
@@ -31,8 +32,22 @@ const normalizarFecha = (valor) => {
 
     const partes = contenido.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
     if (!partes) return "";
-    const [, dia, mes, anio] = partes;
-    return `${anio}-${mes.padStart(2, "0")}-${dia.padStart(2, "0")}`;
+
+    const [, mes, dia, anio] = partes;
+    const mesNum = Number(mes);
+    const diaNum = Number(dia);
+    const anioNum = Number(anio);
+    const fecha = new Date(Date.UTC(anioNum, mesNum - 1, diaNum));
+
+    /* Descarta valores como 13/25/2025 o 2/30/2025 en lugar de escribir
+       una fecha invalida en el control y provocar un error del navegador. */
+    if (
+        fecha.getUTCFullYear() !== anioNum ||
+        fecha.getUTCMonth() !== mesNum - 1 ||
+        fecha.getUTCDate() !== diaNum
+    ) return "";
+
+    return `${anio}-${String(mesNum).padStart(2, "0")}-${String(diaNum).padStart(2, "0")}`;
 };
 
 /* Los inputs son no controlados: se escribe directo en el DOM para conservar
